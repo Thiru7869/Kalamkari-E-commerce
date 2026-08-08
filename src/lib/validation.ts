@@ -82,12 +82,38 @@ export const newsletterSchema = z.object({
   website: z.string().max(0).optional(),
 });
 
-export const trackOrderSchema = z.object({
-  number: z
+/**
+ * Profile. Email is absent on purpose — it is the sign-in identity and the
+ * second factor on order tracking, so changing it is account recovery rather
+ * than a profile edit.
+ */
+export const profileSchema = z.object({
+  name: z.string().trim().min(2, 'Name is required').max(120),
+  phone: phoneSchema.optional(),
+});
+
+const orderNumberSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^SVL-[A-Z0-9]{6}$/, 'Order numbers look like SVL-2A7F4C');
+
+export const cancelOrderSchema = z.object({
+  number: orderNumberSchema,
+  reason: z.string().trim().max(600).optional().or(z.literal('')),
+});
+
+export const returnRequestSchema = z.object({
+  number: orderNumberSchema,
+  reason: z
     .string()
     .trim()
-    .toUpperCase()
-    .regex(/^SVL-[A-Z0-9]{6}$/, 'Order numbers look like SVL-2A7F4C'),
+    .min(15, 'Please tell us what is wrong — a sentence is enough')
+    .max(2000),
+});
+
+export const trackOrderSchema = z.object({
+  number: orderNumberSchema,
   email: emailSchema,
 });
 

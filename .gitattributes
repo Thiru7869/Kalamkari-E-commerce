@@ -1,0 +1,9 @@
+# Normalise line endings in the repository; check out native on each platform.
+* text=auto
+
+# Binary assets git should never try to diff or convert.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.db binary

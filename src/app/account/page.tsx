@@ -7,8 +7,11 @@ import { auth, signOut } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/primitives';
+import { ProfileForm } from '@/components/account/profile-form';
+import { AddressBook } from '@/components/account/address-book';
+import { OrderActions } from '@/components/account/order-actions';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { statusLabel } from '@/lib/orders';
+import { statusLabel, statusDescription } from '@/lib/orders';
 
 export const metadata: Metadata = {
   title: 'Your account',
@@ -21,15 +24,22 @@ export default async function AccountPage() {
 
   const userId = session.user.id;
 
-  const [orders, wishlistCount, addresses] = await Promise.all([
+  const [user, orders, wishlistCount, addresses] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, email: true, phone: true },
+    }),
     prisma.order.findMany({
       where: { userId },
       orderBy: { placedAt: 'desc' },
-      take: 10,
+      take: 20,
       include: { items: { take: 4 } },
     }),
     prisma.wishlistItem.count({ where: { userId } }),
-    prisma.address.findMany({ where: { userId }, orderBy: { isDefault: 'desc' } }),
+    prisma.address.findMany({
+      where: { userId },
+      orderBy: [{ isDefault: 'desc' }, { id: 'asc' }],
+    }),
   ]);
 
   return (
@@ -37,9 +47,9 @@ export default async function AccountPage() {
       <div className="flex flex-wrap items-start justify-between gap-6">
         <div>
           <h1 className="text-display-lg">
-            {session.user.name ? `Hello, ${session.user.name.split(' ')[0]}` : 'Your account'}
+            {user?.name ? `Hello, ${user.name.split(' ')[0]}` : 'Your account'}
           </h1>
-          <p className="mt-2 text-muted-foreground">{session.user.email}</p>
+          <p className="mt-2 text-muted-foreground">{user?.email}</p>
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -89,6 +99,9 @@ export default async function AccountPage() {
         ))}
       </ul>
 
+      {/* ------------------------------------------------------------------ */}
+      {/* Orders                                                              */}
+      {/* ------------------------------------------------------------------ */}
       <section id="orders" className="mt-14 scroll-mt-28" aria-labelledby="orders-heading">
         <h2 id="orders-heading" className="text-display-sm">
           Your orders
@@ -104,10 +117,21 @@ export default async function AccountPage() {
         ) : (
           <ul className="mt-6 flex flex-col gap-4">
             {orders.map((order) => (
-              <li key={order.id}>
+              <li
+                key={order.id}
+                className="rounded-sm border border-border bg-card p-5 transition-colors hover:border-foreground/25"
+              >
+                {/*
+                  The tracking link carries the order number only. It used to
+                  carry the email address too, which put it in browser history
+                  and in the Referer of every outbound link on the page — the
+                  address is the second factor protecting the order, so it is
+                  the last thing that should be published in a URL. A signed-in
+                  owner is recognised by session instead.
+                */}
                 <Link
-                  href={`/orders/track?number=${order.number}&email=${encodeURIComponent(order.email)}`}
-                  className="block rounded-sm border border-border bg-card p-5 transition-colors hover:border-foreground/25"
+                  href={`/orders/track?number=${order.number}`}
+                  className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
                     <div>
@@ -125,6 +149,11 @@ export default async function AccountPage() {
                     </div>
                   </div>
 
+                  {/* What is actually happening to the cloth, not just a state name. */}
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                    {statusDescription(order.status)}
+                  </p>
+
                   <ul className="mt-4 flex gap-2">
                     {order.items.map((item) => (
                       <li
@@ -136,42 +165,41 @@ export default async function AccountPage() {
                     ))}
                   </ul>
                 </Link>
+
+                <OrderActions number={order.number} status={order.status} />
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      {addresses.length > 0 && (
-        <section id="addresses" className="mt-14 scroll-mt-28" aria-labelledby="addresses-heading">
-          <h2 id="addresses-heading" className="text-display-sm">
-            Saved addresses
-          </h2>
-          <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {addresses.map((address) => (
-              <li key={address.id} className="rounded-sm border border-border bg-card p-5">
-                <address className="text-sm not-italic leading-relaxed">
-                  <span className="font-medium">{address.fullName}</span>
-                  <br />
-                  <span className="text-muted-foreground">
-                    {address.line1}
-                    <br />
-                    {address.line2 && (
-                      <>
-                        {address.line2}
-                        <br />
-                      </>
-                    )}
-                    {address.city}, {address.state} {address.postalCode}
-                    <br />
-                    {address.phone}
-                  </span>
-                </address>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {/* ------------------------------------------------------------------ */}
+      {/* Addresses                                                           */}
+      {/* ------------------------------------------------------------------ */}
+      <section id="addresses" className="mt-14 scroll-mt-28" aria-labelledby="addresses-heading">
+        <h2 id="addresses-heading" className="text-display-sm">
+          Saved addresses
+        </h2>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+          Editing these never changes an order that has already been placed — every order
+          keeps its own record of where it was sent.
+        </p>
+        <AddressBook addresses={addresses} />
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Profile                                                             */}
+      {/* ------------------------------------------------------------------ */}
+      <section id="details" className="mt-14 scroll-mt-28" aria-labelledby="details-heading">
+        <h2 id="details-heading" className="text-display-sm">
+          Your details
+        </h2>
+        <ProfileForm
+          name={user?.name ?? ''}
+          phone={user?.phone ?? ''}
+          email={user?.email ?? ''}
+        />
+      </section>
     </div>
   );
 }
