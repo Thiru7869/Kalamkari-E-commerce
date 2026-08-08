@@ -335,15 +335,21 @@ export const naturalDyes = [
 /* -------------------------------------------------------------------------- */
 
 /**
- * The seven tones the background moves through as the page is read.
+ * The tones the ground moves through as the page is read.
  *
- * These are not decorative gradients. They are the pot colours, in the order
- * the craft actually reaches them: the fermented iron first because the black
- * is drawn before anything else, then madder, then the yellow that is painted
- * on, then the vat, then the green that only exists as one over the other,
- * then catechu, and finally back to the myrobalan cream the cloth started from
- * — because the last thing that happens to a finished piece is twenty washings
- * that take it back towards its own ground.
+ * These are the pot colours **as they sit on cloth**, not as they sit in the
+ * pot — which is a real distinction in this craft and the reason the sequence
+ * is warm rather than saturated. Kasim in the jar is black; on myrobalan-
+ * treated cotton, before it strikes, it is a grey shadow. Madder off the boil
+ * stains the whole ground a pale blush long before it washes back. What a
+ * visitor standing in the workshop actually sees, at every stage, is a warm
+ * off-white shifting by a few degrees.
+ *
+ * Rendering the jar colours instead gave a page that lurched from black to
+ * blood red to navy behind the reading, which is both untrue to the craft and
+ * exhausting to read against. These stay inside beige, buff and blush, in the
+ * order the cloth passes through them, and end on the sunned cream a finished
+ * piece comes back to.
  *
  * `ink` is the text colour that clears AA against that tone. It is stated
  * rather than computed so it can be checked by eye against the real swatch.
@@ -359,13 +365,14 @@ export type DyeTone = {
 };
 
 export const dyeWash: DyeTone[] = [
-  { id: 'kasim', label: 'Kasim black', source: 'Rusted iron fermented with jaggery', hex: '#22201D', ink: 'light' },
-  { id: 'chay', label: 'Madder red', source: 'Chay root, struck over alum', hex: '#8E2F22', ink: 'light' },
-  { id: 'myrobalan', label: 'Myrobalan gold', source: 'Flower and pomegranate rind', hex: '#B9862A', ink: 'dark' },
-  { id: 'indigo', label: 'Indigo blue', source: 'Vat indigo, oxidised in air', hex: '#2C4268', ink: 'light' },
-  { id: 'green', label: 'Green', source: 'Indigo laid over yellow', hex: '#4A5D3A', ink: 'light' },
-  { id: 'katha', label: 'Catechu brown', source: 'Catechu bark', hex: '#6F4B31', ink: 'light' },
-  { id: 'cotton', label: 'Myrobalan cream', source: 'The ground the cloth began from', hex: '#E3D4B4', ink: 'dark' },
+  { id: 'cotton', label: 'Loom cream', source: 'Cotton as it comes off the loom', hex: '#F6F0E4', ink: 'dark' },
+  { id: 'myrobalan-ground', label: 'Myrobalan ground', source: 'The buff the nut leaves behind', hex: '#EFE2C6', ink: 'dark' },
+  { id: 'kasim', label: 'Kasim shadow', source: 'Iron liquor, before it darkens', hex: '#DED3C0', ink: 'dark' },
+  { id: 'chay', label: 'Madder blush', source: 'Chay root, first strike', hex: '#EBCFBF', ink: 'dark' },
+  { id: 'myrobalan', label: 'Myrobalan gold', source: 'Flower and pomegranate rind', hex: '#F0DBA8', ink: 'dark' },
+  { id: 'green', label: 'Vat green', source: 'Indigo drawn over yellow', hex: '#DDE0C4', ink: 'dark' },
+  { id: 'katha', label: 'Catechu warmth', source: 'Catechu bark, thinned', hex: '#E7D6C0', ink: 'dark' },
+  { id: 'sun', label: 'Sunned cream', source: 'Twenty washings and the sun', hex: '#F8F3E7', ink: 'dark' },
 ];
 
 /* -------------------------------------------------------------------------- */

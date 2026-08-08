@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SareeCanvas, journeyStages, JOURNEY_COUNT } from '@/components/craft/saree-stages';
 import type { ProcessPhase, DyeTone } from '@/content/process';
 import { cn } from '@/lib/utils';
@@ -43,7 +44,16 @@ export function ProcessJourney({
   const washRef = useRef<HTMLDivElement>(null);
   const [activePhase, setActivePhase] = useState(0);
   const [stage, setStage] = useState(0);
-  const [ink, setInk] = useState<'light' | 'dark'>('light');
+  const [ink, setInk] = useState<'light' | 'dark'>('dark');
+  /** True while the page is moving. Drives the frame's presence. */
+  const [scrolling, setScrolling] = useState(false);
+  /**
+   * Set when the reader steps the frame by hand. Scroll then stops driving it
+   * until they move the page again — otherwise the next scroll tick would
+   * immediately overwrite the stage they just chose.
+   */
+  const [manual, setManual] = useState(false);
+  const manualRef = useRef(false);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -99,11 +109,29 @@ export function ProcessJourney({
         end: 'bottom bottom',
         scrub: false,
         onUpdate: (self) => {
+          if (manualRef.current) return;
           const next = Math.min(
             JOURNEY_COUNT - 1,
             Math.floor(self.progress * JOURNEY_COUNT),
           );
           setStage((prev) => (prev === next ? prev : next));
+        },
+      });
+
+      /* ---- Is the page moving? ------------------------------------------- */
+
+      // The frame is fully present while the reader is travelling and settles
+      // back to three-quarters when they stop, so it holds the page together
+      // during the journey and yields to the text once they are reading.
+      let idle: number;
+      ScrollTrigger.create({
+        trigger: root,
+        start: 'top bottom',
+        end: 'bottom top',
+        onUpdate: () => {
+          setScrolling(true);
+          window.clearTimeout(idle);
+          idle = window.setTimeout(() => setScrolling(false), 260);
         },
       });
 
@@ -166,7 +194,7 @@ export function ProcessJourney({
       </div>
 
       <div className="container">
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)] lg:gap-14 xl:gap-20">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:gap-16">
           {/* ---------------------------------------------------------------- */}
           {/* Left: the reading                                                */}
           {/* ---------------------------------------------------------------- */}
@@ -267,10 +295,26 @@ export function ProcessJourney({
           {/* Right: the cloth, framed and sticky                              */}
           {/* ---------------------------------------------------------------- */}
           <aside
-            className="pointer-events-none sticky top-24 hidden h-fit py-24 lg:block"
+            className="sticky top-24 hidden h-fit py-16 lg:block"
             aria-hidden="true"
           >
-            <ClothFrame stage={stage} ink={ink} phases={phases} activePhase={activePhase} />
+            <ClothFrame
+              stage={stage}
+              ink={ink}
+              phases={phases}
+              activePhase={activePhase}
+              scrolling={scrolling}
+              manual={manual}
+              onStep={(next) => {
+                manualRef.current = true;
+                setManual(true);
+                setStage(Math.max(0, Math.min(JOURNEY_COUNT - 1, next)));
+              }}
+              onRelease={() => {
+                manualRef.current = false;
+                setManual(false);
+              }}
+            />
           </aside>
         </div>
       </div>
@@ -310,55 +354,85 @@ export function ProcessJourney({
 /**
  * The cloth, in a frame.
  *
- * Double-ruled rather than a single border — a hairline inside a heavier
- * outer line, the way a narrative panel is actually mounted in this workshop,
- * and the same rhythm as the temple borders in the drawing itself.
+ * Double-ruled rather than a single border - a hairline inside a heavier outer
+ * line, the way a narrative panel is actually mounted in this workshop, and
+ * the same rhythm as the temple borders in the drawing itself.
  *
- * `ink` follows the wash so the caption and the stage rail stay legible as the
- * tone moves from kasim black to myrobalan cream.
+ * Two behaviours worth naming:
+ *
+ *  - **Presence follows travel.** While the page is moving the frame is fully
+ *    opaque and the reader is watching the cloth change; when they stop it
+ *    settles to three-quarters and yields to the paragraph they have stopped
+ *    to read. It never disappears, because the whole point is that the cloth
+ *    and the words are the same story.
+ *  - **The controls sit on the image.** Low-contrast until hovered, so they
+ *    are available without competing with the drawing. Stepping by hand takes
+ *    scroll out of the loop until the reader hands it back, because otherwise
+ *    the next scroll tick would immediately overwrite their choice.
+ *
+ * `ink` follows the ground so the caption stays legible as the tone shifts.
  */
 function ClothFrame({
   stage,
   ink,
   phases,
   activePhase,
+  scrolling,
+  manual,
+  onStep,
+  onRelease,
 }: {
   stage: number;
   ink: 'light' | 'dark';
   phases: ProcessPhase[];
   activePhase: number;
+  scrolling: boolean;
+  manual: boolean;
+  onStep: (next: number) => void;
+  onRelease: () => void;
 }) {
   const current = journeyStages[stage];
   const light = ink === 'light';
 
+  const control = cn(
+    'absolute top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full',
+    'border backdrop-blur-sm transition-all duration-300',
+    'opacity-20 hover:opacity-100 focus-visible:opacity-100 group-hover/frame:opacity-65',
+    'disabled:pointer-events-none disabled:opacity-0',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    light
+      ? 'border-cotton-100/40 bg-kasim-950/40 text-cotton-50'
+      : 'border-kasim-900/25 bg-cotton-50/70 text-kasim-900',
+  );
+
   return (
-    <div className="pointer-events-auto">
+    <div
+      className={cn(
+        'transition-opacity duration-500 ease-out motion-reduce:transition-none',
+        scrolling || manual ? 'opacity-100' : 'opacity-[0.75]',
+      )}
+    >
       <div
         className={cn(
-          'rounded-sm p-3 shadow-[0_30px_80px_-50px_rgb(0_0_0/0.85)] transition-colors duration-700',
-          light ? 'bg-cotton-50/10 ring-1 ring-cotton-100/25' : 'bg-kasim-950/[0.06] ring-1 ring-kasim-900/20',
+          'group/frame relative rounded-sm p-3 shadow-[0_30px_80px_-50px_rgb(0_0_0/0.85)] transition-colors duration-700',
+          light
+            ? 'bg-cotton-50/10 ring-1 ring-cotton-100/25'
+            : 'bg-kasim-950/[0.05] ring-1 ring-kasim-900/15',
         )}
       >
-        {/* Outer rule */}
         <div
           className={cn(
             'rounded-[2px] border p-2 transition-colors duration-700',
-            light ? 'border-cotton-100/35' : 'border-kasim-900/25',
+            light ? 'border-cotton-100/35' : 'border-kasim-900/20',
           )}
         >
-          {/* Inner hairline, then the cloth */}
           <div
             className={cn(
               'overflow-hidden rounded-[1px] border transition-colors duration-700',
-              light ? 'border-cotton-100/25' : 'border-kasim-900/20',
+              light ? 'border-cotton-100/25' : 'border-kasim-900/15',
             )}
           >
             <div className="relative aspect-[46/60] w-full bg-cotton-100 dark:bg-kasim-800">
-              {/*
-                Two canvases stacked: the outgoing state stays mounted
-                underneath at zero opacity so the change reads as dye arriving
-                on one cloth rather than one picture replacing another.
-              */}
               <SareeCanvas
                 stage={0}
                 layers={current.layers}
@@ -368,9 +442,46 @@ function ClothFrame({
             </div>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => onStep(stage - 1)}
+          disabled={stage === 0}
+          className={cn(control, 'left-5')}
+        >
+          <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+          <span className="sr-only">Previous stage of the cloth</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onStep(stage + 1)}
+          disabled={stage === JOURNEY_COUNT - 1}
+          className={cn(control, 'right-5')}
+        >
+          <ChevronRight className="h-5 w-5" aria-hidden="true" />
+          <span className="sr-only">Next stage of the cloth</span>
+        </button>
+
+        {manual && (
+          <button
+            type="button"
+            onClick={onRelease}
+            className={cn(
+              'absolute bottom-5 left-1/2 -translate-x-1/2 rounded-sm border px-3 py-1.5',
+              'text-[0.6875rem] uppercase tracking-[0.12em] backdrop-blur-sm transition-opacity duration-300',
+              'opacity-60 hover:opacity-100 focus-visible:opacity-100',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              light
+                ? 'border-cotton-100/40 bg-kasim-950/45 text-cotton-50'
+                : 'border-kasim-900/25 bg-cotton-50/75 text-kasim-900',
+            )}
+          >
+            Follow the page again
+          </button>
+        )}
       </div>
 
-      {/* Caption plate, on the dye rather than on a card. */}
       <div className="mt-4 px-1">
         <p
           className={cn(
@@ -378,11 +489,11 @@ function ClothFrame({
             light ? 'text-cotton-100/80' : 'text-kasim-900/70',
           )}
         >
-          Stage {current.n} of {JOURNEY_COUNT} · {current.steps}
+          Stage {current.n} of {JOURNEY_COUNT} - {current.steps}
         </p>
         <p
           className={cn(
-            'mt-1.5 font-display text-lg leading-snug transition-colors duration-700',
+            'mt-1.5 font-display text-xl leading-snug transition-colors duration-700',
             light ? 'text-cotton-50' : 'text-kasim-950',
           )}
         >
@@ -397,7 +508,6 @@ function ClothFrame({
           {current.caption}
         </p>
 
-        {/* Twelve ticks — position without a second set of numbers. */}
         <ol className="mt-5 flex items-center gap-1" aria-hidden="true">
           {journeyStages.map((s, i) => (
             <li
@@ -416,14 +526,13 @@ function ClothFrame({
           ))}
         </ol>
 
-        {/* Which phase of the six the reader is in. */}
         <p
           className={cn(
             'mt-4 text-[0.6875rem] uppercase tracking-[0.14em] transition-colors duration-700',
             light ? 'text-cotton-100/55' : 'text-kasim-900/55',
           )}
         >
-          {phases[activePhase]?.numeral} · {phases[activePhase]?.title}
+          {phases[activePhase]?.numeral} - {phases[activePhase]?.title}
         </p>
       </div>
     </div>

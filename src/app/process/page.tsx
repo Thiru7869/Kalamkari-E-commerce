@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ProcessJourney } from '@/components/process/process-journey';
 import { ColourWalk } from '@/components/process/colour-walk';
+import { FamilyCollage } from '@/components/process/family-collage';
 import { Button } from '@/components/ui/button';
 import {
   processPhases,
@@ -34,6 +35,10 @@ export default function ProcessPage() {
     <>
       <section className="border-b border-border bg-cotton-100 pb-14 pt-16 md:pb-20 md:pt-24 dark:bg-card">
         <div className="container">
+          {/* The heading and the household, side by side. The collage fills the
+              space the heading leaves at the top right on wide screens, and
+              drops under it below lg rather than shrinking to nothing. */}
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start lg:gap-12 xl:gap-16">
           <div className="max-w-3xl">
             <Breadcrumbs trail={[{ label: 'The process' }]} className="mb-6" />
             <p className="eyebrow">The making of a Kalamkari saree</p>
@@ -48,9 +53,12 @@ export default function ProcessPage() {
             </p>
             <p className="mt-4 leading-relaxed text-muted-foreground">
               Scroll through it. The cloth in the frame beside the text moves through
-              twelve states as you read, and the colour behind the page moves through the
-              seven pots in the order the craft reaches them.
+              twelve states as you read, and the ground behind the page warms and cools
+              with it.
             </p>
+          </div>
+
+            <FamilyCollage className="mt-10 lg:mt-1.5" />
           </div>
 
           <dl className="mt-12 grid gap-6 border-t border-border pt-8 sm:grid-cols-3 lg:grid-cols-5">
