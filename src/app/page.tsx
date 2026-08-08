@@ -7,6 +7,7 @@ import { WelcomeNote } from '@/components/home/welcome-note';
 import { HeroBanner } from '@/components/home/hero-banner';
 import { CollectionCards } from '@/components/home/collection-cards';
 import { HowItsMade } from '@/components/craft/how-its-made';
+import { TrustStrip } from '@/components/layout/trust-strip';
 import { ProductCard } from '@/components/shop/product-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/primitives';
@@ -66,10 +67,10 @@ const bannerSlides = [
 const collectionCards = [
   {
     label: 'Featured',
-    title: 'Featured',
+    title: 'Featured Sarees',
     blurb:
       'What the family would put in your hands first this week — chosen for the drawing, not the margin.',
-    href: '/shop?collection=featured',
+    href: '/collections/featured-sarees',
     image: '/images/products/hero-sarees.jpg',
   },
   {
@@ -77,7 +78,7 @@ const collectionCards = [
     title: 'Premium',
     blurb:
       'Signed and exhibition-grade work. Narrative pallus, dense jaal, the hardest drawing this workshop does.',
-    href: '/shop?collection=premium',
+    href: '/collections/premium',
     image: '/images/products/hero-paintings.jpg',
   },
   {
@@ -382,6 +383,9 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* What you are actually buying, and where each claim is set out. */}
+      <TrustStrip />
 
       {/* ------------------------------------------------------------------ */}
       {/* The process, as an invitation                                       */}

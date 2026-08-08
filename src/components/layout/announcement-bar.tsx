@@ -25,19 +25,9 @@ import { cn } from '@/lib/utils';
  * technology so the messages are announced once.
  */
 export function AnnouncementBar() {
-  const [dismissed, setDismissed] = useState(true);
+  const [dismissed, setDismissed] = useState(false);
   const [reduced, setReduced] = useState(false);
   const [rotating, setRotating] = useState(0);
-
-  // Hidden until mount: reading storage during render is a hydration mismatch,
-  // and a bar that flashes for someone who closed it is worse than none.
-  useEffect(() => {
-    try {
-      setDismissed(window.localStorage.getItem('svl_announce') === '1');
-    } catch {
-      setDismissed(false);
-    }
-  }, []);
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -63,13 +53,23 @@ export function AnnouncementBar() {
     setDismissed(true);
     try {
       window.localStorage.setItem('svl_announce', '1');
+      // Keep the pre-paint script and this component in agreement, so a client
+      // navigation does not bring the bar back for the rest of the session.
+      document.documentElement.dataset.announce = 'closed';
     } catch {
       /* Storage unavailable. It closes for this page load and that is enough. */
     }
   };
 
   return (
-    <div className="relative flex h-9 items-center overflow-hidden border-b border-border/60 bg-kasim-900 text-cotton-200">
+    <div
+      // Rendered on the server and hidden before paint by the inline script in
+      // the layout when it has been dismissed. Deciding this in an effect
+      // instead would either shift the whole page down 36px on every first
+      // load, or flash the bar at everyone who has already closed it.
+      data-announce-bar
+      className="relative flex h-9 items-center overflow-hidden border-b border-border/60 bg-kasim-900 text-cotton-200"
+    >
       {reduced ? (
         <p
           className="flex-1 px-12 text-center text-[0.6875rem] uppercase tracking-[0.14em]"

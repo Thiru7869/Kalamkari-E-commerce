@@ -117,7 +117,10 @@ export function WelcomeOverlay({ onClose }: { onClose: () => void }) {
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-sm text-cotton-100/80 transition-colors hover:bg-cotton-50/10 hover:text-cotton-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cotton-100/60 md:text-muted-foreground md:hover:bg-foreground/5 md:hover:text-foreground md:focus-visible:ring-ring"
+          // The panel is split image | words, and this sits at the top right —
+          // over the words column at every width, never over the photograph.
+          // So it takes the surface's own foreground, not a light ink.
+          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X className="h-5 w-5" aria-hidden="true" />
           <span className="sr-only">Close</span>

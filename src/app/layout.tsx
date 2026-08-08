@@ -9,6 +9,7 @@ import { SiteFooter } from '@/components/layout/site-footer';
 import { MobileTabBar } from '@/components/layout/mobile-tab-bar';
 import { FloatingDock } from '@/components/layout/floating-dock';
 import { FirstVisit } from '@/components/welcome/first-visit';
+import { PageTransition } from '@/components/motion/page-transition';
 import { site } from '@/content/site';
 import { absoluteUrl } from '@/lib/utils';
 import './globals.css';
@@ -140,6 +141,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-background">
+        {/*
+          Resolves the announcement bar before first paint.
+
+          It is rendered server-side so the header never shifts down when it
+          appears; this removes it for anybody who has closed it, in the same
+          frame, so they never see it flash. Same technique next-themes uses
+          for the theme, and for the same reason.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('svl_announce')==='1'){document.documentElement.dataset.announce='closed'}}catch(e){}",
+          }}
+        />
+
         <a href="#main" className="skip-link">
           Skip to main content
         </a>
@@ -148,7 +164,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SmoothScrollProvider>
             <SiteHeader />
             <main id="main" className="min-h-[60vh] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
-              {children}
+              <PageTransition>{children}</PageTransition>
             </main>
             <SiteFooter />
             <MobileTabBar />

@@ -173,6 +173,11 @@
     }
   }
 
+  /* Set before paint by the inline script in the root layout. */
+  html[data-announce='closed'] [data-announce-bar] {
+    display: none;
+  }
+
   /* Skip link — visible only on keyboard focus. */
   .skip-link {
     @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100]

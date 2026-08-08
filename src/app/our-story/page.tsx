@@ -93,7 +93,7 @@ export default function OurStoryPage() {
 
           <div className="mt-14 flex flex-col gap-16 md:gap-24">
             {family.map((member, i) => (
-              <RevealOnScroll key={member.id} delay={0.05}>
+              <RevealOnScroll key={member.id} delay={Math.min(i, 4) * 0.07}>
                 <article
                   className={`grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-14 ${
                     i % 2 === 1 ? 'lg:[&>figure]:order-2' : ''
@@ -155,7 +155,7 @@ export default function OurStoryPage() {
 
       <section className="border-t border-border bg-cotton-100 py-16 md:py-20 dark:bg-card">
         <div className="container">
-          <div className="mx-auto max-w-2xl text-center">
+          <RevealOnScroll className="mx-auto max-w-2xl text-center">
             <h2 className="text-display-md">See the work itself</h2>
             <p className="mt-4 text-body-lg text-muted-foreground">
               The story is the reason for the price. The pieces are the reason for the story.
@@ -171,7 +171,7 @@ export default function OurStoryPage() {
                 <Link href="/process">Walk through the 23 steps</Link>
               </Button>
             </div>
-          </div>
+          </RevealOnScroll>
         </div>
       </section>
     </>
