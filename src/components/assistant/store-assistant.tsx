@@ -220,7 +220,7 @@ export function StoreAssistant() {
           <MessageCircle className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
         )}
         <span className="font-inscription text-[0.8125rem] tracking-[0.06em]">
-          {open ? 'Close' : 'Ask ' + assistantIdentity.name}
+          {open ? 'Close' : assistantIdentity.label}
         </span>
       </button>
 
@@ -239,7 +239,7 @@ export function StoreAssistant() {
             id={panelId}
             role="dialog"
             aria-modal="false"
-            aria-label={`${assistantIdentity.name}, ${assistantIdentity.role}`}
+            aria-label={`${assistantIdentity.label}, ${assistantIdentity.role}`}
             className={cn(
               'pointer-events-auto fixed z-50 flex flex-col overflow-hidden',
               'border border-border bg-cotton-50 shadow-2xl dark:bg-card',

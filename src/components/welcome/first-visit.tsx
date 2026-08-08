@@ -1,27 +1,36 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { WELCOME_VERSION, TOUR_VERSION } from '@/content/welcome';
 
 /**
- * Sequences the doorway and the walk-through.
+ * Sequences the loading frame, the doorway and the walk-through.
  *
- * Both are code-split and never requested for a returning visitor, so the
- * overwhelming majority of page loads pay nothing for either.
+ *   preloader  →  welcome  →  quick tour  →  the site
+ *
+ * All three are code-split and none is requested twice in a session, so the
+ * overwhelming majority of page views inside a visit pay nothing for any of
+ * them.
+ *
+ * Persistence is **sessionStorage**, not localStorage. Two reasons: the store
+ * asked for the welcome to return on a new visit, and — more practically — a
+ * localStorage flag written during development is invisible and permanent, and
+ * is exactly why the welcome appeared to have stopped working.
  *
  * Rules:
- *  - Neither appears until after mount. Reading localStorage during render is
- *    a hydration mismatch, and a welcome that flashes for returning visitors
- *    is worse than none.
- *  - Neither appears on checkout, the account pages or admin. Interrupting
+ *  - Nothing appears until after mount. Reading storage during render is a
+ *    hydration mismatch, and a doorway that flashes for a returning visitor is
+ *    worse than none.
+ *  - Nothing appears on checkout, the account pages or admin. Interrupting
  *    somebody mid-purchase to introduce the shop is indefensible.
- *  - Dismissal is versioned, so the copy can be changed later without either
- *    being stuck shut forever.
- *  - A visitor who has already scrolled is past the doorway. Showing it then
- *    would be an interruption rather than a greeting.
+ *  - A visitor who is already scrolled is reading, not arriving; they get
+ *    straight through.
  */
+
+const Preloader = dynamic(() => import('./preloader').then((m) => m.Preloader), {
+  ssr: false,
+});
 
 const WelcomeOverlay = dynamic(
   () => import('./welcome-overlay').then((m) => m.WelcomeOverlay),
@@ -32,27 +41,26 @@ const QuickTour = dynamic(() => import('./quick-tour').then((m) => m.QuickTour),
   ssr: false,
 });
 
-const WELCOME_KEY = 'svl_welcome';
-const TOUR_KEY = 'svl_tour';
+const SEEN_KEY = 'svl_intro';
 
 /** Routes where an interruption is never acceptable. */
 const SUPPRESSED = ['/checkout', '/admin', '/account', '/signin', '/orders'];
 
-type Phase = 'idle' | 'welcome' | 'tour' | 'done';
+type Phase = 'idle' | 'preloader' | 'welcome' | 'tour' | 'done';
 
-function seen(key: string, version: string) {
+function seen(step: string) {
   try {
-    return window.localStorage.getItem(key) === version;
+    return window.sessionStorage.getItem(`${SEEN_KEY}_${step}`) === '1';
   } catch {
     // Private browsing with storage disabled. Treat as seen rather than
-    // showing the overlay on every single page load.
+    // replaying the whole sequence on every navigation.
     return true;
   }
 }
 
-function remember(key: string, version: string) {
+function remember(step: string) {
   try {
-    window.localStorage.setItem(key, version);
+    window.sessionStorage.setItem(`${SEEN_KEY}_${step}`, '1');
   } catch {
     /* Storage unavailable — nothing to do, and nothing worth failing over. */
   }
@@ -63,8 +71,12 @@ export function FirstVisit() {
   const [phase, setPhase] = useState<Phase>('idle');
 
   useEffect(() => {
-    if (SUPPRESSED.some((prefix) => pathname.startsWith(prefix))) return;
     if (phase !== 'idle') return;
+
+    if (SUPPRESSED.some((prefix) => pathname.startsWith(prefix))) {
+      setPhase('done');
+      return;
+    }
 
     // Deep-linked and already reading: do not interrupt.
     if (window.scrollY > 200) {
@@ -72,12 +84,15 @@ export function FirstVisit() {
       return;
     }
 
-    if (!seen(WELCOME_KEY, WELCOME_VERSION)) {
+    if (!seen('preloader')) {
+      setPhase('preloader');
+      return;
+    }
+    if (!seen('welcome')) {
       setPhase('welcome');
       return;
     }
-
-    if (!seen(TOUR_KEY, TOUR_VERSION)) {
+    if (!seen('tour')) {
       setPhase('tour');
       return;
     }
@@ -85,29 +100,24 @@ export function FirstVisit() {
     setPhase('done');
   }, [pathname, phase]);
 
-  if (phase === 'welcome') {
-    return (
-      <WelcomeOverlay
-        onClose={() => {
-          remember(WELCOME_KEY, WELCOME_VERSION);
-          // Straight into the tour, as asked — but only if it has not already
-          // been taken and dismissed.
-          setPhase(seen(TOUR_KEY, TOUR_VERSION) ? 'done' : 'tour');
-        }}
-      />
-    );
-  }
+  const finishPreloader = useCallback(() => {
+    remember('preloader');
+    setPhase(seen('welcome') ? 'done' : 'welcome');
+  }, []);
 
-  if (phase === 'tour') {
-    return (
-      <QuickTour
-        onClose={() => {
-          remember(TOUR_KEY, TOUR_VERSION);
-          setPhase('done');
-        }}
-      />
-    );
-  }
+  const finishWelcome = useCallback(() => {
+    remember('welcome');
+    setPhase(seen('tour') ? 'done' : 'tour');
+  }, []);
+
+  const finishTour = useCallback(() => {
+    remember('tour');
+    setPhase('done');
+  }, []);
+
+  if (phase === 'preloader') return <Preloader onDone={finishPreloader} />;
+  if (phase === 'welcome') return <WelcomeOverlay onClose={finishWelcome} />;
+  if (phase === 'tour') return <QuickTour onClose={finishTour} />;
 
   return null;
 }

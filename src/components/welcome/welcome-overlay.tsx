@@ -9,6 +9,7 @@ import { welcome } from '@/content/welcome';
 import { site } from '@/content/site';
 import { family } from '@/content/family';
 import { Button } from '@/components/ui/button';
+import { SocialLinks } from '@/components/layout/social-links';
 
 /**
  * The doorway.
@@ -221,9 +222,10 @@ export function WelcomeOverlay({ onClose }: { onClose: () => void }) {
                   </Link>
                 </Button>
               </div>
-              <p className="mt-3 text-center text-xs text-muted-foreground sm:text-left">
-                {welcome.footnote}
-              </p>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground">{welcome.footnote}</p>
+                <SocialLinks size="sm" />
+              </div>
             </div>
           </div>
         </div>

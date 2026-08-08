@@ -11,6 +11,7 @@ import { HeaderShell } from './header-shell';
 import { ThemeToggle } from './theme-toggle';
 import { AnnouncementBar } from './announcement-bar';
 import { ExploreMenu } from './explore-menu';
+import { HeaderSearch } from '@/components/shop/header-search';
 
 async function CartBadge() {
   const count = await getCartCount();
@@ -59,10 +60,16 @@ export async function SiteHeader() {
               index — one opens everything, the other finds one thing. */}
           <ExploreMenu />
 
+          {/* A real field from lg up, where there is room for one. Below that
+              the icon still goes to /search, which carries the same field at
+              full width. */}
+          <div data-tour="search" className="hidden lg:block">
+            <HeaderSearch className="mx-1" />
+          </div>
+
           <Link
             href="/search"
-            data-tour="search"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
           >
             <Search className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
             <span className="sr-only">Search</span>

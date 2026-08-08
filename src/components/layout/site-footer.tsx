@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { MapPin } from 'lucide-react';
 import { footerNav, site } from '@/content/site';
 import { NewsletterForm } from '@/components/forms/newsletter-form';
+import { SocialLinks } from './social-links';
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -33,6 +34,10 @@ export function SiteFooter() {
             <div className="mt-8">
               <NewsletterForm />
             </div>
+
+            {/* Renders nothing at all until the store publishes a handle — a
+                row of icons where two go nowhere reads as an abandoned site. */}
+            <SocialLinks className="mt-7" tone="inverse" size="sm" />
           </div>
 
           <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">

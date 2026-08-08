@@ -175,15 +175,18 @@ export const starterPrompts = [
 /**
  * The assistant's name.
  *
- * Chitra — Telugu and Sanskrit for a picture or a painting, and the root of
- * *chitrakara*, the painter. It is a real given name in this part of Andhra,
- * which is the point: the visitor should feel handed to somebody at a counter
- * rather than routed to a product. It also sits correctly beside "Kalamkari"
- * itself — kalam is the pen, kari the craftsmanship, chitra the thing that
- * results.
+ * Lakshmi, after the store itself — Sri Vijaya Lakshmi, which takes its name
+ * from the founders' daughter. Naming the assistant after the house rather
+ * than inventing a mascot is the point: a visitor should feel handed to
+ * somebody at this counter, not routed to a product.
+ *
+ * `label` is what the launcher says. It is kept beside the name because
+ * "Ask Lakshmi" reads as an invitation while a bare name reads as a signature,
+ * and the launcher needs the former.
  */
 export const assistantIdentity = {
-  name: 'Chitra',
+  name: 'Lakshmi',
+  label: 'Ask Lakshmi',
   /** Shown under the name in the chat header. */
   role: `Store assistant · ${site.location.town}`,
   greeting:

@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { BackToTop } from './back-to-top';
+import { WhatsAppFloat } from './whatsapp-float';
 import { useScrollDirection } from './use-scroll-direction';
 import { useMediaQuery } from './use-media-query';
 import { cn } from '@/lib/utils';
@@ -36,13 +37,24 @@ const StoreAssistant = dynamic(
  */
 const ASSISTANT_SUPPRESSED = ['/admin', '/checkout'];
 
+/**
+ * Where the next step is a conversation rather than a purchase.
+ *
+ * On these four the WhatsApp button replaces the chat launcher rather than
+ * joining it — two ways to start the same conversation, stacked in the same
+ * corner, is how a page ends up with two floating buttons on top of each other.
+ */
+const WHATSAPP_ROUTES = ['/journal', '/contact', '/custom'];
+
 export function FloatingDock() {
   const pathname = usePathname();
   const direction = useScrollDirection();
   // Matches the `md` breakpoint the tab bar uses, and stays in sync on rotate.
   const isCompact = useMediaQuery('(max-width: 767px)');
 
-  const assistantSuppressed = ASSISTANT_SUPPRESSED.some((prefix) => pathname.startsWith(prefix));
+  const wantsWhatsApp = WHATSAPP_ROUTES.some((prefix) => pathname.startsWith(prefix));
+  const assistantSuppressed =
+    wantsWhatsApp || ASSISTANT_SUPPRESSED.some((prefix) => pathname.startsWith(prefix));
 
   /*
     On a phone the tab bar already occupies the bottom of the screen
@@ -71,6 +83,7 @@ export function FloatingDock() {
       inert={retracted ? true : undefined}
     >
       <BackToTop />
+      {wantsWhatsApp && <WhatsAppFloat />}
       {!assistantSuppressed && <StoreAssistant />}
     </div>
   );
