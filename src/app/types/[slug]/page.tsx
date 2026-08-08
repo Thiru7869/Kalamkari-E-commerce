@@ -7,6 +7,7 @@ import { SectionHeader } from '@/components/layout/section-header';
 import { ProductGrid } from '@/components/shop/product-card';
 import { NarrativeNote } from '@/components/shop/narrative-note';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
+import { KnowMore } from '@/components/ui/know-more';
 import { Button } from '@/components/ui/button';
 import {
   getTypeVarieties,
@@ -162,13 +163,25 @@ export default async function TypePage({ params }: { params: Params }) {
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-20">
             <RevealOnScroll>
               <h2 className="text-display-md">About {type.label.toLowerCase()}</h2>
-              <div className="mt-6 flex flex-col gap-4">
-                {type.body.map((para, i) => (
+
+              {/* The first paragraph carries the point; the rest is one click
+                  away. These pages are read standing in a shop as often as
+                  sitting down, and a wall of prose above the stock is the
+                  fastest way to lose somebody who came to look. */}
+              <KnowMore
+                lead={
+                  <p className="mt-6 text-body-lg leading-relaxed text-muted-foreground">
+                    {type.body[0]}
+                  </p>
+                }
+                panelClassName="flex flex-col gap-4 border-l-2 border-border pl-5"
+              >
+                {type.body.slice(1).map((para, i) => (
                   <p key={i} className="leading-relaxed text-muted-foreground">
                     {para}
                   </p>
                 ))}
-              </div>
+              </KnowMore>
             </RevealOnScroll>
 
             <RevealOnScroll delay={0.08}>
@@ -196,6 +209,27 @@ export default async function TypePage({ params }: { params: Params }) {
           </div>
         </div>
       </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* A few pieces                                                        */}
+      {/* ------------------------------------------------------------------ */}
+      {items.length > 0 && (
+        <section className="border-t border-border py-12 md:py-16">
+          <div className="container">
+            <RevealOnScroll>
+              <SectionHeader
+                eyebrow="In the store now"
+                title={`${type.label} ready to send`}
+                action={{ label: `All ${total}`, href: `/shop/${type.category}` }}
+              />
+            </RevealOnScroll>
+
+            <div className="mt-8">
+              <ProductGrid products={items} wishlistIds={wishlistIds} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* Varieties — the substance of the page                               */}
@@ -325,27 +359,6 @@ export default async function TypePage({ params }: { params: Params }) {
                 </li>
               ))}
             </ul>
-          </div>
-        </section>
-      )}
-
-      {/* ------------------------------------------------------------------ */}
-      {/* A few pieces                                                        */}
-      {/* ------------------------------------------------------------------ */}
-      {items.length > 0 && (
-        <section className="border-t border-border py-14 md:py-20">
-          <div className="container">
-            <RevealOnScroll>
-              <SectionHeader
-                eyebrow="In the store now"
-                title={`${type.label} ready to send`}
-                action={{ label: `All ${total}`, href: `/shop/${type.category}` }}
-              />
-            </RevealOnScroll>
-
-            <div className="mt-8">
-              <ProductGrid products={items} wishlistIds={wishlistIds} />
-            </div>
           </div>
         </section>
       )}

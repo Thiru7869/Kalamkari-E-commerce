@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLightbox } from '@/components/ui/lightbox';
 import { cn } from '@/lib/utils';
 
 /**
@@ -39,7 +42,21 @@ export function HeroBanner({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
+  /** Set once the visitor has looked at a piece full screen. */
+  const [opened, setOpened] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const router = useRouter();
+
+  const lightbox = useLightbox(
+    slides.map((slide) => ({ src: slide.src, alt: slide.alt, caption: slide.caption })),
+  );
+
+  const go = (next: number) => setIndex((next + slides.length) % slides.length);
+
+  const openFull = (i: number) => {
+    setOpened(true);
+    lightbox.open(i);
+  };
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -76,10 +93,28 @@ export function HeroBanner({
       onBlurCapture={() => setPaused(false)}
     >
       {/* ---- The large panel ------------------------------------------- */}
-      <Link
-        href={active.href}
-        className="group relative block aspect-[4/5] overflow-hidden rounded-sm bg-kasim-800 shadow-[0_28px_70px_-40px_rgb(0_0_0/0.85)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cotton-100 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-      >
+      {/*
+        Two interactions, deliberately in this order.
+
+        The first opens the piece full screen, because the one thing a small
+        image cannot show is the line — and the line is the entire argument.
+        Once somebody has looked properly, the control under it takes them to
+        the shop. Going straight to a listing on the first tap would skip the
+        only part of this that is persuasive.
+      */}
+      <div className="group relative aspect-[4/5] overflow-hidden rounded-sm bg-kasim-800 shadow-[0_28px_70px_-40px_rgb(0_0_0/0.85)]">
+        <button
+          type="button"
+          onClick={() => (opened ? router.push('/shop') : openFull(index))}
+          className="absolute inset-0 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cotton-100"
+        >
+          <span className="sr-only">
+            {opened
+              ? 'See everything in the store'
+              : `${active.label} — open full screen`}
+          </span>
+        </button>
+
         {slides.map((slide, i) => {
           const isActive = i === index;
           return (
@@ -103,9 +138,6 @@ export function HeroBanner({
                 isActive ? 'opacity-100' : 'opacity-0',
               )}
               style={{
-                // The dye front: fully open when active, closed on a diagonal
-                // when not. Two polygons with matched vertex counts so the
-                // browser can interpolate between them.
                 clipPath: isActive
                   ? 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)'
                   : 'polygon(0% 0%, 0% 0%, 22% 100%, 0% 100%)',
@@ -119,15 +151,47 @@ export function HeroBanner({
           aria-hidden="true"
         />
 
-        <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
+        {/* Low-visibility steppers. Present at all times so they can be found,
+            quiet enough that they are not the first thing the eye lands on. */}
+        <button
+          type="button"
+          onClick={() => go(index - 1)}
+          className="absolute left-2 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-cotton-100/25 bg-kasim-950/40 text-cotton-50 opacity-25 backdrop-blur-sm transition-opacity duration-300 hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cotton-100/70"
+        >
+          <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+          <span className="sr-only">Previous piece</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => go(index + 1)}
+          className="absolute right-2 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-cotton-100/25 bg-kasim-950/40 text-cotton-50 opacity-25 backdrop-blur-sm transition-opacity duration-300 hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cotton-100/70"
+        >
+          <ChevronRight className="h-5 w-5" aria-hidden="true" />
+          <span className="sr-only">Next piece</span>
+        </button>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-4 md:p-5">
           <p className="font-inscription text-[0.625rem] uppercase tracking-[0.2em] text-myrobalan-300">
             {active.label}
           </p>
           <p className="mt-1.5 max-w-[22rem] font-display text-lg leading-snug text-cotton-50 md:text-xl">
             {active.caption}
           </p>
+          <p className="mt-2 text-[0.6875rem] text-cotton-100/60">
+            {opened ? 'Tap again for the store' : 'Tap to open full screen'}
+          </p>
         </div>
-      </Link>
+
+        {/* The direct route, for anybody who does not want the full screen. */}
+        <Link
+          href={active.href}
+          className="absolute right-3 top-3 z-20 rounded-sm border border-cotton-100/25 bg-kasim-950/45 px-2.5 py-1.5 text-[0.6875rem] uppercase tracking-[0.1em] text-cotton-50 opacity-0 backdrop-blur-sm transition-opacity duration-300 hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cotton-100/70"
+        >
+          See {active.label.toLowerCase()}
+        </Link>
+      </div>
+
+      {lightbox.view}
 
       {/* ---- The two panels behind, offset like stacked cloth ---------- */}
       <div className="pointer-events-none absolute -right-3 -top-6 hidden gap-2 lg:flex">

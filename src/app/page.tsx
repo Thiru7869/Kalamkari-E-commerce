@@ -7,6 +7,7 @@ import { WelcomeNote } from '@/components/home/welcome-note';
 import { HeroBanner } from '@/components/home/hero-banner';
 import { CollectionCards } from '@/components/home/collection-cards';
 import { HowItsMade } from '@/components/craft/how-its-made';
+import { TwoCrafts } from '@/components/home/two-crafts';
 import { TrustStrip } from '@/components/layout/trust-strip';
 import { ProductCard } from '@/components/shop/product-card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,6 @@ import { getFeaturedProducts, getCategories } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { site } from '@/content/site';
 import { family } from '@/content/family';
-import { naturalDyes, whatWeDoNotUse } from '@/content/process';
 import { absoluteUrl } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -60,6 +60,20 @@ const bannerSlides = [
     label: 'For the home',
     caption: 'Cloth that gets used, washed, and softens into the house.',
     href: '/shop/home-decor',
+  },
+  {
+    src: '/images/products/hero-blouses.jpg',
+    alt: 'A painted Kalamkari blouse piece in silk cotton.',
+    label: 'Blouse pieces',
+    caption: 'A metre of cloth, and the densest filling this workshop does.',
+    href: '/shop/blouses',
+  },
+  {
+    src: '/images/store/store-wide.jpg',
+    alt: 'The front room of the store in Srikalahasti, with cloth laid out on the floor.',
+    label: 'The store',
+    caption: 'A working home. Somebody is painting in it most days of the year.',
+    href: '/contact',
   },
 ];
 
@@ -114,11 +128,28 @@ export default async function HomePage() {
       <section className="relative isolate overflow-hidden">
         <HeroScene className="absolute inset-0 -z-10 h-full w-full" />
 
-        {/* Scrim: the hero text must stay AA-legible over the whole dye sweep,
-            from cream to deep madder. */}
+        {/*
+          Scrim.
+
+          The old one was a flat black wash at three opacities, which read as
+          grey over every dye behind it and flattened the whole hero. This is
+          built from the pots instead: indigo at the top where the cloth is
+          still pale, catechu through the middle, and a deep madder-into-kasim
+          at the foot. It still holds the text at AA over the full sweep — the
+          alpha is unchanged — but the hero now sits in a colour rather than
+          under a shadow.
+        */}
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-kasim-950/55 via-kasim-950/35 to-kasim-950/75"
+          className="absolute inset-0 -z-10"
           aria-hidden="true"
+          style={{
+            backgroundImage:
+              'linear-gradient(to bottom,' +
+              'rgb(27 41 66 / 0.62) 0%,' +
+              'rgb(70 48 34 / 0.42) 34%,' +
+              'rgb(69 24 19 / 0.46) 62%,' +
+              'rgb(20 19 18 / 0.80) 100%)',
+          }}
         />
 
         <div className="container relative py-14 md:py-24">
@@ -166,83 +197,12 @@ export default async function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* The distinction that matters most, stated immediately               */}
       {/* ------------------------------------------------------------------ */}
-      <section className="border-b border-border bg-cotton-100 py-16 md:py-24 dark:bg-card">
-        <div className="container">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-20">
-            <RevealOnScroll>
-              <p className="eyebrow">Two crafts, one name</p>
-              <h2 className="mt-4 text-display-md">
-                Almost everything sold as “Kalamkari” is printed. This is not.
-              </h2>
-              <p className="mt-5 text-body-lg text-muted-foreground">
-                Printed Kalamkari is carved into a block or burned into a screen and
-                then repeated. This craft is drawn freehand with a bamboo pen, once,
-                with no tracing and no repetition device of any kind.
-              </p>
-              <p className="mt-4 leading-relaxed text-muted-foreground">
-                It grew up serving the temple rather than the export trade, which is why
-                the subjects are narrative: epics, deities, stories painted to be read
-                across a room. You cannot carve a block for a scene that happens once.
-              </p>
-              <Link
-                href="/our-story"
-                className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Read the full story
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={0.1}>
-              <div className="rounded-sm border border-border bg-background p-6 md:p-8">
-                <h3 className="font-display text-display-sm">What we never use</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  This list is the whole reason a piece takes six weeks instead of a day.
-                </p>
-                <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
-                  {whatWeDoNotUse.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm">
-                      <span
-                        className="mt-[0.3rem] h-3 w-3 shrink-0 rounded-full border border-chay-600"
-                        aria-hidden="true"
-                      >
-                        <span className="block h-full w-full origin-center rotate-45 border-t border-chay-600" />
-                      </span>
-                      <span className="text-muted-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-8 border-t border-border pt-6">
-                  <h3 className="font-display text-display-sm">What we use instead</h3>
-                  <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-3">
-                    {naturalDyes.slice(0, 6).map((dye) => (
-                      <li key={dye.colour} className="flex items-center gap-2.5">
-                        <span
-                          className="h-6 w-6 shrink-0 rounded-full border border-foreground/15"
-                          style={{ backgroundColor: dye.hex }}
-                          aria-hidden="true"
-                        />
-                        <span className="text-sm">
-                          <span className="block leading-tight">{dye.colour}</span>
-                          <span className="block text-xs leading-tight text-muted-foreground">
-                            {dye.source}
-                          </span>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </RevealOnScroll>
-          </div>
-        </div>
-      </section>
+      <TwoCrafts />
 
       {/* ------------------------------------------------------------------ */}
       {/* Categories                                                          */}
       {/* ------------------------------------------------------------------ */}
-      <section className="py-16 md:py-24">
+      <section className="py-11 md:py-16">
         <div className="container">
           <RevealOnScroll>
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -267,7 +227,7 @@ export default async function HomePage() {
             a single column would turn a composition into a list, which is
             precisely the thing worth keeping.
           */}
-          <ul className="mt-8 grid grid-cols-2 gap-2.5 md:mt-10 md:gap-4 lg:grid-cols-3">
+          <ul className="mt-7 grid grid-cols-2 gap-2.5 md:mt-9 md:gap-4 lg:grid-cols-3">
             {categories.map((category, i) => (
               <li
                 key={category.id}
@@ -276,7 +236,7 @@ export default async function HomePage() {
                 <RevealOnScroll delay={i * 0.05}>
                   <Link
                     href={`/shop/${category.slug}`}
-                    className="group relative flex h-full min-h-[9.5rem] flex-col justify-end overflow-hidden rounded-sm bg-kasim-800 p-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-[13rem] sm:p-5 md:min-h-[15rem] md:p-6"
+                    className="group relative flex h-full min-h-[8.5rem] flex-col justify-end overflow-hidden rounded-sm bg-kasim-800 p-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-[13rem] sm:p-5 md:min-h-[15rem] md:p-6"
                   >
                     <Image
                       src={category.heroImage}
@@ -359,14 +319,15 @@ export default async function HomePage() {
               </p>
             </RevealOnScroll>
 
-            <ul className="mt-10 grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-3 md:gap-x-6">
+            <ul className="mt-10 grid grid-cols-3 gap-x-2.5 gap-y-6 sm:gap-x-4 sm:gap-y-9 md:gap-x-6">
               {featured.map((product) => (
                 <li key={product.id} className="flex">
                   <ProductCard
                     product={product}
                     wishlisted={wishlistIds.has(product.id)}
+                    density="compact"
                     className="w-full"
-                    sizes="(min-width: 768px) 30vw, 45vw"
+                    sizes="(min-width: 768px) 30vw, 31vw"
                   />
                 </li>
               ))}
@@ -448,7 +409,7 @@ export default async function HomePage() {
         <div className="container">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-20">
             <RevealOnScroll>
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-cotton-300">
+              <div className="relative mx-auto aspect-[4/5] w-[62%] overflow-hidden rounded-sm bg-cotton-300 sm:w-[48%] lg:mx-0 lg:w-full">
                 <Image
                   src={master.image}
                   alt={`${master.name} at work in the store in ${site.location.town}`}

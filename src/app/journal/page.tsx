@@ -102,45 +102,82 @@ export default async function JournalPage() {
             )}
 
             {rest.length > 0 && (
-              <ul className="mt-16 grid gap-x-6 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
-                {rest.map((post) => (
-                  <li key={post.id}>
-                    <article className="group relative flex h-full flex-col">
-                      <div className="relative aspect-[16/10] overflow-hidden rounded-sm bg-cotton-300">
-                        <Image
-                          src={post.coverImage}
-                          alt=""
-                          fill
-                          sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
-                          className="object-cover transition-transform duration-700 motion-safe:group-hover:scale-[1.03]"
-                        />
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                        {toList(post.tags).slice(0, 2).map((tag) => (
-                          <span key={tag}>{tag}</span>
-                        ))}
-                      </div>
-                      <h2 className="mt-2 font-display text-xl leading-snug">
-                        <Link
-                          href={`/journal/${post.slug}`}
-                          className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              <ul className="mt-14 grid grid-cols-3 gap-x-3 gap-y-8 md:gap-x-6 md:gap-y-12">
+                {rest.map((post, i) => {
+                  /*
+                    A collage rather than a uniform grid.
+
+                    Three across at every width, and every fourth entry takes
+                    two columns with a landscape crop while the rest stay
+                    square. That gives the page a rhythm — wide, square,
+                    square — instead of a wall of identical rectangles, and it
+                    keeps working however many posts there are, because the
+                    pattern is derived from the index rather than hand-placed.
+                  */
+                  const wide = i % 4 === 0;
+
+                  return (
+                    <li key={post.id} className={wide ? 'col-span-2' : undefined}>
+                      <article className="group relative flex h-full flex-col">
+                        <div
+                          className={`relative overflow-hidden rounded-sm bg-cotton-300 ${
+                            wide ? 'aspect-[16/10]' : 'aspect-square'
+                          }`}
                         >
-                          {post.title}
-                        </Link>
-                      </h2>
-                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                        {post.excerpt}
-                      </p>
-                      <p className="mt-auto pt-4 text-xs text-muted-foreground">
-                        <time dateTime={post.publishedAt.toISOString()}>
-                          {formatDate(post.publishedAt)}
-                        </time>
-                        <span aria-hidden="true"> · </span>
-                        {post.readMinutes} min read
-                      </p>
-                    </article>
-                  </li>
-                ))}
+                          <Image
+                            src={post.coverImage}
+                            alt=""
+                            fill
+                            sizes={
+                              wide
+                                ? '(min-width: 1024px) 60vw, 66vw'
+                                : '(min-width: 1024px) 30vw, 33vw'
+                            }
+                            className="object-cover transition-transform duration-700 motion-safe:group-hover:scale-[1.03]"
+                          />
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-2 text-[0.5625rem] uppercase tracking-[0.12em] text-muted-foreground md:text-xs">
+                          {toList(post.tags).slice(0, wide ? 2 : 1).map((tag) => (
+                            <span key={tag}>{tag}</span>
+                          ))}
+                        </div>
+
+                        <h2
+                          className={`mt-1.5 font-display leading-snug ${
+                            wide ? 'text-lg md:text-2xl' : 'text-[0.9375rem] md:text-xl'
+                          }`}
+                        >
+                          <Link
+                            href={`/journal/${post.slug}`}
+                            className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            {post.title}
+                          </Link>
+                        </h2>
+
+                        {/* The excerpt is the first thing to go when a card is
+                            one third of a phone wide — the title and the date
+                            carry it there. */}
+                        <p
+                          className={`mt-1.5 line-clamp-2 text-sm leading-snug text-muted-foreground ${
+                            wide ? '' : 'hidden md:line-clamp-2 md:block'
+                          }`}
+                        >
+                          {post.excerpt}
+                        </p>
+
+                        <p className="mt-auto pt-2.5 text-[0.6875rem] text-muted-foreground md:text-xs">
+                          <time dateTime={post.publishedAt.toISOString()}>
+                            {formatDate(post.publishedAt)}
+                          </time>
+                          <span aria-hidden="true"> &middot; </span>
+                          {post.readMinutes} min
+                        </p>
+                      </article>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </>
