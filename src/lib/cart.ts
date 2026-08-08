@@ -5,44 +5,20 @@ import { cookies } from 'next/headers';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
-import { site } from '@/content/site';
+import {
+  computeTotals,
+  EMPTY_CART,
+  type CartLine,
+  type CartSummary,
+} from '@/lib/totals';
+
+// Re-exported so existing call sites keep one import for everything cart-shaped.
+// The arithmetic itself lives in lib/totals.ts, free of the auth stack.
+export { computeTotals, EMPTY_CART };
+export type { CartLine, CartSummary };
 
 const GUEST_COOKIE = 'svl_cart';
 const GUEST_COOKIE_MAX_AGE = 60 * 60 * 24 * 60; // 60 days
-
-export type CartLine = {
-  id: string;
-  productId: string;
-  quantity: number;
-  name: string;
-  slug: string;
-  image: string;
-  price: number;
-  /** Live stock, so the cart can warn when a one-of-one piece has since sold. */
-  stock: number;
-  categorySlug: string;
-};
-
-export type CartSummary = {
-  id: string | null;
-  lines: CartLine[];
-  itemCount: number;
-  subtotal: number;
-  shipping: number;
-  total: number;
-  /** Paise still needed to reach free shipping, or 0. */
-  freeShippingGap: number;
-};
-
-export const EMPTY_CART: CartSummary = {
-  id: null,
-  lines: [],
-  itemCount: 0,
-  subtotal: 0,
-  shipping: 0,
-  total: 0,
-  freeShippingGap: site.shipping.freeAbove,
-};
 
 /**
  * Resolve the caller's cart **without writing anything**.
@@ -156,20 +132,6 @@ export async function mergeGuestCart(userId: string) {
   }
 
   await prisma.cart.delete({ where: { id: guestCart.id } });
-}
-
-export function computeTotals(lines: CartLine[]) {
-  const subtotal = lines.reduce((sum, l) => sum + l.price * l.quantity, 0);
-  const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0);
-  const shipping =
-    subtotal === 0 || subtotal >= site.shipping.freeAbove ? 0 : site.shipping.flatRate;
-  return {
-    subtotal,
-    itemCount,
-    shipping,
-    total: subtotal + shipping,
-    freeShippingGap: Math.max(0, site.shipping.freeAbove - subtotal),
-  };
 }
 
 export const getCart = cache(async (): Promise<CartSummary> => {

@@ -37,6 +37,43 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
           },
+          {
+            // Report-only to begin with. Turning this into an enforcing
+            // `Content-Security-Policy` is a one-word change, but it should be
+            // made only after a period of watching real traffic — a CSP that
+            // blocks a payment widget is worse than no CSP at all.
+            //
+            // Two allowances are load-bearing and not laziness:
+            //
+            //   'unsafe-inline' in script-src — the JSON-LD blocks on the home,
+            //   product and contact pages are inline <script> tags, and Next's
+            //   own bootstrap is inline too. Removing it needs a nonce plumbed
+            //   through middleware, which is the natural next step once the
+            //   report stream is quiet.
+            //
+            //   'unsafe-eval' — three.js compiles shader programs at runtime.
+            //
+            // Everything else is closed: no plugins, no framing, no form posts
+            // to another origin, and connect/img/frame limited to what the site
+            // actually uses (Razorpay's checkout when payments are switched on).
+            key: 'Content-Security-Policy-Report-Only',
+            value: [
+              "default-src 'self'",
+              "base-uri 'self'",
+              "object-src 'none'",
+              "frame-ancestors 'self'",
+              "form-action 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com",
+              "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+              "worker-src 'self' blob:",
+              "manifest-src 'self'",
+              'upgrade-insecure-requests',
+            ].join('; '),
+          },
         ],
       },
       {

@@ -19,14 +19,36 @@ import { PrismaClient } from '@prisma/client';
 const BASE = process.env.SMOKE_BASE_URL ?? 'http://localhost:3000';
 const prisma = new PrismaClient();
 
-const manifest = JSON.parse(
-  readFileSync(new URL('../.next/server/server-reference-manifest.json', import.meta.url), 'utf8'),
-);
+/**
+ * Map exportedName -> action id.
+ *
+ * Prefers the snapshot written at the end of the build (see
+ * scripts/snapshot-actions.mjs). The live manifest is a fallback only: a
+ * running server can rewrite it to hold just the actions it has loaded, so
+ * reading it here finds a subset and the test fails on actions that are
+ * perfectly fine.
+ */
+function loadActionIds() {
+  try {
+    return JSON.parse(
+      readFileSync(new URL('../.next/smoke-action-ids.json', import.meta.url), 'utf8'),
+    );
+  } catch {
+    const manifest = JSON.parse(
+      readFileSync(
+        new URL('../.next/server/server-reference-manifest.json', import.meta.url),
+        'utf8',
+      ),
+    );
+    return Object.fromEntries(
+      Object.entries(manifest.node)
+        .filter(([, entry]) => entry?.exportedName)
+        .map(([id, entry]) => [entry.exportedName, id]),
+    );
+  }
+}
 
-/** Map exportedName -> action id from the build manifest. */
-const actionIds = Object.fromEntries(
-  Object.entries(manifest.node).map(([id, entry]) => [entry.exportedName, id]),
-);
+const actionIds = loadActionIds();
 
 let cookieJar = '';
 
@@ -103,8 +125,17 @@ async function main() {
   const cart = await get('/cart');
   check('cart page shows the piece', cart.text.includes(product.name));
 
-  const cartRows = await prisma.cart.count();
-  check('cart row created', cartRows > 0, `${cartRows} cart(s)`);
+  // Identify the cart this run created, by the guest id in our own cookie jar.
+  // Scoping to it keeps the test re-runnable: asserting over every cart in the
+  // database makes a leftover row from an earlier aborted run fail a perfectly
+  // good checkout.
+  const guestId = cookieJar
+    .split('; ')
+    .find((c) => c.startsWith('svl_cart='))
+    ?.slice('svl_cart='.length);
+
+  const ourCart = guestId ? await prisma.cart.findUnique({ where: { guestId } }) : null;
+  check('cart row created', Boolean(ourCart), ourCart ? ourCart.id : 'no guest cart cookie');
 
   // 3 — place a COD order
   const place = await callAction('placeOrder', '/checkout', [
@@ -148,7 +179,9 @@ async function main() {
     check('stock decremented', after.stock === stockBefore - 1,
       `${stockBefore} -> ${after.stock}`);
 
-    const remaining = await prisma.cartItem.count();
+    const remaining = ourCart
+      ? await prisma.cartItem.count({ where: { cartId: ourCart.id } })
+      : -1;
     check('cart emptied after checkout', remaining === 0, `${remaining} item(s) left`);
   }
 

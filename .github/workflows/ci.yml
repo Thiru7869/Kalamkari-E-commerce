@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A second push to the same branch cancels the first — the earlier result is
+# no longer interesting once it has been superseded.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck · lint · test · build · smoke
+    runs-on: ubuntu-latest
+
+    env:
+      # A throwaway SQLite file and a throwaway secret. Nothing here is a real
+      # credential and nothing here reaches a real service: with no SMTP host
+      # and no payment keys set, the mail layer prints to the console and the
+      # online payment option is simply not offered. That is exactly the
+      # degraded configuration worth testing.
+      DATABASE_URL: file:./ci.db
+      AUTH_SECRET: ci-only-not-a-real-secret-value-000000000000
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # --legacy-peer-deps: several three.js ecosystem packages have not yet
+      # widened their React 19 peer ranges. The code itself is React 19 ready.
+      - name: Install
+        run: npm ci --legacy-peer-deps
+
+      - name: Prepare database
+        run: |
+          npx prisma generate
+          npx prisma migrate deploy
+          npm run db:seed
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npx next build
+
+      # The smoke test drives the real server actions over HTTP against the
+      # production build — add to cart, read the cart, place a COD order — then
+      # asserts against the database. Two of the bugs found while building this
+      # were invisible to tsc, eslint and next build, and only appeared when the
+      # code actually ran.
+      - name: Start the production server
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Smoke-test the purchase path
+        run: npm run smoke
