@@ -330,6 +330,159 @@ export const naturalDyes = [
   },
 ] as const;
 
+/* -------------------------------------------------------------------------- */
+/* The dye wash behind /process                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The seven tones the background moves through as the page is read.
+ *
+ * These are not decorative gradients. They are the pot colours, in the order
+ * the craft actually reaches them: the fermented iron first because the black
+ * is drawn before anything else, then madder, then the yellow that is painted
+ * on, then the vat, then the green that only exists as one over the other,
+ * then catechu, and finally back to the myrobalan cream the cloth started from
+ * — because the last thing that happens to a finished piece is twenty washings
+ * that take it back towards its own ground.
+ *
+ * `ink` is the text colour that clears AA against that tone. It is stated
+ * rather than computed so it can be checked by eye against the real swatch.
+ */
+export type DyeTone = {
+  id: string;
+  label: string;
+  /** Source of the colour, one short line. */
+  source: string;
+  hex: string;
+  /** 'light' = pale text on this tone. 'dark' = ink text on this tone. */
+  ink: 'light' | 'dark';
+};
+
+export const dyeWash: DyeTone[] = [
+  { id: 'kasim', label: 'Kasim black', source: 'Rusted iron fermented with jaggery', hex: '#22201D', ink: 'light' },
+  { id: 'chay', label: 'Madder red', source: 'Chay root, struck over alum', hex: '#8E2F22', ink: 'light' },
+  { id: 'myrobalan', label: 'Myrobalan gold', source: 'Flower and pomegranate rind', hex: '#B9862A', ink: 'dark' },
+  { id: 'indigo', label: 'Indigo blue', source: 'Vat indigo, oxidised in air', hex: '#2C4268', ink: 'light' },
+  { id: 'green', label: 'Green', source: 'Indigo laid over yellow', hex: '#4A5D3A', ink: 'light' },
+  { id: 'katha', label: 'Catechu brown', source: 'Catechu bark', hex: '#6F4B31', ink: 'light' },
+  { id: 'cotton', label: 'Myrobalan cream', source: 'The ground the cloth began from', hex: '#E3D4B4', ink: 'dark' },
+];
+
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The colour walk-through on /process, using the same progressive pattern as
+ * the home page's eight stages.
+ *
+ * One entry per colour actually used in this workshop. Each says where it
+ * comes from, how it is applied, and the one thing about it that surprises
+ * people — all of it drawn from the dye index above rather than invented.
+ */
+export type ColourStory = {
+  id: string;
+  name: string;
+  /** Telugu or trade name, where the artisans use one. */
+  localName?: string;
+  hex: string;
+  /** Contrast pairing for text laid directly on the swatch. */
+  ink: 'light' | 'dark';
+  source: string;
+  /** Painted, dipped, struck in a bath, or not a dye at all. */
+  method: string;
+  /** Two or three sentences. The voice of somebody who has stood over the pot. */
+  body: string;
+  /** The single fact worth remembering. */
+  note: string;
+};
+
+export const colourStories: ColourStory[] = [
+  {
+    id: 'cream',
+    name: 'Myrobalan cream',
+    localName: 'karakkaya',
+    hex: '#EFE2C6',
+    ink: 'dark',
+    source: 'Chebulic myrobalan nut, ground and steeped with buffalo milk',
+    method: 'Steeped, not dyed',
+    body: 'Every Kalamkari begins on this colour, and it is the only one that is not a decision. The cloth is soaked in ground myrobalan and buffalo milk and comes out of the sun a warm, uneven cream. Nothing has been added to make it that shade — it is simply what the nut leaves behind.',
+    note: 'The ground was never bleached white. Any Kalamkari on a brilliant white cloth has had help from something that did not come out of a pot.',
+  },
+  {
+    id: 'black',
+    name: 'Kasim black',
+    localName: 'kasim / kasimi',
+    hex: '#22201D',
+    ink: 'light',
+    source: 'Rusted iron and jaggery, fermented about twenty-one days',
+    method: 'Drawn with the kalam',
+    body: 'Scrap iron and palm jaggery sit sealed in an earthen pot for three weeks until the sugars pull the iron into solution. What you pour off is thin, foul-smelling and very nearly colourless. Drawn onto myrobalan-treated cloth it darkens as you watch, because the iron is meeting the tannin already waiting in the fibre.',
+    note: 'The liquid that makes the black is not black. The colour forms in the cloth, not on it — which is why the outline is still there after fifty years.',
+  },
+  {
+    id: 'red',
+    name: 'Madder red',
+    localName: 'chay ver',
+    hex: '#8E2F22',
+    ink: 'light',
+    source: 'Madder or chay root, boiled with dried flowers',
+    method: 'Struck in a bath, over an alum mordant',
+    body: 'The artist never touches a red pigment. Every area that will be red is painted first with a clear solution of alum, which reads as a faint damp shadow and nothing more. Days later the whole cloth goes into a boiling pot of madder root, and the alizarin binds only where the alum went.',
+    note: 'One bath gives pink through deep maroon in a single pass. The variation was decided days earlier, by hand, in a liquid nobody could see.',
+  },
+  {
+    id: 'pink',
+    name: 'Pink',
+    hex: '#C66857',
+    ink: 'dark',
+    source: 'The same madder bath, over a thinner alum layer',
+    method: 'Struck in a bath',
+    body: 'Pink is not a separate dye and never was. It is the same root, in the same pot, on the same day — the only difference is how much alum the artist laid down underneath it. A thin mordant takes less colour.',
+    note: 'On a printed cloth pink and red are two inks. Here they are one bath and two thicknesses of an invisible liquid.',
+  },
+  {
+    id: 'yellow',
+    name: 'Myrobalan gold',
+    hex: '#D4A337',
+    ink: 'dark',
+    source: 'Myrobalan flower and pomegranate rind, boiled with alum',
+    method: 'Painted directly',
+    body: 'Yellow is one of only three colours drawn straight onto the cloth with the pen. It arrives as a soft mustard-gold and settles further in a day of open sun. Natural yellow does not go bright, and it never has.',
+    note: 'If the yellow glows acid-lemon, the piece has been helped along. That is the quickest tell there is.',
+  },
+  {
+    id: 'blue',
+    name: 'Indigo blue',
+    localName: 'neeli',
+    hex: '#2C4268',
+    ink: 'light',
+    source: 'Vat indigo',
+    method: 'Dipped, with wax resist',
+    body: 'Indigo is the exception in this craft: it refuses to be painted. Areas that must stay clear are covered in wax and the whole cloth is lowered into the vat. It comes out yellow-green and turns blue in front of you as the air reaches it. Repeat dips make deeper blues.',
+    note: 'The blue is made by the air, not by the vat. Nothing in the pot is the colour you end up with.',
+  },
+  {
+    id: 'green',
+    name: 'Green',
+    hex: '#4A5D3A',
+    ink: 'light',
+    source: 'Indigo laid over yellow',
+    method: 'Two layers, in that order',
+    body: 'There is no green dye in this palette and there never has been. Green exists only where the indigo vat passes over cloth that was already painted with myrobalan yellow. Reverse the order and it does not work.',
+    note: 'This is why a piece with green in it takes noticeably longer than one without: it needs both the painting and the dipping, and they cannot be swapped.',
+  },
+  {
+    id: 'brown',
+    name: 'Catechu brown',
+    localName: 'katha',
+    hex: '#6F4B31',
+    ink: 'light',
+    source: 'Catechu bark',
+    method: 'Painted directly',
+    body: 'A quiet, warm brown boiled out of catechu bark and drawn on with the pen like the yellow. It is used for earth, for tree trunks, for the ground a figure stands on — the parts of a narrative panel nobody looks at directly and everybody would miss.',
+    note: 'The third and last of the colours that are painted rather than struck or dipped.',
+  },
+];
+
 /** Used on the home page and the process page to answer the obvious objection. */
 export const whatWeDoNotUse = [
   'Chemical or azo dyes',

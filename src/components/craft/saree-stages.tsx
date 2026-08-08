@@ -88,6 +88,173 @@ export const sareeStages: SareeStage[] = [
 export const STAGE_COUNT = sareeStages.length;
 
 /* -------------------------------------------------------------------------- */
+/* The long journey — twelve stages, for /process                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Which layers of the drawing are visible.
+ *
+ * The eight-stage rail on the home page derives these from its index. The
+ * twelve-stage journey on /process sets them explicitly, because it moves
+ * through the same cloth at finer resolution and several of its stages change
+ * only one thing — the whole point of watching it slowly.
+ */
+export type ClothLayers = {
+  /** Myrobalan and buffalo milk: the ground turns cream. */
+  prepared: boolean;
+  /** Charcoal composition is down. */
+  drawn: boolean;
+  /** Iron liquor has struck: the outline is black rather than pale. */
+  blackened: boolean;
+  /** Alum painted, before the bath — visible only as a damp shadow. */
+  alum: boolean;
+  /** The madder bath has been run. */
+  madder: boolean;
+  /** Indigo dipped and the yellows painted. */
+  indigo: boolean;
+  /** Twenty washings and the sun. */
+  finished: boolean;
+};
+
+export type JourneyStage = {
+  n: number;
+  short: string;
+  title: string;
+  /** The real step numbers, of twenty-three, that this stage covers. */
+  steps: string;
+  /** One line, shown under the frame. Longer prose lives in the phase text. */
+  caption: string;
+  layers: ClothLayers;
+};
+
+const NONE: ClothLayers = {
+  prepared: false,
+  drawn: false,
+  blackened: false,
+  alum: false,
+  madder: false,
+  indigo: false,
+  finished: false,
+};
+
+/**
+ * Twelve states of one length of cotton.
+ *
+ * Deliberately not evenly spaced across the twenty-three steps: the craft is
+ * not evenly spaced either. Four of these stages happen before a pen is picked
+ * up, and two of them — the alum and the bath — are the pair the whole page
+ * exists to explain, so they get a stage each rather than sharing one.
+ */
+export const journeyStages: JourneyStage[] = [
+  {
+    n: 1,
+    short: 'Loom',
+    title: 'Off the loom',
+    steps: 'Step 1',
+    caption: 'Stiff with mill starch. It repels dye and drinks ink — nothing can be done to it yet.',
+    layers: { ...NONE },
+  },
+  {
+    n: 2,
+    short: 'Washed',
+    title: 'Beaten at the river',
+    steps: 'Steps 2–3',
+    caption: 'Washed against stone in the Swarnamukhi until the water runs clear, then dried on sand.',
+    layers: { ...NONE },
+  },
+  {
+    n: 3,
+    short: 'Myrobalan',
+    title: 'Myrobalan and buffalo milk',
+    steps: 'Steps 4–5',
+    caption: 'The ground turns cream. That colour is the nut, not a dye — and the tannin now waiting in the fibre is what will later turn black.',
+    layers: { ...NONE, prepared: true },
+  },
+  {
+    n: 4,
+    short: 'Burnished',
+    title: 'Smoothed over stone',
+    steps: 'Step 6',
+    caption: 'Raised fibres flattened. A pen dragged across an unsmoothed cloth catches and skips.',
+    layers: { ...NONE, prepared: true },
+  },
+  {
+    n: 5,
+    short: 'Charcoal',
+    title: 'The story set out in charcoal',
+    steps: 'Steps 7–8',
+    caption: 'Burnt tamarind twigs. Several days of decisions on a nine-yard cloth, with nothing undoable.',
+    layers: { ...NONE, prepared: true, drawn: true },
+  },
+  {
+    n: 6,
+    short: 'Kasim',
+    title: 'The iron liquor strikes',
+    steps: 'Steps 9–11',
+    caption: 'A pale brown liquid drawn with a bamboo kalam turns black in the cloth, not in the pot.',
+    layers: { ...NONE, prepared: true, drawn: true, blackened: true },
+  },
+  {
+    n: 7,
+    short: 'Washed',
+    title: 'The charcoal washed away',
+    steps: 'Step 12',
+    caption: 'Everything that did not bind goes downstream. A finished black drawing on cream — and no other colour at all.',
+    layers: { ...NONE, prepared: true, drawn: true, blackened: true },
+  },
+  {
+    n: 8,
+    short: 'Alum',
+    title: 'Painting in a colour you cannot see',
+    steps: 'Steps 13–15',
+    caption: 'Every area that will be red is painted with clear alum. Days of work go down invisibly.',
+    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true },
+  },
+  {
+    n: 9,
+    short: 'Madder',
+    title: 'The bath where the red arrives',
+    steps: 'Steps 16–17',
+    caption: 'Boiled in madder root. Colour binds only where the alum went, and washes out everywhere else.',
+    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true },
+  },
+  {
+    n: 10,
+    short: 'Yellow',
+    title: 'Myrobalan gold, painted on',
+    steps: 'Steps 18–19',
+    caption: 'A soft mustard from flower and pomegranate rind, fixed by a day in the sun. Never a bright lemon.',
+    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true },
+  },
+  {
+    n: 11,
+    short: 'Indigo',
+    title: 'The one colour that is dipped',
+    steps: 'Steps 20–21',
+    caption: 'Waxed, lowered into the vat, and blue as the air reaches it. Laid over the yellow it makes the green.',
+    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true, indigo: true },
+  },
+  {
+    n: 12,
+    short: 'Sun',
+    title: 'Twenty washings, and the river',
+    steps: 'Steps 22–23',
+    caption: 'Most of them to take colour away rather than add it. The ground clears, the cloth softens, the piece is done.',
+    layers: {
+      prepared: true,
+      drawn: true,
+      blackened: true,
+      alum: true,
+      madder: true,
+      indigo: true,
+      finished: true,
+    },
+  },
+];
+
+export const JOURNEY_COUNT = journeyStages.length;
+
+/* -------------------------------------------------------------------------- */
 /* Motifs                                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -141,28 +308,37 @@ const JAAL = Array.from({ length: 5 }, (_, row) =>
 
 export function SareeCanvas({
   stage,
+  layers,
+  label,
   className,
 }: {
-  /** Zero-indexed stage, 0 through STAGE_COUNT − 1. */
+  /** Zero-indexed stage, 0 through STAGE_COUNT − 1. Ignored when `layers` is given. */
   stage: number;
+  /**
+   * Explicit layer control, for callers walking the cloth at a different
+   * resolution than the eight-stage rail — see `journeyStages`.
+   */
+  layers?: ClothLayers;
+  /** Overrides the generated accessible name. */
+  label?: string;
   className?: string;
 }) {
   // Each layer is gated on the stage it belongs to. Written out rather than
   // computed so the mapping from stage to visible layer stays readable.
-  const prepared = stage >= 1;
-  const drawn = stage >= 2;
-  const blackened = stage >= 3;
-  const alum = stage >= 4;
-  const madder = stage >= 5;
-  const indigo = stage >= 6;
-  const finished = stage >= 7;
+  const prepared = layers ? layers.prepared : stage >= 1;
+  const drawn = layers ? layers.drawn : stage >= 2;
+  const blackened = layers ? layers.blackened : stage >= 3;
+  const alum = layers ? layers.alum : stage >= 4;
+  const madder = layers ? layers.madder : stage >= 5;
+  const indigo = layers ? layers.indigo : stage >= 6;
+  const finished = layers ? layers.finished : stage >= 7;
 
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
       className={cn('h-full w-full', className)}
       role="img"
-      aria-label={`Stage ${stage + 1} of ${STAGE_COUNT}: ${sareeStages[stage]?.title}`}
+      aria-label={label ?? `Stage ${stage + 1} of ${STAGE_COUNT}: ${sareeStages[stage]?.title}`}
       style={
         {
           '--ink-opacity': drawn ? 1 : 0,

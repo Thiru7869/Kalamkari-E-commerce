@@ -3,8 +3,16 @@ import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ProcessJourney } from '@/components/process/process-journey';
+import { ColourWalk } from '@/components/process/colour-walk';
 import { Button } from '@/components/ui/button';
-import { processPhases, naturalDyes, totalSteps, whatWeDoNotUse } from '@/content/process';
+import {
+  processPhases,
+  naturalDyes,
+  totalSteps,
+  whatWeDoNotUse,
+  dyeWash,
+  colourStories,
+} from '@/content/process';
 import { site } from '@/content/site';
 import { absoluteUrl } from '@/lib/utils';
 
@@ -39,7 +47,9 @@ export default function ProcessPage() {
               materials — and if any one of them is skipped, the piece fails.
             </p>
             <p className="mt-4 leading-relaxed text-muted-foreground">
-              Scroll through it. The cloth beside the text changes as the process does.
+              Scroll through it. The cloth in the frame beside the text moves through
+              twelve states as you read, and the colour behind the page moves through the
+              seven pots in the order the craft reaches them.
             </p>
           </div>
 
@@ -65,8 +75,11 @@ export default function ProcessPage() {
         </div>
       </section>
 
-      {/* The scroll-driven sequence. */}
-      <ProcessJourney phases={processPhases} />
+      {/* The scroll-driven sequence: dye wash, framed cloth, twenty-three steps. */}
+      <ProcessJourney phases={processPhases} tones={dyeWash} />
+
+      {/* The palette, one colour at a time. */}
+      <ColourWalk colours={colourStories} />
 
       {/* ------------------------------------------------------------------ */}
       {/* Dye reference                                                       */}
@@ -74,12 +87,12 @@ export default function ProcessPage() {
       <section id="dyes" className="scroll-mt-24 border-y border-border bg-cotton-100 py-16 md:py-24 dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
-            <p className="eyebrow">The palette</p>
-            <h2 className="mt-3 text-display-md">Where each colour comes from</h2>
+            <p className="eyebrow">The reference</p>
+            <h2 className="mt-3 text-display-md">The same eight, as a table</h2>
             <p className="mt-4 text-muted-foreground">
-              Eight colours, and only three of them are painted on directly. The swatches
-              are approximations — the real colour shifts with the cloth, the water and
-              the season, which is a feature of natural dyeing rather than a fault in it.
+              For anyone who would rather read it than walk through it. The swatches are
+              approximations — the real colour shifts with the cloth, the water and the
+              season, which is a feature of natural dyeing rather than a fault in it.
             </p>
           </div>
 
