@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { CommissionForm } from '@/components/forms/commission-form';
+import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
+import { NarrativeNote } from '@/components/shop/narrative-note';
+import { commissionTimeline } from '@/content/commission';
 import { site } from '@/content/site';
 
 export const metadata: Metadata = {
@@ -106,7 +109,7 @@ export default function CommissionPage() {
             </div>
 
             <div>
-              <div className="rounded-sm border border-border bg-card p-5 md:p-7">
+              <div className="rounded-sm border border-border bg-card p-5 md:p-7 lg:sticky lg:top-24">
                 <h2 className="text-display-sm">Tell us what you have in mind</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   There is no obligation in this, and no payment is taken here. It starts a
@@ -116,6 +119,54 @@ export default function CommissionPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* What actually happens after you send                                */}
+      {/* ------------------------------------------------------------------ */}
+      <section className="border-y border-border bg-cotton-100 py-14 md:py-20 dark:bg-card">
+        <div className="container">
+          <RevealOnScroll>
+            <p className="eyebrow">After you send it</p>
+            <h2 className="mt-3 text-display-md">What happens, and when</h2>
+            <p className="mt-4 max-w-2xl text-body-lg text-muted-foreground">
+              Including the step where we say no. A commission that does not suit pen
+              Kalamkari is better refused than taken.
+            </p>
+          </RevealOnScroll>
+
+          <ol className="mt-10 grid gap-5 md:mt-14 md:grid-cols-5">
+            {commissionTimeline.map((stage, i) => (
+              <li key={stage.n}>
+                <RevealOnScroll delay={i * 0.06}>
+                  <div className="flex h-full flex-col border-t-2 border-primary/30 pt-4">
+                    <span className="tabular font-display text-2xl leading-none text-primary/70">
+                      {stage.n}
+                    </span>
+                    <h3 className="mt-3 font-display text-base leading-snug">{stage.title}</h3>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                      {stage.body}
+                    </p>
+                    <p className="mt-3 text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground/70">
+                      {stage.when}
+                    </p>
+                  </div>
+                </RevealOnScroll>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* The narrative traditions                                            */}
+      {/* ------------------------------------------------------------------ */}
+      <section className="py-14 md:py-20">
+        <div className="container">
+          <RevealOnScroll>
+            <NarrativeNote />
+          </RevealOnScroll>
         </div>
       </section>
     </>

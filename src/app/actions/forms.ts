@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { notifyEnquiry, notifyCommission } from '@/lib/mail';
+import { REFERENCE_LIMITS } from '@/content/commission';
 import {
   commissionSchema,
   enquirySchema,
@@ -71,6 +72,50 @@ export async function submitEnquiry(_prev: FormState, formData: FormData): Promi
 
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Reads and validates attached reference pictures.
+ *
+ * Type is checked against the declared MIME rather than the extension, size is
+ * capped per file and by count, and anything that fails is dropped silently
+ * rather than failing the whole enquiry — losing a picture is recoverable,
+ * losing a commission enquiry because a phone attached a HEIC is not. The
+ * store is told in the notification how many arrived.
+ */
+async function readReferences(formData: FormData) {
+  const files = formData
+    .getAll('references')
+    .filter((entry): entry is File => entry instanceof File && entry.size > 0)
+    .slice(0, REFERENCE_LIMITS.maxFiles);
+
+  // `Uint8Array<ArrayBuffer>` rather than the default `ArrayBufferLike`:
+  // Prisma's Bytes input rejects a view that might be over a SharedArrayBuffer.
+  const accepted: {
+    filename: string;
+    mimeType: string;
+    size: number;
+    data: Uint8Array<ArrayBuffer>;
+  }[] = [];
+
+  for (const file of files) {
+    if (!REFERENCE_LIMITS.accept.includes(file.type as (typeof REFERENCE_LIMITS.accept)[number])) {
+      continue;
+    }
+    if (file.size > REFERENCE_LIMITS.maxBytes) continue;
+
+    accepted.push({
+      // Never trust a client-supplied filename as a path. This is stored and
+      // shown back to the store, never used to open anything.
+      filename: file.name.replace(/[^\w.\- ]+/g, '_').slice(0, 200) || 'reference',
+      mimeType: file.type,
+      size: file.size,
+      // Uint8Array rather than Buffer: Prisma Bytes wants a plain view.
+      data: new Uint8Array(await file.arrayBuffer()),
+    });
+  }
+
+  return accepted;
+}
+
 export async function submitCommission(_prev: FormState, formData: FormData): Promise<FormState> {
   const raw = Object.fromEntries(formData);
   // Empty budget inputs arrive as '' and must not be coerced to 0.
@@ -103,8 +148,13 @@ export async function submitCommission(_prev: FormState, formData: FormData): Pr
 
   const session = await auth();
 
+  const references = await readReferences(formData);
+
   const commission = await prisma.commissionRequest.create({
     data: {
+      attachments: references.length
+        ? { create: references.map((r) => ({ ...r })) }
+        : undefined,
       userId: session?.user?.id ?? null,
       name: parsed.data.name,
       email: parsed.data.email,
@@ -120,6 +170,7 @@ export async function submitCommission(_prev: FormState, formData: FormData): Pr
   });
 
   await notifyCommission({
+    attachmentCount: references.length,
     name: commission.name,
     email: commission.email,
     phone: commission.phone,
@@ -133,8 +184,9 @@ export async function submitCommission(_prev: FormState, formData: FormData): Pr
 
   return {
     status: 'success',
-    message:
-      'Your commission enquiry has reached the store. Expect a reply within a few days — we will talk through the drawing, the cloth and a realistic timeline before anything is agreed.',
+    message: references.length
+      ? `Your commission enquiry has reached the store, with ${references.length} reference ${references.length === 1 ? 'picture' : 'pictures'}. Expect a reply within a few days — we will talk through the drawing, the cloth and a realistic timeline before anything is agreed.`
+      : 'Your commission enquiry has reached the store. Expect a reply within a few days — we will talk through the drawing, the cloth and a realistic timeline before anything is agreed.',
   };
 }
 

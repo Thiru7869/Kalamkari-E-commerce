@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { submitCommission } from '@/app/actions/forms';
 import { initialFormState } from '@/lib/form-state';
 import { Honeypot } from './honeypot';
 import { FieldError } from './field-error';
+import { CommissionGuide } from './commission-guide';
+import { ReferenceUpload } from './reference-upload';
 
 const PIECE_TYPES = [
   { value: 'saree', label: 'Saree' },
@@ -32,6 +34,13 @@ function SubmitButton() {
 export function CommissionForm({ className }: { className?: string }) {
   const [state, formAction] = useActionState(submitCommission, initialFormState);
 
+  // The guide writes into these rather than replacing the fields, so somebody
+  // who ignores it entirely gets exactly the form that was here before.
+  const briefRef = useRef<HTMLTextAreaElement>(null);
+  const [pieceType, setPieceType] = useState('saree');
+  const [fabric, setFabric] = useState('');
+  const [timeline, setTimeline] = useState('');
+
   if (state.status === 'success') {
     return (
       <div className={className} role="status">
@@ -46,6 +55,24 @@ export function CommissionForm({ className }: { className?: string }) {
 
   return (
     <form action={formAction} className={className} noValidate>
+      <CommissionGuide
+        className="mb-6"
+        onApply={({ brief, pieceType: pt, fabric: fb, timeline: tl }) => {
+          if (pt) setPieceType(pt);
+          if (fb !== undefined) setFabric(fb);
+          if (tl) setTimeline(tl);
+
+          // Prepend rather than overwrite: anything already typed is the
+          // visitor's own words and outranks the generated draft.
+          const el = briefRef.current;
+          if (el) {
+            el.value = `${brief}${el.value}`.trimStart();
+            el.focus();
+            el.setSelectionRange(el.value.length, el.value.length);
+          }
+        }}
+      />
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <Label htmlFor="c-name" required>Your name</Label>
@@ -96,7 +123,8 @@ export function CommissionForm({ className }: { className?: string }) {
             id="c-type"
             name="pieceType"
             required
-            defaultValue="saree"
+            value={pieceType}
+            onChange={(e) => setPieceType(e.target.value)}
             className="mt-1.5 h-11 w-full rounded-sm border border-input bg-card px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {PIECE_TYPES.map((t) => (
@@ -112,6 +140,8 @@ export function CommissionForm({ className }: { className?: string }) {
           <Input
             id="c-fabric"
             name="fabric"
+            value={fabric}
+            onChange={(e) => setFabric(e.target.value)}
             className="mt-1.5"
             placeholder="Cotton, tussar, Chanderi…"
           />
@@ -120,6 +150,7 @@ export function CommissionForm({ className }: { className?: string }) {
         <div className="sm:col-span-2">
           <Label htmlFor="c-brief" required>What would you like painted?</Label>
           <Textarea
+            ref={briefRef}
             id="c-brief"
             name="brief"
             required
@@ -130,9 +161,13 @@ export function CommissionForm({ className }: { className?: string }) {
             aria-describedby={state.errors?.brief ? 'c-brief-error' : 'c-brief-hint'}
           />
           <p id="c-brief-hint" className="mt-1.5 text-xs text-muted-foreground">
-            If you have a reference image, mention it here — we will ask for it by email.
+            Rough is fine. This is where the conversation starts, not where it ends.
           </p>
           <FieldError id="c-brief-error" message={state.errors?.brief} />
+        </div>
+
+        <div className="sm:col-span-2">
+          <ReferenceUpload />
         </div>
 
         <div>
@@ -171,6 +206,8 @@ export function CommissionForm({ className }: { className?: string }) {
           <Input
             id="c-timeline"
             name="timeline"
+            value={timeline}
+            onChange={(e) => setTimeline(e.target.value)}
             className="mt-1.5"
             placeholder="“Before Sankranti”, “no deadline”, a date…"
           />

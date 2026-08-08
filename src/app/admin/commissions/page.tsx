@@ -28,6 +28,15 @@ export default async function AdminCommissionsPage() {
   const requests = await prisma.commissionRequest.findMany({
     orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
     take: 100,
+    include: {
+      // Metadata only. The bytes are streamed on demand by the reference
+      // route, so a page of a hundred enquiries does not load a hundred
+      // photographs into memory to render a list.
+      attachments: {
+        select: { id: true, filename: true, mimeType: true, size: true },
+        orderBy: { createdAt: 'asc' },
+      },
+    },
   });
 
   return (
@@ -65,6 +74,37 @@ export default async function AdminCommissionsPage() {
                 </div>
                 <CommissionStatusSelect id={request.id} status={request.status} />
               </div>
+
+              {request.attachments.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                    {request.attachments.length} reference{' '}
+                    {request.attachments.length === 1 ? 'picture' : 'pictures'}
+                  </p>
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {request.attachments.map((file) => (
+                      <li key={file.id}>
+                        <a
+                          href={`/admin/commissions/reference/${file.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block h-20 w-20 overflow-hidden rounded-sm border border-border transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          title={`${file.filename} · ${Math.round(file.size / 1024)} kB`}
+                        >
+                          {/* Served from a private admin route; there is
+                              nothing for the image optimiser to do with it. */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={`/admin/commissions/reference/${file.id}`}
+                            alt={file.filename}
+                            className="h-full w-full object-cover"
+                          />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <p className="mt-4 whitespace-pre-line text-sm leading-relaxed">{request.brief}</p>
 

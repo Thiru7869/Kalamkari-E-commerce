@@ -428,8 +428,37 @@ model CommissionRequest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  attachments CommissionReference[]
+
   @@index([status])
   @@index([createdAt])
+}
+
+/// A reference picture attached to a commission enquiry.
+///
+/// Held in the database rather than on a file host on purpose. These are a
+/// handful of small pictures per enquiry, looked at once by a person, and
+/// keeping them here means the feature needs no third-party account, no
+/// credentials, and no writable filesystem — so it behaves identically on a
+/// serverless deploy and on a laptop. `Bytes` is supported by both SQLite and
+/// PostgreSQL, so the provider-portability rule still holds.
+///
+/// They are never public: the only way to read one is the admin route, which
+/// calls requireAdmin() before it touches the row.
+model CommissionReference {
+  id           String   @id @default(cuid())
+  commissionId String
+  /// Original name, kept so the store can refer to it in a reply.
+  filename     String
+  mimeType     String
+  /// Bytes, so the admin list can show a size without loading the blob.
+  size         Int
+  data         Bytes
+  createdAt    DateTime @default(now())
+
+  commission CommissionRequest @relation(fields: [commissionId], references: [id], onDelete: Cascade)
+
+  @@index([commissionId])
 }
 
 model BlogPost {

@@ -265,6 +265,7 @@ Mark it handled at ${absoluteUrl('/admin/enquiries')}`;
 }
 
 export function storeCommissionNotice(commission: {
+  attachmentCount?: number;
   name: string;
   email: string;
   phone: string | null;
@@ -295,6 +296,9 @@ ${budget}
 
 TIMELINE
 ${commission.timeline || 'not given'}
+
+REFERENCE PICTURES
+${commission.attachmentCount ? `${commission.attachmentCount} attached — open the enquiry to see them` : 'none'}
 
 REPLY TO
 ${commission.email}${commission.phone ? `\n${commission.phone}` : ''}

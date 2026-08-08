@@ -108,6 +108,7 @@ export async function notifyEnquiry(enquiry: {
 }
 
 export async function notifyCommission(commission: {
+  attachmentCount?: number;
   name: string;
   email: string;
   phone: string | null;
