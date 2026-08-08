@@ -9,6 +9,9 @@ import { checkoutSchema } from '@/lib/validation';
 import { generateOrderNumber } from '@/lib/utils';
 import { primaryImage } from '@/lib/serialize';
 import { isRazorpayConfigured } from '@/lib/payments';
+import { notifyOrderPlaced } from '@/lib/mail';
+import { grantOrderAccess } from '@/lib/order-access';
+import { SoldOutError, isSoldOutError } from '@/lib/errors';
 
 // CheckoutState and initialCheckoutState live in lib/form-state.ts — see the
 // note there on why a 'use server' module cannot export them.
@@ -111,7 +114,7 @@ export async function placeOrder(
         data: { stock: { decrement: line.quantity } },
       });
       if (updated.count === 0) {
-        throw new Error(`SOLD_OUT:${line.name}`);
+        throw new SoldOutError(line.name);
       }
     }
 
@@ -179,10 +182,7 @@ export async function placeOrder(
 
     return created;
   }).catch((error: unknown) => {
-    const message = error instanceof Error ? error.message : '';
-    if (message.startsWith('SOLD_OUT:')) {
-      return { soldOut: message.slice('SOLD_OUT:'.length) } as const;
-    }
+    if (isSoldOutError(error)) return { soldOut: error.productName } as const;
     throw error;
   });
 
@@ -193,9 +193,37 @@ export async function placeOrder(
     };
   }
 
+  // Receipt to the customer, notice to the store.
+  //
+  // Only for cash on delivery: an online order is not really an order until
+  // the payment clears, and telling somebody their order is confirmed before
+  // that would be a lie the webhook would then have to retract. The Razorpay
+  // path sends the same mail from the payment handler.
+  if (input.paymentMethod === 'COD') {
+    await notifyOrderPlaced({
+      number: order.number,
+      email: order.email,
+      shipName: order.shipName,
+      shipLine1: order.shipLine1,
+      shipLine2: order.shipLine2,
+      shipCity: order.shipCity,
+      shipState: order.shipState,
+      shipPostalCode: order.shipPostalCode,
+      subtotal: order.subtotal,
+      shipping: order.shipping,
+      total: order.total,
+      paymentMethod: order.paymentMethod,
+      items: lines.map((l) => ({ name: l.name, quantity: l.quantity, price: l.price })),
+    });
+  }
+
   revalidatePath('/cart');
   revalidatePath('/', 'layout');
 
+  // Entitle this browser to read the order, so the confirmation URL does not
+  // have to carry the email address that protects it.
+  await grantOrderAccess(order.number);
+
   // redirect() throws internally, so it must be outside the transaction.
-  redirect(`/checkout/confirmation/${order.number}?email=${encodeURIComponent(input.email)}`);
+  redirect(`/checkout/confirmation/${order.number}`);
 }

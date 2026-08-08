@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/primitives';
 import { mainNav, site, contactPhone } from '@/content/site';
+import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 
 export function MobileMenu({ isSignedIn }: { isSignedIn: boolean }) {
@@ -130,6 +131,12 @@ export function MobileMenu({ isSignedIn }: { isSignedIn: boolean }) {
               Call the store
             </a>
           )}
+
+          {/* The header toggle is desktop-only, so the drawer carries it here. */}
+          <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
+            <span className="text-muted-foreground">Dark theme</span>
+            <ThemeToggle />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { notifyEnquiry, notifyCommission } from '@/lib/mail';
 import {
   commissionSchema,
   enquirySchema,
@@ -40,7 +41,7 @@ export async function submitEnquiry(_prev: FormState, formData: FormData): Promi
   // Honeypot filled — accept silently so the bot does not learn anything.
   if (parsed.data.website) return { status: 'success', message: 'Thank you — we will be in touch.' };
 
-  await prisma.enquiry.create({
+  const enquiry = await prisma.enquiry.create({
     data: {
       name: parsed.data.name,
       email: parsed.data.email,
@@ -48,6 +49,17 @@ export async function submitEnquiry(_prev: FormState, formData: FormData): Promi
       subject: parsed.data.subject,
       message: parsed.data.message,
     },
+  });
+
+  // The store has no reason to sit refreshing /admin. Notification failures are
+  // swallowed inside the mail layer: the enquiry is already saved, and telling
+  // the visitor it failed would be both untrue and useless to them.
+  await notifyEnquiry({
+    name: enquiry.name,
+    email: enquiry.email,
+    phone: enquiry.phone,
+    subject: enquiry.subject,
+    message: enquiry.message,
   });
 
   return {
@@ -91,7 +103,7 @@ export async function submitCommission(_prev: FormState, formData: FormData): Pr
 
   const session = await auth();
 
-  await prisma.commissionRequest.create({
+  const commission = await prisma.commissionRequest.create({
     data: {
       userId: session?.user?.id ?? null,
       name: parsed.data.name,
@@ -105,6 +117,18 @@ export async function submitCommission(_prev: FormState, formData: FormData): Pr
       budgetMax: budgetMax != null ? budgetMax * 100 : null,
       timeline: parsed.data.timeline || null,
     },
+  });
+
+  await notifyCommission({
+    name: commission.name,
+    email: commission.email,
+    phone: commission.phone,
+    pieceType: commission.pieceType,
+    fabric: commission.fabric,
+    brief: commission.brief,
+    budgetMin: commission.budgetMin,
+    budgetMax: commission.budgetMax,
+    timeline: commission.timeline,
   });
 
   return {

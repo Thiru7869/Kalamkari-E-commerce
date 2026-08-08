@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Marcellus, Mulish, Noto_Sans_Telugu } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SmoothScrollProvider } from '@/components/providers/smooth-scroll-provider';
 import { ServiceWorkerRegistrar } from '@/components/providers/service-worker-registrar';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -142,28 +143,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
 
-        <SmoothScrollProvider>
-          <SiteHeader />
-          <main id="main" className="min-h-[60vh] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
-            {children}
-          </main>
-          <SiteFooter />
-          <MobileTabBar />
-          <FloatingDock />
-        </SmoothScrollProvider>
+        <ThemeProvider>
+          <SmoothScrollProvider>
+            <SiteHeader />
+            <main id="main" className="min-h-[60vh] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
+              {children}
+            </main>
+            <SiteFooter />
+            <MobileTabBar />
+            <FloatingDock />
+          </SmoothScrollProvider>
 
-        <Toaster
-          position="bottom-center"
-          // Clear of the phone tab bar.
-          offset={88}
-          toastOptions={{
-            classNames: {
-              toast: 'font-sans rounded-sm border border-border bg-card text-card-foreground',
-              description: 'text-muted-foreground',
-            },
-          }}
-        />
-        <ServiceWorkerRegistrar />
+          <Toaster
+            position="bottom-center"
+            // Clear of the phone tab bar.
+            offset={88}
+            toastOptions={{
+              classNames: {
+                toast: 'font-sans rounded-sm border border-border bg-card text-card-foreground',
+                description: 'text-muted-foreground',
+              },
+            }}
+          />
+          <ServiceWorkerRegistrar />
+        </ThemeProvider>
       </body>
     </html>
   );

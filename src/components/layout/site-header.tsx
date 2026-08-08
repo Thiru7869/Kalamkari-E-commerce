@@ -8,6 +8,7 @@ import { MobileMenu } from './mobile-menu';
 import { DesktopNav } from './desktop-nav';
 import { Wordmark } from './wordmark';
 import { HeaderShell } from './header-shell';
+import { ThemeToggle } from './theme-toggle';
 
 async function CartBadge() {
   const count = await getCartCount();
@@ -67,6 +68,8 @@ export async function SiteHeader() {
             <Search className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
             <span className="sr-only">Search</span>
           </Link>
+
+          <ThemeToggle className="hidden sm:inline-flex" />
 
           <Link
             href="/wishlist"

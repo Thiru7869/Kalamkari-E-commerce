@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { OrderDetail } from '@/components/orders/order-detail';
 import { Button } from '@/components/ui/button';
+import { hasOrderAccess } from '@/lib/order-access';
 import { site } from '@/content/site';
 
 export const metadata: Metadata = {
@@ -14,17 +15,9 @@ export const metadata: Metadata = {
 };
 
 type Params = Promise<{ number: string }>;
-type Search = Promise<{ email?: string }>;
 
-export default async function ConfirmationPage({
-  params,
-  searchParams,
-}: {
-  params: Params;
-  searchParams: Search;
-}) {
+export default async function ConfirmationPage({ params }: { params: Params }) {
   const { number } = await params;
-  const { email } = await searchParams;
 
   const order = await prisma.order.findUnique({
     where: { number: number.toUpperCase() },
@@ -34,13 +27,14 @@ export default async function ConfirmationPage({
   if (!order) notFound();
 
   // An order number alone must not expose an address and phone number. The
-  // owner is either signed in as the purchaser, or arriving with the matching
-  // email in the redirect from checkout.
+  // reader is either signed in as the purchaser, an admin, or holding the
+  // httpOnly grant this browser was given at checkout. The email address is
+  // deliberately no longer accepted from the URL — see lib/order-access.ts.
   const session = await auth();
   const isOwner =
     (session?.user?.id && order.userId === session.user.id) ||
     session?.user?.role === 'ADMIN' ||
-    (email && email.toLowerCase() === order.email.toLowerCase());
+    (await hasOrderAccess(order.number));
 
   if (!isOwner) notFound();
 
@@ -50,8 +44,10 @@ export default async function ConfirmationPage({
         <CheckCircle2 className="mx-auto h-10 w-10 text-primary" aria-hidden="true" />
         <h1 className="mt-5 text-display-lg">Thank you</h1>
         <p className="mt-4 text-body-lg text-muted-foreground">
-          Your order is with the store in {site.location.town}. We have sent a confirmation
-          to {order.email}.
+          Your order is with the store in {site.location.town}.{' '}
+          {order.paymentStatus === 'PENDING' && order.paymentMethod === 'RAZORPAY'
+            ? 'A confirmation goes out as soon as the payment clears.'
+            : `We have sent a confirmation to ${order.email}.`}
         </p>
         <p className="tabular mt-6 inline-block rounded-sm border border-border bg-card px-5 py-3 font-display text-xl">
           {order.number}

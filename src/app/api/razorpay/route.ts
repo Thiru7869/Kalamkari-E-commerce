@@ -6,6 +6,7 @@ import {
   isRazorpayConfigured,
   verifyRazorpaySignature,
 } from '@/lib/payments';
+import { confirmOrderPaid } from '@/lib/order-payment';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -94,38 +95,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Payment could not be verified.' }, { status: 400 });
     }
 
-    const order = await prisma.order.findUnique({
-      where: { number: verify.data.orderNumber },
-      select: { id: true, razorpayOrderId: true },
+    // Both this and the webhook confirm through the same idempotent path, so
+    // whichever arrives first wins and the second is a no-op. See
+    // lib/order-payment.ts.
+    const result = await confirmOrderPaid({
+      orderNumber: verify.data.orderNumber,
+      razorpayOrderId: verify.data.razorpayOrderId,
+      razorpayPaymentId: verify.data.razorpayPaymentId,
+      source: 'browser',
     });
 
-    if (!order) return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
-
-    // The signature proves the payment is genuine; this proves it belongs to
-    // *this* order rather than a cheaper one the caller also paid for.
-    if (order.razorpayOrderId !== verify.data.razorpayOrderId) {
+    if (result.outcome === 'not-found') {
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+    }
+    if (result.outcome === 'mismatched-order') {
       return NextResponse.json({ error: 'Payment does not match this order.' }, { status: 400 });
     }
 
-    await prisma.$transaction([
-      prisma.order.update({
-        where: { id: order.id },
-        data: {
-          paymentStatus: 'PAID',
-          status: 'CONFIRMED',
-          confirmedAt: new Date(),
-          razorpayPaymentId: verify.data.razorpayPaymentId,
-        },
-      }),
-      prisma.orderEvent.create({
-        data: {
-          orderId: order.id,
-          status: 'CONFIRMED',
-          message: 'Payment received. Order confirmed at the store in Srikalahasti.',
-        },
-      }),
-    ]);
-
+    // 'already-paid' is success from the browser's point of view — the webhook
+    // simply got there first.
     return NextResponse.json({ ok: true });
   }
 

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { ORDER_STATUSES, statusDescription, statusLabel } from '@/lib/orders';
+import { notifyOrderDispatched, notifyOrderCancelled, notifyOrderStatus } from '@/lib/mail';
 
 type Result = { ok: true; message: string } | { ok: false; error: string };
 
@@ -48,6 +49,14 @@ export async function updateOrderStatus(
         ...(status === 'SHIPPED' && !order.shippedAt ? { shippedAt: now } : {}),
         ...(status === 'DELIVERED' && !order.deliveredAt ? { deliveredAt: now } : {}),
         ...(status === 'CANCELLED' && !order.cancelledAt ? { cancelledAt: now } : {}),
+        // Cancelling an order that was actually paid for owes the customer
+        // money. Recording that here means the refund shows on the order and
+        // in the admin list, rather than living only in somebody's memory.
+        // The money itself moves in the payment provider's dashboard; this is
+        // the store's record that it should.
+        ...(status === 'CANCELLED' && order.paymentStatus === 'PAID'
+          ? { paymentStatus: 'REFUNDED' }
+          : {}),
       },
     });
 
@@ -71,6 +80,26 @@ export async function updateOrderStatus(
       }
     }
   });
+
+  // Tell the customer, for the transitions they would want to hear about.
+  // A status the store moves through internally (PACKED) is not one of them —
+  // an email per internal step trains people to stop reading them.
+  const message = note?.trim() || statusDescription(status);
+
+  if (status === 'SHIPPED' && order.status !== 'SHIPPED') {
+    await notifyOrderDispatched(
+      { number: order.number, email: order.email, shipName: order.shipName },
+      order.courier,
+      order.trackingNumber,
+    );
+  } else if (status === 'CANCELLED' && order.status !== 'CANCELLED') {
+    await notifyOrderCancelled(
+      { number: order.number, email: order.email },
+      order.paymentStatus === 'PAID',
+    );
+  } else if ((status === 'IN_PRODUCTION' || status === 'DELIVERED') && order.status !== status) {
+    await notifyOrderStatus({ number: order.number, email: order.email }, status, message);
+  }
 
   revalidatePath('/admin');
   revalidatePath('/admin/orders');
