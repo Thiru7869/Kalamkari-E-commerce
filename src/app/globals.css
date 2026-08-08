@@ -1,0 +1,233 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme = myrobalan-treated cotton. The background is never pure
+       white, because the cloth never is. */
+    --background: 42 45% 96%;      /* cotton-100 */
+    --foreground: 40 8% 13%;       /* kasim-900, the outline black */
+
+    --card: 40 50% 98%;
+    --card-foreground: 40 8% 13%;
+
+    --popover: 40 50% 98%;
+    --popover-foreground: 40 8% 13%;
+
+    /* Primary is the chay/madder red — the colour of the craft's signature. */
+    --primary: 8 61% 34%;          /* chay-600 */
+    --primary-foreground: 42 60% 97%;
+
+    --secondary: 38 30% 88%;
+    --secondary-foreground: 30 20% 22%;
+
+    --muted: 40 25% 91%;
+    --muted-foreground: 35 8% 38%;
+
+    /* Accent is indigo — the one colour that is dipped, not painted. */
+    --accent: 215 41% 29%;         /* indigo-600 */
+    --accent-foreground: 42 60% 97%;
+
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 42 60% 97%;
+
+    --border: 38 22% 82%;
+    --input: 38 22% 80%;
+    --ring: 8 61% 34%;
+
+    --radius: 0.25rem; /* Hand-drawn work does not need rounded chrome. */
+  }
+
+  .dark {
+    /* Dark theme = the store at night, or an indigo vat. Not neutral grey. */
+    --background: 30 12% 8%;
+    --foreground: 40 30% 92%;
+
+    --card: 30 10% 11%;
+    --card-foreground: 40 30% 92%;
+
+    --popover: 30 10% 11%;
+    --popover-foreground: 40 30% 92%;
+
+    --primary: 10 48% 52%;         /* chay lifts in the dark to stay readable */
+    --primary-foreground: 30 12% 8%;
+
+    --secondary: 30 8% 18%;
+    --secondary-foreground: 40 30% 92%;
+
+    --muted: 30 8% 16%;
+    --muted-foreground: 38 12% 65%;
+
+    --accent: 215 30% 60%;
+    --accent-foreground: 30 12% 8%;
+
+    --destructive: 0 55% 48%;
+    --destructive-foreground: 40 30% 92%;
+
+    --border: 30 8% 22%;
+    --input: 30 8% 24%;
+    --ring: 10 48% 52%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    /* Lenis drives scrolling; native smooth-scroll would fight it. The
+       fallback below applies only when Lenis is not mounted. */
+    scroll-behavior: auto;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    /* Prevent horizontal scroll from any oversized 3D canvas or wide table. */
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    font-synthesis-weight: none;
+  }
+
+  /* Cormorant's regular is a *book* weight — correct for running text, too
+     light for a heading standing alone on a cream ground. 500 is the weight at
+     which its thin strokes still hold at 16px on a phone. */
+  h1, h2, h3, h4 {
+    @apply font-display;
+    font-weight: 500;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, unmistakable focus. Never removed anywhere in this codebase. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Selection in madder red, at low alpha so text stays readable. */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.22);
+  }
+
+  /* Number-heavy UI (prices, order refs) should not have wandering digits. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* The section eyebrow used across the site: small, tracked, in kasim grey.
+     Set in the inscriptional face — these labels name a thing rather than say
+     something about it, which is what carved capitals are for. */
+  .eyebrow {
+    @apply font-inscription text-eyebrow uppercase tracking-[0.2em] text-muted-foreground;
+  }
+
+  /* A hairline rule that reads like a drawn line rather than a CSS border. */
+  .kalam-rule {
+    @apply block h-px w-full;
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      hsl(var(--foreground) / 0.28) 12%,
+      hsl(var(--foreground) / 0.28) 88%,
+      transparent
+    );
+  }
+
+  /* Applied to large cloth-coloured surfaces so they read as woven, not flat.
+     Cheap: one inline SVG, composited once. */
+  .cloth-texture {
+    position: relative;
+    isolation: isolate;
+  }
+  .cloth-texture::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0 bg-cloth-grain opacity-[0.18];
+    mix-blend-mode: multiply;
+    z-index: -1;
+  }
+
+  /* Skip link — visible only on keyboard focus. */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100]
+           focus:rounded-sm focus:bg-primary focus:px-4 focus:py-2
+           focus:text-primary-foreground;
+  }
+}
+
+@layer utilities {
+  /* Reserve room for the phone tab bar so content is never trapped under it. */
+  .pb-tabbar {
+    padding-bottom: var(--tabbar-height, 0px);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Horizontal rails on mobile: snap, with edge padding that matches the
+     container so the first card lines up with the heading above it. */
+  .snap-rail {
+    @apply flex snap-x snap-mandatory gap-4 overflow-x-auto no-scrollbar;
+    scroll-padding-inline: 1.25rem;
+  }
+  .snap-rail > * {
+    @apply snap-start shrink-0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Lenis
+   --------------------------------------------------------------------------- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion
+   Everything decorative stops. Scroll-driven *content* still resolves to its
+   final state — a user who asks for less motion must not lose information.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .motion-safe-only {
+    display: none !important;
+  }
+}
+
+/* Printing an order confirmation or an invoice should not print chrome. */
+@media print {
+  header, footer, nav, .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

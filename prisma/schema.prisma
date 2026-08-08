@@ -1,0 +1,472 @@
+// Sri Vijaya Lakshmi Fine Kalamkari Arts — data model
+//
+// Defaults to SQLite so the project runs immediately after clone. To move to
+// PostgreSQL, change `provider` to "postgresql" and point DATABASE_URL at your
+// instance — no other change is required, because this schema deliberately
+// avoids provider-specific features (no native enums, no arrays, no JSON
+// columns). Lists are stored as newline-delimited text and read through the
+// helpers in src/lib/serialize.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth (Auth.js / NextAuth v5 model contract)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?
+  role          String    @default("CUSTOMER") // CUSTOMER | ADMIN
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  addresses    Address[]
+  orders       Order[]
+  reviews      Review[]
+  wishlist     WishlistItem[]
+  cart         Cart?
+  commissions  CommissionRequest[]
+
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue
+// ---------------------------------------------------------------------------
+
+/// Top-level shop sections: sarees, dupattas, blouses, paintings, home-decor.
+model Category {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  teluguName  String?
+  tagline     String
+  description String
+  heroImage   String
+  /// Ordering in navigation and on the shop index.
+  position    Int     @default(0)
+  featured    Boolean @default(false)
+
+  products Product[]
+
+  @@index([position])
+}
+
+/// The base cloth a piece is painted on. Kept as a first-class entity because
+/// on a Kalamkari site the fabric is not a filter facet — it changes how the
+/// dye behaves, how the piece drapes, and how it must be cared for. Customers
+/// genuinely shop by it.
+model Fabric {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  /// Family used for grouping filters: cotton | silk | blended | sheer
+  family      String
+  /// One or two sentences on how this cloth takes natural dye.
+  description String
+  /// Care guidance specific to this cloth + natural dye combination.
+  careNote    String
+  position    Int     @default(0)
+
+  products Product[]
+
+  @@index([family])
+  @@index([position])
+}
+
+/// A motif tradition (Ramayana panels, Tree of Life, Krishna Leela, temple
+/// borders...). Kalamkari is narrative art; motif is the most meaningful way
+/// to browse it, more so than colour or price.
+model Motif {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  /// The story or symbolism behind the motif. Shown on product pages.
+  story       String
+  position    Int     @default(0)
+
+  products ProductMotif[]
+
+  @@index([position])
+}
+
+model Product {
+  id          String @id @default(cuid())
+  slug        String @unique
+  name        String
+  /// One-line hook used on cards and in search results.
+  summary     String
+  /// Long-form description: what is depicted, how it was made, who made it.
+  description String
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  fabricId String?
+  fabric   Fabric? @relation(fields: [fabricId], references: [id])
+
+  /// Price in paise (integer money — never floats).
+  price         Int
+  /// Optional strike-through price, also in paise.
+  compareAtPrice Int?
+
+  /// Newline-delimited image paths. First entry is the primary image.
+  images String
+
+  /// Newline-delimited dye names actually used on this piece
+  /// (e.g. "Kasim black\nAlum-mordanted chay red").
+  naturalDyes String
+
+  /// Dimensions, free text, e.g. "6.3 m with blouse piece" or "24 x 36 in".
+  dimensions String?
+  /// Newline-delimited care instructions.
+  careNotes  String?
+
+  /// Days of hand-work that went into the piece. Used to justify price
+  /// honestly rather than with invented scarcity.
+  craftDays Int?
+
+  /// Named artist within the family, if the piece is attributable.
+  artisan String?
+
+  /// Every piece is one of one unless stated otherwise — this is hand painting.
+  stock Int @default(1)
+
+  status   String  @default("ACTIVE") // ACTIVE | DRAFT | ARCHIVED
+  featured Boolean @default(false)
+  /// Marks pieces that are signed, award-lineage, or exhibition grade.
+  masterpiece Boolean @default(false)
+
+  ratingSum   Int @default(0)
+  ratingCount Int @default(0)
+  viewCount   Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  motifs       ProductMotif[]
+  reviews      Review[]
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  wishlistedBy WishlistItem[]
+
+  @@index([categoryId, status])
+  @@index([fabricId])
+  @@index([featured])
+  @@index([price])
+  @@index([createdAt])
+}
+
+model ProductMotif {
+  productId String
+  motifId   String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  motif   Motif   @relation(fields: [motifId], references: [id], onDelete: Cascade)
+
+  @@id([productId, motifId])
+  @@index([motifId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int
+  title     String?
+  body      String
+  /// Only reviews attached to a delivered order are marked verified.
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+}
+
+// ---------------------------------------------------------------------------
+// Cart & wishlist
+// ---------------------------------------------------------------------------
+
+model Cart {
+  id        String   @id @default(cuid())
+  /// Set for signed-in carts.
+  userId    String?  @unique
+  /// Set for guest carts, mirrored in an httpOnly cookie.
+  guestId   String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------------
+
+model Address {
+  id        String  @id @default(cuid())
+  userId    String
+  fullName  String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  postalCode String
+  country   String  @default("India")
+  isDefault Boolean @default(false)
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([userId])
+}
+
+model Order {
+  id     String @id @default(cuid())
+  /// Human-facing reference, e.g. SVL-2A7F4C.
+  number String @unique
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  /// Contact details are snapshotted so guest orders survive without a User.
+  email String
+  phone String?
+
+  addressId String?
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  /// Shipping address snapshot — an order must not change when the user later
+  /// edits their address book.
+  shipName       String
+  shipLine1      String
+  shipLine2      String?
+  shipCity       String
+  shipState      String
+  shipPostalCode String
+  shipCountry    String  @default("India")
+
+  /// All money in paise.
+  subtotal Int
+  shipping Int @default(0)
+  discount Int @default(0)
+  total    Int
+
+  status        String @default("PENDING")
+  // PENDING | CONFIRMED | IN_PRODUCTION | PACKED | SHIPPED | DELIVERED | CANCELLED
+  paymentMethod String @default("COD") // COD | RAZORPAY
+  paymentStatus String @default("PENDING") // PENDING | PAID | FAILED | REFUNDED
+
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+
+  courier        String?
+  trackingNumber String?
+  /// Customer-facing note left at checkout (gifting, occasion, deadline).
+  customerNote   String?
+
+  placedAt    DateTime  @default(now())
+  confirmedAt DateTime?
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  cancelledAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  items  OrderItem[]
+  events OrderEvent[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([placedAt])
+  @@index([email])
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  productId String?
+
+  /// Snapshots — the catalogue may change or a one-of-one piece may be
+  /// archived after sale, but the order must stay readable forever.
+  name     String
+  slug     String
+  image    String
+  price    Int
+  quantity Int
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+/// Append-only order timeline. Drives the tracking page, so the customer sees
+/// the real stages of a handmade order rather than a generic courier status.
+model OrderEvent {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  message   String
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+// ---------------------------------------------------------------------------
+// Commissions, journal, enquiries
+// ---------------------------------------------------------------------------
+
+model CommissionRequest {
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  name  String
+  email String
+  phone String?
+
+  /// saree | dupatta | painting | home-decor | other
+  pieceType String
+  fabric    String?
+  /// The narrative or motif the customer wants painted.
+  brief     String
+  /// Newline-delimited reference image paths, if uploaded.
+  references String?
+  budgetMin Int?
+  budgetMax Int?
+  /// Free text — "before Sankranti", "no deadline".
+  timeline  String?
+
+  status    String   @default("NEW") // NEW | IN_DISCUSSION | ACCEPTED | IN_PROGRESS | COMPLETED | DECLINED
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  excerpt     String
+  /// Markdown-ish body rendered by src/lib/markdown.ts.
+  body        String
+  coverImage  String
+  author      String
+  /// Newline-delimited tags.
+  tags        String
+  readMinutes Int       @default(5)
+  published   Boolean   @default(true)
+  publishedAt DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, publishedAt])
+}
+
+model Enquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  handled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([handled, createdAt])
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  confirmed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}

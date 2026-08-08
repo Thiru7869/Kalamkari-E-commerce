@@ -1,0 +1,77 @@
+{
+  "name": "Sri Vijaya Lakshmi Fine Kalamkari Arts",
+  "short_name": "Sri Vijaya Lakshmi",
+  "description": "Hand-painted Srikalahasti Kalamkari from a family store. Natural dyes only — no blocks, no prints, no chemical colour.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#F4EDE0",
+  "theme_color": "#F4EDE0",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["shopping", "lifestyle", "art"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shop sarees",
+      "short_name": "Sarees",
+      "url": "/shop/sarees",
+      "description": "Hand-painted Kalamkari sarees"
+    },
+    {
+      "name": "The 23 steps",
+      "short_name": "Process",
+      "url": "/process",
+      "description": "How a Kalamkari saree is made"
+    },
+    {
+      "name": "Track an order",
+      "short_name": "Track",
+      "url": "/orders/track",
+      "description": "Follow an order through production"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshots/mobile-home.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "The home page on a phone"
+    },
+    {
+      "src": "/images/screenshots/desktop-process.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "The interactive 23-step process page"
+    }
+  ]
+}
