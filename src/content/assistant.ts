@@ -45,6 +45,10 @@ export const knowledge: KnowledgeEntry[] = [
     keywords: [
       'block print', 'printed', 'machilipatnam', 'difference', 'real or fake',
       'how do i know', 'authentic', 'genuine', 'handmade', 'screen print',
+      // The phrasings people actually use for this, which is the question the
+      // whole site exists to answer.
+      'hand painted', 'painted or printed', 'printed or painted',
+      'tell the difference', 'how to tell', 'fake', 'original', 'block printed',
     ],
     answer:
       'Most cloth sold as "Kalamkari" is block-printed or screen-printed, and much of it uses chemical colour. There are two genuine traditions: Machilipatnam, which is carved into wooden blocks and repeated, and Srikalahasti, which is drawn freehand with a bamboo pen. Ours is the second. The tell is repetition — on a printed piece the same motif recurs identically; on ours, two peacocks on the same saree are never the same peacock. Look also at the back of the cloth: hand-drawn dye penetrates the weave, print sits on the surface.',
@@ -86,6 +90,9 @@ export const knowledge: KnowledgeEntry[] = [
     keywords: [
       'wash', 'care', 'clean', 'maintain', 'dry clean', 'fade', 'iron',
       'store it', 'looking after', 'detergent',
+      // Natural phrasings — a bare 'wash' also appears on the process entry,
+      // so these are what separate "how do I wash it" from "how is it washed".
+      'wash it', 'how to wash', 'washing', 'look after', 'care for',
     ],
     answer:
       'Natural dye is fixed, not fragile — but it is fixed by tannin and metal salts rather than by a chemical bond, so treat it gently. Cold water, mild soap, no detergent with bleach or optical brightener, and never wring it. Dry in shade rather than direct sun after the first year. Iron on the reverse. Naturally dyed cloth softens and settles over time; a little mellowing is the cloth behaving correctly, not a defect.',
@@ -96,6 +103,8 @@ export const knowledge: KnowledgeEntry[] = [
     keywords: [
       'shipping', 'delivery', 'deliver', 'post', 'courier', 'how long to arrive',
       'international', 'abroad', 'free shipping', 'track',
+      'do you ship', 'ship to', 'delivery time', 'how much is shipping',
+      'how long does delivery', 'when will it arrive',
     ],
     answer: `Within India, ${site.shipping.domesticDays}, flat rate, and free above ₹${(
       site.shipping.freeAbove / 100

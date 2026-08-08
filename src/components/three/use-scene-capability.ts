@@ -33,8 +33,7 @@ export function useSceneCapability(): SceneCapability {
   });
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+    // WebGL support cannot change during a session, so it is probed once.
     let hasWebGL = false;
     try {
       const canvas = document.createElement('canvas');
@@ -51,23 +50,50 @@ export function useSceneCapability(): SceneCapability {
       hasWebGL = false;
     }
 
-    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-    const cores = navigator.hardwareConcurrency ?? 4;
-    const smallViewport = window.innerWidth < 768;
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // Matches the `md` breakpoint the rest of the site uses.
+    const compactQuery = window.matchMedia('(max-width: 767px)');
 
-    const lowPower =
-      (deviceMemory != null && deviceMemory <= 4) || cores <= 4 || smallViewport;
+    const measure = () => {
+      const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+      const cores = navigator.hardwareConcurrency ?? 4;
 
-    // Retina beyond 2x buys nothing perceptible here and costs 2.25x the pixels.
-    const maxDpr = lowPower ? 1.5 : 2;
+      const lowPower =
+        (deviceMemory != null && deviceMemory <= 4) || cores <= 4 || compactQuery.matches;
 
-    setState({
-      ready: true,
-      enabled: hasWebGL,
-      reducedMotion,
-      dpr: [1, Math.min(window.devicePixelRatio || 1, maxDpr)],
-      lowPower,
-    });
+      // Retina beyond 2x buys nothing perceptible here and costs 2.25x the pixels.
+      const maxDpr = lowPower ? 1.5 : 2;
+
+      setState({
+        ready: true,
+        enabled: hasWebGL,
+        reducedMotion: motionQuery.matches,
+        dpr: [1, Math.min(window.devicePixelRatio || 1, maxDpr)],
+        lowPower,
+      });
+    };
+
+    measure();
+
+    /*
+      Both preferences are subscribed rather than sampled.
+
+      `prefers-reduced-motion` is the one that matters: a visitor who turns it
+      on partway through reading /process is asking for the animation to stop
+      *now*, and a value read once at mount would keep the rAF loop running
+      until they reloaded — which is exactly the thing somebody with vestibular
+      sensitivity cannot comfortably do.
+
+      The viewport query is subscribed for a duller reason: rotating a phone
+      changes which side of the low-power threshold it sits on, and the DPR cap
+      should follow.
+    */
+    motionQuery.addEventListener('change', measure);
+    compactQuery.addEventListener('change', measure);
+    return () => {
+      motionQuery.removeEventListener('change', measure);
+      compactQuery.removeEventListener('change', measure);
+    };
   }, []);
 
   return state;

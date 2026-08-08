@@ -29,20 +29,57 @@ function tokenise(input: string): string[] {
     .filter((word) => word.length > 2 && !STOP_WORDS.has(word));
 }
 
+/**
+ * Crudest possible stemming: drop a trailing plural `s`.
+ *
+ * Enough to stop "what dyes do you use" missing the keyword "dye", which is
+ * about as ordinary a question as this store receives. `ss` is left alone so
+ * "process" does not become "proces".
+ */
+function stem(word: string): string {
+  if (word.length > 3 && word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
+  return word;
+}
+
+/**
+ * Flattens punctuation to spaces for phrase matching.
+ *
+ * Without this, "how do I tell hand-painted from printed?" fails to match the
+ * keyword "hand painted", because the hyphen is not a space. That is not a
+ * hypothetical: it is the single most common question this store is asked and
+ * the one the whole site is built to answer, and it was falling through to
+ * "I would rather not guess at that one".
+ */
+function normalise(input: string): string {
+  return ` ${input.toLowerCase().replace(/[^a-z0-9₹\s]/g, ' ').replace(/\s+/g, ' ').trim()} `;
+}
+
 function scoreEntry(entry: KnowledgeEntry, question: string, tokens: string[]) {
-  const lower = question.toLowerCase();
+  const flattened = normalise(question);
   let score = 0;
 
   for (const keyword of entry.keywords) {
     // A whole phrase appearing verbatim is far stronger evidence than a word
     // overlap, so it is weighted an order of magnitude higher.
-    if (keyword.includes(' ') && lower.includes(keyword)) {
+    if (keyword.includes(' ') && flattened.includes(normalise(keyword).slice(1, -1))) {
       score += 10;
       continue;
     }
+    const keywordStem = stem(keyword);
+
     for (const token of tokens) {
-      if (token === keyword) score += 4;
-      else if (token.length > 4 && keyword.includes(token)) score += 2;
+      // Exact, or the same word in the other number ("dye" / "dyes").
+      if (token === keyword || stem(token) === keywordStem) {
+        score += 4;
+        continue;
+      }
+      // A partial overlap is weak evidence and is scored as such. Multi-word
+      // keywords are excluded: they have already had their chance as a phrase
+      // above, and letting "colour" half-match "what colours" is how an
+      // unrelated question ends up confidently answered with the dye list.
+      if (!keyword.includes(' ') && token.length > 4 && keyword.includes(token)) {
+        score += 2;
+      }
     }
   }
 
