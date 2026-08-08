@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { site } from '@/content/site';
+import Link from 'next/link';
+import { contactEmail } from '@/content/site';
 
 export const metadata: Metadata = {
   title: 'Privacy',
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
+  const email = contactEmail();
+
   return (
     <div className="container py-14 md:py-20">
       <div className="mx-auto max-w-[46rem]">
@@ -79,12 +82,18 @@ export default function PrivacyPage() {
             <p className="mt-4 leading-relaxed text-muted-foreground">
               You can ask what we hold about you, ask us to correct it, or ask us to delete
               it. Write to{' '}
-              <a
-                href={`mailto:${site.contact.email}`}
-                className="text-primary underline underline-offset-4"
-              >
-                {site.contact.email}
-              </a>{' '}
+              {email ? (
+                <a
+                  href={`mailto:${email}`}
+                  className="text-primary underline underline-offset-4"
+                >
+                  {email}
+                </a>
+              ) : (
+                <Link href="/contact" className="text-primary underline underline-offset-4">
+                  the store
+                </Link>
+              )}{' '}
               and a person — not a system — will read it.
             </p>
           </section>

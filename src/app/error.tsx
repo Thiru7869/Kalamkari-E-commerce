@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { site } from '@/content/site';
+import { contactEmail } from '@/content/site';
 
 export default function ErrorBoundary({
   error,
@@ -12,6 +12,8 @@ export default function ErrorBoundary({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const email = contactEmail();
+
   useEffect(() => {
     // Replace with your error reporting service. The digest is the only part
     // safe to show a visitor — the message may contain internals.
@@ -42,12 +44,15 @@ export default function ErrorBoundary({
         )}
 
         <p className="mt-6 text-sm text-muted-foreground">
-          <a
-            href={`mailto:${site.contact.email}`}
-            className="text-primary underline underline-offset-4"
-          >
-            {site.contact.email}
-          </a>
+          {email ? (
+            <a href={`mailto:${email}`} className="text-primary underline underline-offset-4">
+              {email}
+            </a>
+          ) : (
+            <Link href="/contact" className="text-primary underline underline-offset-4">
+              Write to the store
+            </Link>
+          )}
         </p>
       </div>
     </div>

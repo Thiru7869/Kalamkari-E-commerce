@@ -48,16 +48,28 @@ function SubmitButton() {
   );
 }
 
+/** Why the form is not on offer. Each states the condition, not a refusal. */
+const INELIGIBLE_NOTE: Record<string, string> = {
+  guest: 'Reviews are written by the person the piece went to. Sign in to write one.',
+  'not-purchased':
+    'Reviews here come from the person the piece was sent to — there is only ever one of them, which is what makes them worth reading.',
+  'already-reviewed': 'You have already written about this piece. Thank you.',
+};
+
 export function ReviewSection({
   productId,
   reviews,
   rating,
   count,
+  canReview,
+  ineligibleReason,
 }: {
   productId: string;
   reviews: Review[];
   rating: number | null;
   count: number;
+  canReview: boolean;
+  ineligibleReason: 'guest' | 'not-purchased' | 'already-reviewed' | null;
 }) {
   const [state, formAction] = useActionState(submitReview, initialFormState);
   const [showForm, setShowForm] = useState(false);
@@ -84,14 +96,20 @@ export function ReviewSection({
             )}
           </div>
 
-          {state.status !== 'success' && (
+          {canReview && state.status !== 'success' && (
             <Button variant="outline" onClick={() => setShowForm((v) => !v)}>
               {showForm ? 'Cancel' : 'Write a review'}
             </Button>
           )}
         </div>
 
-        {showForm && state.status !== 'success' && (
+        {!canReview && ineligibleReason && state.status !== 'success' && (
+          <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground">
+            {INELIGIBLE_NOTE[ineligibleReason]}
+          </p>
+        )}
+
+        {canReview && showForm && state.status !== 'success' && (
           <form
             action={formAction}
             className="mt-8 max-w-xl rounded-sm border border-border bg-background p-5 md:p-6"

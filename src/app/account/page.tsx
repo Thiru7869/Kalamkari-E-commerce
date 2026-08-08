@@ -65,11 +65,14 @@ export default async function AccountPage() {
         </div>
       </div>
 
+      {/* In-page anchors for the two sections below; the wishlist is its own
+          route. A tile that linked back to the page it sits on was worse than
+          no link at all. */}
       <ul className="mt-8 grid gap-4 sm:grid-cols-3">
         {[
-          { href: '/account', label: 'Orders', value: orders.length, Icon: Package },
+          { href: '#orders', label: 'Orders', value: orders.length, Icon: Package },
           { href: '/wishlist', label: 'Saved pieces', value: wishlistCount, Icon: Heart },
-          { href: '/account', label: 'Addresses', value: addresses.length, Icon: MapPin },
+          { href: '#addresses', label: 'Addresses', value: addresses.length, Icon: MapPin },
         ].map(({ href, label, value, Icon }) => (
           <li key={label}>
             <Link
@@ -86,7 +89,7 @@ export default async function AccountPage() {
         ))}
       </ul>
 
-      <section className="mt-14" aria-labelledby="orders-heading">
+      <section id="orders" className="mt-14 scroll-mt-28" aria-labelledby="orders-heading">
         <h2 id="orders-heading" className="text-display-sm">
           Your orders
         </h2>
@@ -140,7 +143,7 @@ export default async function AccountPage() {
       </section>
 
       {addresses.length > 0 && (
-        <section className="mt-14" aria-labelledby="addresses-heading">
+        <section id="addresses" className="mt-14 scroll-mt-28" aria-labelledby="addresses-heading">
           <h2 id="addresses-heading" className="text-display-sm">
             Saved addresses
           </h2>

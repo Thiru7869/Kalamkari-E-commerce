@@ -109,7 +109,7 @@ export const knowledge: KnowledgeEntry[] = [
       'personalise', 'personalize', 'design my own', 'special order',
     ],
     answer:
-      'Because nothing here is printed, nothing has to be chosen from a catalogue. You can either answer a short set of questions and let us propose a piece, or draw the design yourself in our editor — base cloth, borders, outlines, motifs, colours — and send it to the store. Two honest warnings: the monsoon stops everything, because every stage ends with the cloth going into the sun; and natural dye is not a colour picker, so we can promise madder red or indigo blue but not an exact paint-chip match.',
+      'Because nothing here is printed, nothing has to be chosen from a catalogue. Tell us what you want painted — a subject, an occasion, a cloth, a rough budget and a timeline — and the store replies to talk it through before anything is agreed. It does not have to be precise; most commissions start vague and get specific in conversation. Two honest warnings: the monsoon stops everything, because every stage ends with the cloth going into the sun; and natural dye is not a colour picker, so we can promise madder red or indigo blue but not an exact paint-chip match.',
     link: { label: 'Design a custom piece', href: '/custom' },
   },
   {

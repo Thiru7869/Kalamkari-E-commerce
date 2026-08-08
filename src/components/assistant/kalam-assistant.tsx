@@ -61,6 +61,12 @@ export function KalamAssistant() {
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * What the screen reader is told. Written once, when a reply is complete —
+   * never during streaming. Kept separate from `messages` so re-rendering the
+   * transcript cannot re-trigger an announcement.
+   */
+  const [announcement, setAnnouncement] = useState('');
 
   const panelId = useId();
   const pathname = usePathname();
@@ -102,9 +108,14 @@ export function KalamAssistant() {
 
       setError(null);
       setInput('');
+      setAnnouncement('');
 
       const history = [...messages, { id: newId(), role: 'user' as const, content: trimmed }];
       const replyId = newId();
+
+      // Accumulated separately from state so the completion announcement has
+      // the whole reply without having to read it back out of `messages`.
+      let replyText = '';
 
       setMessages([...history, { id: replyId, role: 'assistant', content: '' }]);
       setStreaming(true);
@@ -152,6 +163,7 @@ export function KalamAssistant() {
             const payload = JSON.parse(dataLine);
 
             if (eventLine === 'delta') {
+              replyText += payload.text;
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === replyId ? { ...m, content: m.content + payload.text } : m,
@@ -167,10 +179,13 @@ export function KalamAssistant() {
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
         setError((err as Error).message);
+        setAnnouncement((err as Error).message);
         setMessages((prev) => prev.filter((m) => m.id !== replyId || m.content));
       } finally {
         setStreaming(false);
         abortRef.current = null;
+        // One announcement, after the reply has finished arriving.
+        if (replyText) setAnnouncement(replyText);
       }
     },
     [messages, streaming],
@@ -273,13 +288,17 @@ export function KalamAssistant() {
             </div>
 
             {/* Transcript */}
+            {/*
+              The transcript is deliberately NOT a live region. Streaming text
+              into one makes a screen reader announce every few tokens, which
+              turns a two-sentence answer into a minute of interruption. The
+              reply is announced once, complete, from the region below.
+            */}
             <div
               ref={scrollRef}
               className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
               // Lenis must not swallow this element's scroll.
               data-lenis-prevent
-              aria-live="polite"
-              aria-atomic="false"
             >
               <p className="rounded-sm border border-border bg-muted/50 px-3 py-2 text-[0.75rem] leading-relaxed text-muted-foreground">
                 {assistantIdentity.disclosure}
@@ -349,6 +368,16 @@ export function KalamAssistant() {
                 </p>
               )}
             </div>
+
+            {/*
+              The single live region for this panel. It holds the completed
+              reply — announced once — plus the streaming status, so a screen
+              reader user knows an answer is coming without hearing it built a
+              token at a time.
+            */}
+            <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+              {streaming ? `${assistantIdentity.name} is answering…` : announcement}
+            </p>
 
             {/* Composer */}
             <form

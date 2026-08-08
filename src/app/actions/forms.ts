@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import {
@@ -156,6 +157,12 @@ export async function submitReview(_prev: FormState, formData: FormData): Promis
   const userId = session.user.id;
   const { productId, rating, title, body } = parsed.data;
 
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { slug: true },
+  });
+  if (!product) return { status: 'error', message: 'That piece is no longer listed.' };
+
   const existing = await prisma.review.findUnique({
     where: { productId_userId: { productId, userId } },
   });
@@ -163,11 +170,22 @@ export async function submitReview(_prev: FormState, formData: FormData): Promis
     return { status: 'error', message: 'You have already reviewed this piece.' };
   }
 
-  // "Verified" means there is a delivered order containing this piece.
+  // Reviews are restricted to people who actually received the piece. On a
+  // one-of-one catalogue an unverified review is close to worthless — there is
+  // only ever one buyer, so "someone who owns this" is the only voice that can
+  // say anything about it that the product page does not already say.
   const purchased = await prisma.orderItem.findFirst({
     where: { productId, order: { userId, status: 'DELIVERED' } },
     select: { id: true },
   });
+
+  if (!purchased) {
+    return {
+      status: 'error',
+      message:
+        'Reviews are written by the person the piece went to. Once your order is marked delivered, this opens up.',
+    };
+  }
 
   await prisma.$transaction([
     prisma.review.create({
@@ -177,7 +195,7 @@ export async function submitReview(_prev: FormState, formData: FormData): Promis
         rating,
         title: title || null,
         body,
-        verified: Boolean(purchased),
+        verified: true,
       },
     }),
     // Denormalised aggregates, kept in the same transaction as the write that
@@ -187,6 +205,10 @@ export async function submitReview(_prev: FormState, formData: FormData): Promis
       data: { ratingSum: { increment: rating }, ratingCount: { increment: 1 } },
     }),
   ]);
+
+  // The product page is ISR with a 300s window; without this the confirmation
+  // below would be untrue for up to five minutes.
+  revalidatePath(`/product/${product.slug}`);
 
   return { status: 'success', message: 'Thank you for writing. Your review is now published.' };
 }

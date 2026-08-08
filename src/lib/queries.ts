@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 
@@ -148,7 +149,11 @@ export async function getProducts(filters: ShopFilters) {
   };
 }
 
-export async function getProductBySlug(slug: string) {
+/**
+ * Cached per request: `generateMetadata` and the page body both need the full
+ * product, and without this each product render costs two identical queries.
+ */
+export const getProductBySlug = cache(async (slug: string) => {
   return prisma.product.findUnique({
     where: { slug },
     include: {
@@ -162,7 +167,7 @@ export async function getProductBySlug(slug: string) {
       },
     },
   });
-}
+});
 
 /** Pieces to show under a product: same motif first, then same category. */
 export async function getRelatedProducts(productId: string, categoryId: string, motifIds: string[]) {
@@ -202,13 +207,14 @@ export async function getFeaturedProducts(take = 6) {
   });
 }
 
-export async function getCategories() {
+export const getCategories = cache(async () => {
   return prisma.category.findMany({ orderBy: { position: 'asc' } });
-}
+});
 
-export async function getCategoryBySlug(slug: string) {
+/** Cached: `generateMetadata` and the shop page each resolve the same slug. */
+export const getCategoryBySlug = cache(async (slug: string) => {
   return prisma.category.findUnique({ where: { slug } });
-}
+});
 
 export async function getFilterOptions(categorySlug?: string) {
   const scope: Prisma.ProductWhereInput = {
@@ -258,6 +264,37 @@ export async function getBlogPosts() {
   });
 }
 
-export async function getBlogPost(slug: string) {
+export const getBlogPost = cache(async (slug: string) => {
   return prisma.blogPost.findFirst({ where: { slug, published: true } });
-}
+});
+
+/**
+ * Whether the current visitor may review a piece.
+ *
+ * Two conditions, both enforced again in `submitReview` — this is only so the
+ * page can avoid offering a form that would be rejected: the piece must have
+ * reached them (a delivered order), and they must not have written already.
+ */
+export const getReviewEligibility = cache(
+  async (productId: string): Promise<{ canReview: boolean; reason: 'guest' | 'not-purchased' | 'already-reviewed' | null }> => {
+    const { auth } = await import('@/auth');
+    const session = await auth();
+    const userId = session?.user?.id;
+    if (!userId) return { canReview: false, reason: 'guest' };
+
+    const [purchased, existing] = await Promise.all([
+      prisma.orderItem.findFirst({
+        where: { productId, order: { userId, status: 'DELIVERED' } },
+        select: { id: true },
+      }),
+      prisma.review.findUnique({
+        where: { productId_userId: { productId, userId } },
+        select: { id: true },
+      }),
+    ]);
+
+    if (existing) return { canReview: false, reason: 'already-reviewed' };
+    if (!purchased) return { canReview: false, reason: 'not-purchased' };
+    return { canReview: true, reason: null };
+  },
+);

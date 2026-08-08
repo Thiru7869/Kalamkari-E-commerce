@@ -84,7 +84,7 @@ const collectionCards = [
     label: 'Custom',
     title: 'Custom Items',
     blurb:
-      'Answer a few questions, or draw it yourself in the editor. Nothing here is printed, so nothing has to be chosen from a catalogue.',
+      'Tell us the subject, the cloth and the occasion. Nothing here is printed, so nothing has to be chosen from a catalogue.',
     href: '/custom',
     image: '/images/products/hero-dupattas.jpg',
     accent: true,

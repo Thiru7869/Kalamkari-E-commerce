@@ -33,15 +33,25 @@ export const site = {
   },
 
   /**
-   * Contact placeholders. Replace the values marked TODO with the store's
-   * real published details before launch — they are intentionally obvious
-   * rather than plausible-looking, so none of them can ship by accident.
+   * Published contact channels.
+   *
+   * Each is empty until the store supplies the real value. Empty is the safe
+   * state, not a broken one: every consumer reads these through the helpers at
+   * the foot of this file, and a channel with no value simply does not render —
+   * the same rule `social` already follows. A half-filled `tel:` link or an
+   * address nobody reads is worse than an absent one, because a visitor who
+   * writes to it believes they have reached the store.
+   *
+   * The contact form at /contact works regardless and is never hidden, so
+   * there is always at least one way through to the family.
    */
   contact: {
-    email: 'TODO-store-email@example.com',
-    phone: 'TODO-phone',
+    /** Published store email, e.g. 'hello@example.com'. */
+    email: '',
+    /** Telephone, in the form it should be displayed, e.g. '+91 98765 43210'. */
+    phone: '',
     /** Digits only, country code first — used to build the wa.me deep link. */
-    whatsapp: 'TODO-whatsapp',
+    whatsapp: '',
   },
 
   hours: {
@@ -77,6 +87,49 @@ export const site = {
     note: 'Every piece is checked, folded in unbleached muslin and dispatched from Srikalahasti.',
   },
 } as const;
+
+/* -------------------------------------------------------------------------- */
+/* Contact channels                                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Read a contact channel, or `null` when the store has not published one.
+ *
+ * Everything that renders a contact detail goes through these rather than
+ * touching `site.contact` directly, so an unfilled field can never reach the
+ * page as an empty `mailto:` or a dead `tel:`. Callers are expected to omit
+ * the whole block when they get `null`.
+ */
+export function contactEmail(): string | null {
+  return site.contact.email.trim() || null;
+}
+
+export function contactPhone(): string | null {
+  return site.contact.phone.trim() || null;
+}
+
+/** Full `wa.me` deep link, or null. Strips anything that is not a digit. */
+export function whatsappHref(): string | null {
+  const digits = site.contact.whatsapp.replace(/\D/g, '');
+  return digits ? `https://wa.me/${digits}` : null;
+}
+
+/** True when at least one direct channel is published besides the form. */
+export function hasDirectContactChannel(): boolean {
+  return Boolean(contactEmail() || contactPhone() || whatsappHref());
+}
+
+/** Published social links only. An unset handle does not render. */
+export function socialLinks(): { label: string; href: string }[] {
+  const entries: [string, string][] = [
+    ['Instagram', site.social.instagram],
+    ['Facebook', site.social.facebook],
+    ['YouTube', site.social.youtube],
+  ];
+  return entries
+    .filter(([, href]) => href.trim())
+    .map(([label, href]) => ({ label, href: href.trim() }));
+}
 
 export type NavItem = {
   label: string;
@@ -118,7 +171,7 @@ export const mainNav: NavItem[] = [
   {
     label: 'Custom',
     href: '/custom',
-    hint: 'Have a piece painted for you — guided, or drawn yourself',
+    hint: 'Have a piece painted for you, to your subject and cloth',
   },
   {
     label: 'Journal',

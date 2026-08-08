@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { MapPin, Clock, Mail, Phone, MessageCircle } from 'lucide-react';
 import { ContactForm } from '@/components/forms/contact-form';
-import { site } from '@/content/site';
+import { site, contactEmail, contactPhone, whatsappHref } from '@/content/site';
 import { absoluteUrl } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -11,9 +11,11 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  const whatsappHref = site.contact.whatsapp.startsWith('TODO')
-    ? null
-    : `https://wa.me/${site.contact.whatsapp}`;
+  // Any channel the store has not published is omitted entirely rather than
+  // rendered dead — the form below is always available regardless.
+  const email = contactEmail();
+  const phone = contactPhone();
+  const whatsapp = whatsappHref();
 
   return (
     <>
@@ -71,22 +73,24 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-4">
-                  <Phone className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                  <div>
-                    <dt className="font-medium">Call</dt>
-                    <dd className="mt-1.5 text-muted-foreground">
-                      <a
-                        href={`tel:${site.contact.phone}`}
-                        className="underline underline-offset-4 hover:text-foreground"
-                      >
-                        {site.contact.phone}
-                      </a>
-                    </dd>
+                {phone && (
+                  <div className="flex gap-4">
+                    <Phone className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                    <div>
+                      <dt className="font-medium">Call</dt>
+                      <dd className="mt-1.5 text-muted-foreground">
+                        <a
+                          href={`tel:${phone.replace(/\s/g, '')}`}
+                          className="underline underline-offset-4 hover:text-foreground"
+                        >
+                          {phone}
+                        </a>
+                      </dd>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {whatsappHref && (
+                {whatsapp && (
                   <div className="flex gap-4">
                     <MessageCircle
                       className="mt-0.5 h-5 w-5 shrink-0 text-primary"
@@ -96,7 +100,7 @@ export default function ContactPage() {
                       <dt className="font-medium">WhatsApp</dt>
                       <dd className="mt-1.5 text-muted-foreground">
                         <a
-                          href={whatsappHref}
+                          href={whatsapp}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="underline underline-offset-4 hover:text-foreground"
@@ -111,20 +115,22 @@ export default function ContactPage() {
                   </div>
                 )}
 
-                <div className="flex gap-4">
-                  <Mail className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                  <div>
-                    <dt className="font-medium">Email</dt>
-                    <dd className="mt-1.5 text-muted-foreground">
-                      <a
-                        href={`mailto:${site.contact.email}`}
-                        className="underline underline-offset-4 hover:text-foreground"
-                      >
-                        {site.contact.email}
-                      </a>
-                    </dd>
+                {email && (
+                  <div className="flex gap-4">
+                    <Mail className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                    <div>
+                      <dt className="font-medium">Email</dt>
+                      <dd className="mt-1.5 text-muted-foreground">
+                        <a
+                          href={`mailto:${email}`}
+                          className="underline underline-offset-4 hover:text-foreground"
+                        >
+                          {email}
+                        </a>
+                      </dd>
+                    </div>
                   </div>
-                </div>
+                )}
               </dl>
 
               <div className="mt-10 rounded-sm border border-border bg-muted/40 p-5">

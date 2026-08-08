@@ -46,7 +46,7 @@ The seed creates an admin user (`SEED_ADMIN_EMAIL`, default `admin@example.com`)
 | `npm run setup` | generate + push schema + seed, in one go |
 | `npm run db:seed` | Reseed catalogue, journal and admin user |
 | `npm run db:reset` | Wipe and reseed (destructive) |
-| `npm run db:store` | Prisma Store — the CMS for editing pieces |
+| `npm run db:studio` | Prisma Studio — the CMS for editing pieces |
 | `npm run placeholders` | Write placeholder images (`--force` to overwrite) |
 | `npm run smoke` | End-to-end test of the purchase path against a running server |
 
@@ -105,7 +105,7 @@ src/
     product/[slug]       Product detail
     process/             The 23 steps, scroll-driven 3D
     our-story/           The family
-    commission/          Commission enquiry
+    custom/              Commission enquiry (/commission redirects here)
     journal/             Journal index and posts
     contact/  care/  shipping/  privacy/  terms/
     cart/  checkout/  orders/track/  account/  wishlist/  search/  signin/
@@ -278,7 +278,8 @@ fetches.
 - Sign-in verified end to end (magic link printed to console in dev, session established, admin dashboard reachable)
 - Admin routes and order tracking verified to disclose nothing to anonymous requests
 
-First-load JS: 103 kB shared, 161–174 kB on the heaviest routes, with three.js in a lazy chunk.
+First-load JS: 103 kB shared, 162–174 kB on the heaviest content routes and
+207 kB on the home page, with three.js in a lazy chunk.
 
 ---
 

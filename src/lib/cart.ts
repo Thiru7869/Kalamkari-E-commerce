@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
@@ -44,50 +45,51 @@ export const EMPTY_CART: CartSummary = {
 };
 
 /**
+ * Resolve the caller's cart **without writing anything**.
+ *
+ * This is the version every read path uses, and the distinction is load-bearing
+ * rather than stylistic: Next only permits cookie mutation inside a Server
+ * Action or a Route Handler. A `cookies().set()` or `.delete()` reached during
+ * a Server Component render throws, and because the header renders a cart badge
+ * on every page, that would have taken down the whole site for any signed-in
+ * visitor who still carried a guest cookie.
+ *
+ * So nothing here creates a row, sets a cookie, or claims a guest cart. Guest
+ * carts are merged once, in the Auth.js `signIn` event (see `mergeGuestCart`),
+ * which runs inside a route handler where mutation is legal.
+ *
+ * Wrapped in `cache` so the several components that need the cart in one render
+ * — the header badge, its screen-reader label, the page body — share a single
+ * session lookup and a single query.
+ */
+export const resolveCart = cache(async () => {
+  const session = await auth();
+  const jar = await cookies();
+
+  if (session?.user?.id) {
+    return prisma.cart.findUnique({ where: { userId: session.user.id } });
+  }
+
+  const guestId = jar.get(GUEST_COOKIE)?.value;
+  if (!guestId) return null;
+  return prisma.cart.findUnique({ where: { guestId } });
+});
+
+/**
  * Resolve the caller's cart, creating one if needed.
  *
- * `create: false` is used by read paths so that merely viewing a page never
- * writes a row or sets a cookie for a visitor who has not added anything.
+ * **Only callable from a Server Action or Route Handler** — it may set the
+ * guest cookie. Read paths must use `resolveCart` instead.
  */
-export async function resolveCart(opts: { create?: boolean } = {}) {
-  const create = opts.create ?? false;
+export async function resolveCartForWrite() {
   const session = await auth();
   const jar = await cookies();
 
   if (session?.user?.id) {
     const userId = session.user.id;
     const existing = await prisma.cart.findUnique({ where: { userId } });
-
-    // A visitor who filled a cart and then signed in must keep it.
-    const guestId = jar.get(GUEST_COOKIE)?.value;
-    if (guestId) {
-      const guestCart = await prisma.cart.findUnique({
-        where: { guestId },
-        include: { items: true },
-      });
-      if (guestCart && guestCart.items.length > 0) {
-        const target =
-          existing ?? (await prisma.cart.create({ data: { userId } }));
-        for (const item of guestCart.items) {
-          await prisma.cartItem.upsert({
-            where: { cartId_productId: { cartId: target.id, productId: item.productId } },
-            update: { quantity: { increment: item.quantity } },
-            create: {
-              cartId: target.id,
-              productId: item.productId,
-              quantity: item.quantity,
-            },
-          });
-        }
-        await prisma.cart.delete({ where: { id: guestCart.id } });
-        jar.delete(GUEST_COOKIE);
-        return target;
-      }
-      jar.delete(GUEST_COOKIE);
-    }
-
     if (existing) return existing;
-    return create ? prisma.cart.create({ data: { userId } }) : null;
+    return prisma.cart.create({ data: { userId } });
   }
 
   const guestId = jar.get(GUEST_COOKIE)?.value;
@@ -95,8 +97,6 @@ export async function resolveCart(opts: { create?: boolean } = {}) {
     const cart = await prisma.cart.findUnique({ where: { guestId } });
     if (cart) return cart;
   }
-
-  if (!create) return null;
 
   const newGuestId = randomUUID();
   const cart = await prisma.cart.create({ data: { guestId: newGuestId } });
@@ -108,6 +108,54 @@ export async function resolveCart(opts: { create?: boolean } = {}) {
     maxAge: GUEST_COOKIE_MAX_AGE,
   });
   return cart;
+}
+
+/**
+ * Move a guest cart onto a user account, then drop the guest cookie.
+ *
+ * Called from the Auth.js `signIn` event — a route handler context, so the
+ * cookie deletion here is legal. A visitor who filled a bag and then signed in
+ * to pay must not lose it.
+ *
+ * Quantities are incremented rather than replaced, and capped at live stock so
+ * a merge can never leave someone holding two of a one-of-one piece.
+ */
+export async function mergeGuestCart(userId: string) {
+  const jar = await cookies();
+  const guestId = jar.get(GUEST_COOKIE)?.value;
+  if (!guestId) return;
+
+  // Whatever happens below, the cookie has served its purpose.
+  jar.delete(GUEST_COOKIE);
+
+  const guestCart = await prisma.cart.findUnique({
+    where: { guestId },
+    include: { items: { include: { product: { select: { stock: true } } } } },
+  });
+  if (!guestCart) return;
+
+  if (guestCart.items.length > 0) {
+    const target =
+      (await prisma.cart.findUnique({ where: { userId } })) ??
+      (await prisma.cart.create({ data: { userId } }));
+
+    for (const item of guestCart.items) {
+      const existing = await prisma.cartItem.findUnique({
+        where: { cartId_productId: { cartId: target.id, productId: item.productId } },
+      });
+      const merged = (existing?.quantity ?? 0) + item.quantity;
+      const quantity = Math.min(merged, item.product.stock);
+      if (quantity < 1) continue;
+
+      await prisma.cartItem.upsert({
+        where: { cartId_productId: { cartId: target.id, productId: item.productId } },
+        update: { quantity },
+        create: { cartId: target.id, productId: item.productId, quantity },
+      });
+    }
+  }
+
+  await prisma.cart.delete({ where: { id: guestCart.id } });
 }
 
 export function computeTotals(lines: CartLine[]) {
@@ -124,7 +172,7 @@ export function computeTotals(lines: CartLine[]) {
   };
 }
 
-export async function getCart(): Promise<CartSummary> {
+export const getCart = cache(async (): Promise<CartSummary> => {
   const cart = await resolveCart();
   if (!cart) return EMPTY_CART;
 
@@ -165,10 +213,15 @@ export async function getCart(): Promise<CartSummary> {
     }));
 
   return { id: cart.id, lines, ...computeTotals(lines) };
-}
+});
 
-/** Cheap count for the header badge — avoids loading full product rows. */
-export async function getCartCount(): Promise<number> {
+/**
+ * Cheap count for the header badge — avoids loading full product rows.
+ *
+ * Cached: the header renders both a visual badge and a separate screen-reader
+ * label from this, and neither should cost its own query.
+ */
+export const getCartCount = cache(async (): Promise<number> => {
   const cart = await resolveCart();
   if (!cart) return 0;
   const result = await prisma.cartItem.aggregate({
@@ -176,9 +229,9 @@ export async function getCartCount(): Promise<number> {
     _sum: { quantity: true },
   });
   return result._sum.quantity ?? 0;
-}
+});
 
-export async function getWishlistIds(): Promise<Set<string>> {
+export const getWishlistIds = cache(async (): Promise<Set<string>> => {
   const session = await auth();
   if (!session?.user?.id) return new Set();
   const items = await prisma.wishlistItem.findMany({
@@ -186,4 +239,4 @@ export async function getWishlistIds(): Promise<Set<string>> {
     select: { productId: true },
   });
   return new Set(items.map((i) => i.productId));
-}
+});

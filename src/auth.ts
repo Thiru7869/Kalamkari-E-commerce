@@ -93,15 +93,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   events: {
-    async signIn({ user, isNewUser }) {
-      if (!isNewUser || !user.id) return;
-      // A guest cart is claimed on the next cart read (see lib/cart.ts); there
-      // is nothing to migrate at this point beyond ensuring the row exists.
-      await prisma.cart.upsert({
-        where: { userId: user.id },
-        update: {},
-        create: { userId: user.id },
-      });
+    async signIn({ user }) {
+      if (!user.id) return;
+      // Claim any guest cart for this account.
+      //
+      // This runs here, in a route handler, because it deletes the guest
+      // cookie — and cookie mutation is illegal during a Server Component
+      // render, which is where the cart is otherwise read from. See the note
+      // on `resolveCart` in lib/cart.ts.
+      //
+      // A failure here must never block sign-in: losing a bag is recoverable,
+      // being unable to log in is not.
+      try {
+        const { mergeGuestCart } = await import('@/lib/cart');
+        await mergeGuestCart(user.id);
+      } catch (error) {
+        console.error('[auth] guest cart merge failed:', error);
+      }
     },
   },
   trustHost: true,

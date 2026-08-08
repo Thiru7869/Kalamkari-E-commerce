@@ -11,12 +11,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/primitives';
-import { mainNav, site } from '@/content/site';
+import { mainNav, site, contactPhone } from '@/content/site';
 import { cn } from '@/lib/utils';
 
 export function MobileMenu({ isSignedIn }: { isSignedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const phone = contactPhone();
 
   useEffect(() => setOpen(false), [pathname]);
 
@@ -120,13 +121,15 @@ export function MobileMenu({ isSignedIn }: { isSignedIn: boolean }) {
               <span className="block text-xs">Open in Google Maps</span>
             </span>
           </a>
-          <a
-            href={`tel:${site.contact.phone}`}
-            className="flex items-center gap-2.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
-            Call the store
-          </a>
+          {phone && (
+            <a
+              href={`tel:${phone.replace(/\s/g, '')}`}
+              className="flex items-center gap-2.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+              Call the store
+            </a>
+          )}
         </div>
       </DialogContent>
     </Dialog>

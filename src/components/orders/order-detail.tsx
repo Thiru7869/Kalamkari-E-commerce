@@ -9,7 +9,7 @@ import {
   isCancelled,
 } from '@/lib/orders';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { site } from '@/content/site';
+import { contactEmail } from '@/content/site';
 import { cn } from '@/lib/utils';
 
 type OrderItemRow = {
@@ -50,6 +50,7 @@ export type OrderView = {
 export function OrderDetail({ order }: { order: OrderView }) {
   const cancelled = isCancelled(order.status);
   const current = statusIndex(order.status);
+  const storeEmail = contactEmail();
 
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
@@ -243,12 +244,21 @@ export function OrderDetail({ order }: { order: OrderView }) {
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Write to the store quoting {order.number} and someone will pick it up.
           </p>
-          <a
-            href={`mailto:${site.contact.email}?subject=${encodeURIComponent(`Order ${order.number}`)}`}
-            className="mt-3 inline-block text-sm text-primary underline underline-offset-4"
-          >
-            {site.contact.email}
-          </a>
+          {storeEmail ? (
+            <a
+              href={`mailto:${storeEmail}?subject=${encodeURIComponent(`Order ${order.number}`)}`}
+              className="mt-3 inline-block text-sm text-primary underline underline-offset-4"
+            >
+              {storeEmail}
+            </a>
+          ) : (
+            <Link
+              href="/contact"
+              className="mt-3 inline-block text-sm text-primary underline underline-offset-4"
+            >
+              Write to the store
+            </Link>
+          )}
         </div>
       </aside>
     </div>

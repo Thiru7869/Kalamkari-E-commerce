@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
-import { resolveCart } from '@/lib/cart';
+import { resolveCart, resolveCartForWrite } from '@/lib/cart';
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
 
@@ -22,7 +22,7 @@ export async function addToCart(productId: string, quantity = 1): Promise<Action
     return { ok: false, error: 'This piece has sold. We can paint another — ask about a commission.' };
   }
 
-  const cart = await resolveCart({ create: true });
+  const cart = await resolveCartForWrite();
   if (!cart) return { ok: false, error: 'Could not open a cart. Please try again.' };
 
   const existing = await prisma.cartItem.findUnique({

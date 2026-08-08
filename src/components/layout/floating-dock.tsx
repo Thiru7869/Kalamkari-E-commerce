@@ -25,7 +25,7 @@ const KalamAssistant = dynamic(
 );
 
 /** Routes where a floating chat launcher would be in the way, not helpful. */
-const SUPPRESSED_PREFIXES = ['/admin', '/checkout', '/custom/editor'];
+const SUPPRESSED_PREFIXES = ['/admin', '/checkout'];
 
 export function FloatingDock() {
   const pathname = usePathname();

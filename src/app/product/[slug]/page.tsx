@@ -9,7 +9,7 @@ import { WishlistButton } from '@/components/shop/wishlist-button';
 import { ProductCard } from '@/components/shop/product-card';
 import { ReviewSection } from '@/components/shop/review-section';
 import { Badge, Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/primitives';
-import { getProductBySlug, getRelatedProducts } from '@/lib/queries';
+import { getProductBySlug, getRelatedProducts, getReviewEligibility } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { prisma } from '@/lib/prisma';
 import { toList, primaryImage } from '@/lib/serialize';
@@ -54,9 +54,10 @@ export default async function ProductPage({ params }: { params: Params }) {
   if (!product || product.status !== 'ACTIVE') notFound();
 
   const motifIds = product.motifs.map((m) => m.motifId);
-  const [related, wishlistIds] = await Promise.all([
+  const [related, wishlistIds, reviewEligibility] = await Promise.all([
     getRelatedProducts(product.id, product.categoryId, motifIds),
     getWishlistIds(),
+    getReviewEligibility(product.id),
   ]);
 
   const images = toList(product.images);
@@ -300,6 +301,8 @@ export default async function ProductPage({ params }: { params: Params }) {
           reviews={product.reviews}
           rating={rating}
           count={product.ratingCount}
+          canReview={reviewEligibility.canReview}
+          ineligibleReason={reviewEligibility.reason}
         />
       </Suspense>
 
