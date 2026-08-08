@@ -6,6 +6,8 @@ import { SearchForm } from '@/components/shop/search-form';
 import { getProducts } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { shopCategories } from '@/content/site';
+import { NarrativeNote } from '@/components/shop/narrative-note';
+import { narrativeMotifs, narrativeMotifNames } from '@/content/catalogue';
 
 export const metadata: Metadata = {
   title: 'Search',
@@ -28,6 +30,16 @@ const SUGGESTIONS = [
 export default async function SearchPage({ searchParams }: { searchParams: Search }) {
   const { q } = await searchParams;
   const query = q?.trim() ?? '';
+
+  // Did the visitor ask for one of the four narrative traditions by name? If
+  // so, whatever the grid returns, the honest answer is that these are drawn
+  // to order — so say it above the results rather than after the
+  // disappointment.
+  const askedFor = narrativeMotifs.find((slug) => {
+    const name = narrativeMotifNames[slug].toLowerCase();
+    const q = query.toLowerCase();
+    return q.includes(name) || name.split(' ').some((word) => word.length > 4 && q.includes(word));
+  });
 
   const [{ items, total }, wishlistIds] = await Promise.all([
     query ? getProducts({ q: query }) : Promise.resolve({ items: [], total: 0, page: 1, pageCount: 1 }),
@@ -72,6 +84,51 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
             </ul>
           </div>
         </div>
+      ) : askedFor && total >= 0 ? (
+        <>
+          <NarrativeNote
+            variant="inline"
+            matched={narrativeMotifNames[askedFor]}
+            className="mt-8"
+          />
+          {total === 0 ? (
+            <div className="py-16 text-center">
+              <SearchIcon className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
+              <h2 className="mt-5 font-display text-2xl">
+                No {narrativeMotifNames[askedFor]} pieces finished right now
+              </h2>
+              <p className="mx-auto mt-3 max-w-md leading-relaxed text-muted-foreground">
+                These are the hardest drawing the workshop does and they sell as they are
+                finished. A piece of your own starts with a conversation about the episode,
+                the cloth and a realistic timeline.
+              </p>
+              <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+                <Link
+                  href="/custom"
+                  className="inline-flex h-11 items-center justify-center rounded-sm bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-chay-700"
+                >
+                  Commission one
+                </Link>
+                <Link
+                  href="/shop"
+                  className="inline-flex h-11 items-center justify-center rounded-sm border border-foreground/25 px-5 text-sm font-medium transition-colors hover:bg-foreground/5"
+                >
+                  See everything
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="mt-6 text-sm text-muted-foreground" role="status" aria-live="polite">
+                <span className="tabular">{total}</span>{' '}
+                {total === 1 ? 'piece' : 'pieces'} for “{query}”
+              </p>
+              <div className="mt-6">
+                <ProductGrid products={items} wishlistIds={wishlistIds} />
+              </div>
+            </>
+          )}
+        </>
       ) : total === 0 ? (
         <div className="py-20 text-center">
           <SearchIcon className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />

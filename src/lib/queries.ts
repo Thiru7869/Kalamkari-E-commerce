@@ -268,6 +268,127 @@ export const getBlogPost = cache(async (slug: string) => {
   return prisma.blogPost.findFirst({ where: { slug, published: true } });
 });
 
+/* -------------------------------------------------------------------------- */
+/* The editorial type and collection pages                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The varieties within one category, grouped by fabric family.
+ *
+ * Counts are scoped to the category, so the sarees page says how many cotton
+ * *sarees* exist rather than how many cotton pieces the store holds. Fabrics
+ * with nothing in them are dropped — a variety list that offers a cloth the
+ * store cannot currently supply is worse than a shorter list.
+ */
+export const getTypeVarieties = cache(async (categorySlug: string) => {
+  const scope: Prisma.ProductWhereInput = {
+    status: 'ACTIVE',
+    category: { slug: categorySlug },
+  };
+
+  const fabrics = await prisma.fabric.findMany({
+    where: { products: { some: scope } },
+    orderBy: { position: 'asc' },
+    select: {
+      slug: true,
+      name: true,
+      family: true,
+      description: true,
+      careNote: true,
+      _count: { select: { products: { where: scope } } },
+    },
+  });
+
+  const byFamily = new Map<string, typeof fabrics>();
+  for (const fabric of fabrics) {
+    if (fabric._count.products === 0) continue;
+    const list = byFamily.get(fabric.family) ?? [];
+    list.push(fabric);
+    byFamily.set(fabric.family, list);
+  }
+
+  return byFamily;
+});
+
+/** Motifs present in one category, with counts. Drives the "drawn here" rail. */
+export const getTypeMotifs = cache(async (categorySlug: string) => {
+  const scope: Prisma.ProductWhereInput = {
+    status: 'ACTIVE',
+    category: { slug: categorySlug },
+  };
+
+  return prisma.motif.findMany({
+    where: { products: { some: { product: scope } } },
+    orderBy: { position: 'asc' },
+    select: {
+      slug: true,
+      name: true,
+      story: true,
+      _count: { select: { products: { where: { product: scope } } } },
+    },
+  });
+});
+
+/** Price floor and ceiling within a category, for the "from" line. */
+export const getTypePriceRange = cache(async (categorySlug: string) => {
+  const bounds = await prisma.product.aggregate({
+    where: { status: 'ACTIVE', stock: { gt: 0 }, category: { slug: categorySlug } },
+    _min: { price: true },
+    _max: { price: true },
+    _count: true,
+  });
+  return {
+    min: bounds._min.price,
+    max: bounds._max.price,
+    available: bounds._count,
+  };
+});
+
+/**
+ * The pieces behind a collection page.
+ *
+ * `new` is ordered by completion date rather than by a flag: on a catalogue
+ * where one saree is six weeks of work, "recently finished" is a fact the
+ * database already holds and does not need a curator to maintain.
+ */
+export const getCollectionProducts = cache(
+  async (kind: 'featured' | 'premium' | 'new', categorySlug?: string, take = 24) => {
+    const where: Prisma.ProductWhereInput = {
+      status: 'ACTIVE',
+      ...(categorySlug ? { category: { slug: categorySlug } } : {}),
+      ...(kind === 'featured' ? { featured: true } : {}),
+      ...(kind === 'premium' ? { masterpiece: true } : {}),
+    };
+
+    const orderBy: Prisma.ProductOrderByWithRelationInput[] =
+      kind === 'new'
+        ? [{ createdAt: 'desc' }]
+        : [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }];
+
+    const [items, total] = await Promise.all([
+      prisma.product.findMany({ where, select: productCardSelect, orderBy, take }),
+      prisma.product.count({ where }),
+    ]);
+
+    return { items, total };
+  },
+);
+
+/** A few pieces of a given category, for the type page's lead grid. */
+export const getTypeProducts = cache(async (categorySlug: string, take = 8) => {
+  const where: Prisma.ProductWhereInput = { status: 'ACTIVE', category: { slug: categorySlug } };
+  const [items, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      select: productCardSelect,
+      orderBy: [{ stock: 'desc' }, { masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
+      take,
+    }),
+    prisma.product.count({ where }),
+  ]);
+  return { items, total };
+});
+
 /**
  * Whether the current visitor may review a piece.
  *

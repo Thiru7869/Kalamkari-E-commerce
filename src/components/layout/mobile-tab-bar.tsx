@@ -2,12 +2,21 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LayoutGrid, Paintbrush, User } from 'lucide-react';
+import { Home, LayoutGrid, Paintbrush, PencilLine, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+/**
+ * Five destinations, chosen by what a phone visitor actually does.
+ *
+ * Custom earns its place: on a catalogue that is almost entirely one-of-one,
+ * the commonest reason a visitor leaves empty-handed is that the piece they
+ * wanted has already sold — and the answer to that is a commission, not a
+ * second lap of the shop.
+ */
 const tabs = [
   { label: 'Home', href: '/', Icon: Home },
   { label: 'Shop', href: '/shop', Icon: LayoutGrid },
+  { label: 'Custom', href: '/custom', Icon: PencilLine },
   { label: 'Process', href: '/process', Icon: Paintbrush },
   { label: 'Account', href: '/account', Icon: User },
 ];
@@ -37,7 +46,7 @@ export function MobileTabBar() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-md md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {tabs.map(({ label, href, Icon }) => {
           const isActive =
             href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
@@ -49,6 +58,7 @@ export function MobileTabBar() {
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'relative flex h-[4.25rem] flex-col items-center justify-center gap-1 transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
                   isActive ? 'text-primary' : 'text-muted-foreground',
                 )}
               >
@@ -65,7 +75,7 @@ export function MobileTabBar() {
                   strokeWidth={isActive ? 2.2 : 1.75}
                   aria-hidden="true"
                 />
-                <span className="text-[0.6875rem] font-medium leading-none">{label}</span>
+                <span className="text-[0.625rem] font-medium leading-none">{label}</span>
               </Link>
             </li>
           );

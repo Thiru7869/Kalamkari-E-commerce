@@ -152,16 +152,26 @@ export const mainNav: NavItem[] = [
     label: 'Shop',
     href: '/shop',
     hint: 'Everything currently in the store',
-    children: shopCategories.map((c) => ({
-      label: c.label,
-      href: `/shop/${c.slug}`,
-      hint: c.hint,
-    })),
+    children: [
+      // The editorial type pages, not the filtered grid: somebody opening this
+      // menu is choosing what kind of thing they want, which is exactly the
+      // question those pages answer.
+      { label: 'Sarees', href: '/types/sarees', hint: 'Painted end to end, pallu to border' },
+      { label: 'Dupattas', href: '/types/dupattas', hint: 'And chunnis, by either name' },
+      { label: 'Chunnis', href: '/types/chunnis', hint: 'The same cloth, the other name' },
+      { label: 'Paintings', href: '/types/paintings', hint: 'Narrative panels and framed work' },
+      { label: 'Home Decor', href: '/types/home-decor', hint: 'Cushions, runners, bedspreads' },
+      { label: 'Blouse Pieces', href: '/types/blouse-pieces', hint: 'Stitched or unstitched' },
+      { label: 'Featured Sarees', href: '/collections/featured-sarees', hint: 'Chosen this week' },
+      { label: 'Premium', href: '/collections/premium', hint: 'Signed and exhibition grade' },
+      { label: 'New Arrivals', href: '/collections/new-arrivals', hint: 'Newest off the line' },
+      { label: 'Everything', href: '/shop', hint: 'The full grid, filterable' },
+    ],
   },
   {
     label: 'The Process',
     href: '/process',
-    hint: 'All 23 steps, in 3D',
+    hint: 'All 23 steps, and the seven pots',
   },
   {
     label: 'Our Story',
@@ -185,10 +195,11 @@ export const mainNav: NavItem[] = [
   },
 ];
 
-/** The four items in the phone tab bar. Chosen by what a phone user actually does. */
+/** The phone tab bar. Chosen by what a phone user actually does. */
 export const mobileTabs = [
   { label: 'Home', href: '/', icon: 'home' },
   { label: 'Shop', href: '/shop', icon: 'grid' },
+  { label: 'Custom', href: '/custom', icon: 'pencil' },
   { label: 'Process', href: '/process', icon: 'brush' },
   { label: 'Account', href: '/account', icon: 'user' },
 ] as const;
@@ -196,7 +207,23 @@ export const mobileTabs = [
 export const footerNav = [
   {
     title: 'Shop',
-    links: shopCategories.map((c) => ({ label: c.label, href: `/shop/${c.slug}` })),
+    links: [
+      { label: 'Sarees', href: '/types/sarees' },
+      { label: 'Dupattas & Chunnis', href: '/types/dupattas' },
+      { label: 'Paintings', href: '/types/paintings' },
+      { label: 'Home Decor', href: '/types/home-decor' },
+      { label: 'Blouse Pieces', href: '/types/blouse-pieces' },
+      { label: 'Everything', href: '/shop' },
+    ],
+  },
+  {
+    title: 'Collections',
+    links: [
+      { label: 'Featured Sarees', href: '/collections/featured-sarees' },
+      { label: 'Premium', href: '/collections/premium' },
+      { label: 'New Arrivals', href: '/collections/new-arrivals' },
+      { label: 'Commission a Piece', href: '/custom' },
+    ],
   },
   {
     title: 'The Craft',

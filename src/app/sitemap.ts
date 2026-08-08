@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { absoluteUrl } from '@/lib/utils';
 import { shopCategories } from '@/content/site';
+import { typeDefs, collectionDefs } from '@/content/catalogue';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, posts] = await Promise.all([
@@ -41,6 +42,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'daily' as const,
       priority: 0.8,
+    })),
+    // The editorial type pages answer the question a search engine visitor
+    // actually arrives with, so they rank above the filtered grid.
+    ...typeDefs.map((t) => ({
+      url: absoluteUrl(`/types/${t.slug}`),
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    })),
+    ...collectionDefs.map((c) => ({
+      url: absoluteUrl(`/collections/${c.slug}`),
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.75,
     })),
     ...products.map((p) => ({
       url: absoluteUrl(`/product/${p.slug}`),
