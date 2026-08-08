@@ -252,7 +252,6 @@ export const mainNav: NavItem[] = [
       { label: 'Featured Sarees', href: '/collections/featured-sarees', hint: 'Chosen this week' },
       { label: 'Premium', href: '/collections/premium', hint: 'Signed and exhibition grade' },
       { label: 'New Arrivals', href: '/collections/new-arrivals', hint: 'Newest off the line' },
-      { label: 'Everything', href: '/shop', hint: 'The full grid, filterable' },
     ],
   },
   {

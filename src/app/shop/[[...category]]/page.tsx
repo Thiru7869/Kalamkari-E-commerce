@@ -7,9 +7,9 @@ import { AppliedFilters } from '@/components/shop/applied-filters';
 import { ShopSort } from '@/components/shop/shop-sort';
 import { Pagination } from '@/components/shop/pagination';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
+import { ShopSubnav } from '@/components/shop/shop-subnav';
 import {
   getProducts,
-  getCategories,
   getCategoryBySlug,
   getFilterOptions,
   collections,
@@ -97,13 +97,13 @@ export default async function ShopPage({
     page: asNumber(sp.page) ?? 1,
   };
 
-  const [{ items, total, page, pageCount }, categories, options, wishlistIds] =
-    await Promise.all([
-      getProducts(filters),
-      getCategories(),
-      getFilterOptions(categorySlug),
-      getWishlistIds(),
-    ]);
+  // The category rail now lives in the sticky sub-navbar, which reads the five
+  // types from the content layer, so the page no longer needs to load them.
+  const [{ items, total, page, pageCount }, options, wishlistIds] = await Promise.all([
+    getProducts(filters),
+    getFilterOptions(categorySlug),
+    getWishlistIds(),
+  ]);
 
   const basePath = categorySlug ? `/shop/${categorySlug}` : '/shop';
   const from = (page - 1) * PAGE_SIZE + 1;
@@ -154,44 +154,13 @@ export default async function ShopPage({
             </Link>
           )}
 
-          {/* Category switcher — a horizontal rail on phones. */}
-          <nav aria-label="Categories" className="mt-8">
-            <ul className="snap-rail -mx-5 px-5 md:mx-0 md:flex-wrap md:px-0">
-              <li>
-                <Link
-                  href="/shop"
-                  aria-current={!categorySlug ? 'page' : undefined}
-                  className={`inline-flex h-10 items-center whitespace-nowrap rounded-sm border px-4 text-sm transition-colors ${
-                    !categorySlug
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border hover:border-foreground/40'
-                  }`}
-                >
-                  Everything
-                </Link>
-              </li>
-              {categories.map((c) => (
-                <li key={c.id}>
-                  <Link
-                    href={`/shop/${c.slug}`}
-                    aria-current={categorySlug === c.slug ? 'page' : undefined}
-                    className={`inline-flex h-10 items-center whitespace-nowrap rounded-sm border px-4 text-sm transition-colors ${
-                      categorySlug === c.slug
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border hover:border-foreground/40'
-                    }`}
-                  >
-                    {c.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
         </div>
       </header>
 
-      <div className="container py-8 md:py-12">
+      <div className="container py-6 md:py-10">
         <div className="lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
+          {/* Desktop keeps the inline sidebar; the sheet trigger inside this
+              component is hidden above lg. */}
           <ShopFilters
             options={options}
             basePath={basePath}
@@ -199,32 +168,46 @@ export default async function ShopPage({
           />
 
           <div>
+            <ShopSubnav
+              basePath={basePath}
+              activeCategory={categorySlug}
+              filterSlot={
+                <div className="lg:hidden">
+                  <ShopFilters
+                    options={options}
+                    basePath={basePath}
+                    selected={{ fabrics: filters.fabrics, motifs: filters.motifs }}
+                    triggerOnly
+                  />
+                </div>
+              }
+              sortSlot={<ShopSort current={filters.sort} />}
+              countSlot={
+                <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
+                  {total === 0 ? (
+                    'No pieces match these filters'
+                  ) : (
+                    <>
+                      Showing <span className="tabular">{from}</span>&ndash;
+                      <span className="tabular">{to}</span> of{' '}
+                      <span className="tabular">{total}</span>{' '}
+                      {total === 1 ? 'piece' : 'pieces'}
+                    </>
+                  )}
+                </p>
+              }
+            />
+
             <AppliedFilters
               basePath={basePath}
               fabrics={options.fabrics}
               motifs={options.motifs}
-              className="mb-4 lg:mb-5"
+              className="mt-4"
             />
-
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
-              <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
-                {total === 0 ? (
-                  'No pieces match these filters'
-                ) : (
-                  <>
-                    Showing <span className="tabular">{from}</span>–
-                    <span className="tabular">{to}</span> of{' '}
-                    <span className="tabular">{total}</span>{' '}
-                    {total === 1 ? 'piece' : 'pieces'}
-                  </>
-                )}
-              </p>
-              <ShopSort current={filters.sort} />
-            </div>
 
             {items.length > 0 ? (
               <>
-                <div className="pt-8">
+                <div className="pt-6">
                   <ProductGrid products={items} wishlistIds={wishlistIds} />
                 </div>
                 <Pagination page={page} pageCount={pageCount} />
@@ -234,8 +217,8 @@ export default async function ShopPage({
                 <h2 className="font-display text-2xl">Nothing matches that combination</h2>
                 <p className="mx-auto mt-3 max-w-md text-muted-foreground">
                   The store holds a small number of pieces at any time, because each one
-                  takes weeks. Try widening the filters — or ask us to paint what you had
-                  in mind.
+                  takes weeks. Try widening the filters &mdash; or ask us to paint what you
+                  had in mind.
                 </p>
                 <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
                   <Link

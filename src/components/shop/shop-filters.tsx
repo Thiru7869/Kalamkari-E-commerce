@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,9 @@ import {
   DialogTitle,
   DialogTrigger,
   Checkbox,
-  Badge,
 } from '@/components/ui/primitives';
 import { Button } from '@/components/ui/button';
+import { FilterTrigger } from './shop-subnav';
 
 type Options = {
   fabrics: { slug: string; name: string; family: string; _count: { products: number } }[];
@@ -40,10 +40,17 @@ export function ShopFilters({
   options,
   basePath,
   selected,
+  triggerOnly = false,
 }: {
   options: Options;
   basePath: string;
   selected: { fabrics: string[]; motifs: string[] };
+  /**
+   * Render only the sheet and its trigger, for placing inside the sticky
+   * sub-navbar. Without this the component would also render its desktop
+   * sidebar a second time.
+   */
+  triggerOnly?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -202,22 +209,17 @@ export function ShopFilters({
   return (
     <>
       {/*
-        Phone: a sticky trigger opening a bottom sheet.
+        The sheet, opened from the trigger in the sticky sub-navbar.
 
-        Sticky because the catalogue scrolls past it immediately otherwise, and
-        a reader who has scrolled three rows down and wants to narrow the list
-        should not have to scroll back up to the top of the page to do it.
+        The trigger used to be a full-width button inside its own sticky
+        wrapper, which meant two sticky bars stacked on a phone and forty
+        pixels of chrome doing one job. It now lives in the bar with
+        everything else.
       */}
-      <div className="sticky top-[4.25rem] z-30 -mx-5 bg-background/95 px-5 py-3 backdrop-blur-md lg:hidden">
+      <div className="lg:hidden">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full">
-              <SlidersHorizontal aria-hidden="true" />
-              Filter
-              {activeCount > 0 && (
-                <Badge className="ml-1">{activeCount}</Badge>
-              )}
-            </Button>
+            <FilterTrigger count={activeCount} />
           </DialogTrigger>
           <DialogContent side="bottom" className="max-h-[85svh] rounded-t-lg p-0">
             <DialogTitle className="border-b border-border px-5 py-4 font-display text-lg">
@@ -236,10 +238,13 @@ export function ShopFilters({
         </Dialog>
       </div>
 
-      {/* Desktop: inline sidebar */}
-      <aside className="hidden lg:block" aria-label="Filters">
-        <div className="sticky top-28">{panel}</div>
-      </aside>
+      {/* Desktop: inline sidebar. Suppressed when this instance exists only
+          to supply the sub-navbar's trigger, or it would render twice. */}
+      {!triggerOnly && (
+        <aside className="hidden lg:block" aria-label="Filters">
+          <div className="sticky top-32">{panel}</div>
+        </aside>
+      )}
     </>
   );
 }

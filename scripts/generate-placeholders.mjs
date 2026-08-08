@@ -171,6 +171,10 @@ function write(relPath, width, height) {
 /* ----------------------------------------------------------------- paths --- */
 
 const PRODUCT_SLUGS = [
+  'hanuman-panel-cotton-saree', 'peacock-vine-mulmul-cotton-saree',
+  'lotus-jaal-chanderi-saree', 'temple-border-tussar-dupatta',
+  'floral-jaal-cotton-chunni', 'peacock-blouse-piece-raw-silk',
+  'tree-of-life-narrative-panel', 'lotus-pond-table-runner',
   'ramayana-pallu-cotton-saree-madder', 'tree-of-life-tussar-silk-saree',
   'krishna-leela-soft-silk-saree', 'lotus-pond-indigo-chanderi-saree',
   'floral-jaal-mulmul-cotton-saree', 'dashavatara-pure-silk-saree',
