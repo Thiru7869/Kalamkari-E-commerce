@@ -78,10 +78,26 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
           <h2 className="mt-5 font-display text-2xl">
             Nothing here matches “{query}”
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            The store holds a small number of pieces at any time. If you know what you
-            want and it is not here, it can be painted.
+          <p className="mx-auto mt-3 max-w-md leading-relaxed text-muted-foreground">
+            The store holds a small number of pieces at any time, because each one is weeks
+            of hand-work. Search reads the name, the story, the cloth and the motif — so a
+            term like “indigo”, “Ramayana” or “tussar” will usually find more than a full
+            title will.
           </p>
+
+          <ul className="mx-auto mt-6 flex max-w-md flex-wrap justify-center gap-2">
+            {SUGGESTIONS.map((s) => (
+              <li key={s}>
+                <Link
+                  href={`/search?q=${encodeURIComponent(s)}`}
+                  className="inline-flex h-9 items-center rounded-sm border border-border px-3 text-sm transition-colors hover:border-foreground/40"
+                >
+                  {s}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/shop"

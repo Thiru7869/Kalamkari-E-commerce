@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ProcessJourney } from '@/components/process/process-journey';
@@ -26,6 +27,7 @@ export default function ProcessPage() {
       <section className="border-b border-border bg-cotton-100 pb-14 pt-16 md:pb-20 md:pt-24 dark:bg-card">
         <div className="container">
           <div className="max-w-3xl">
+            <Breadcrumbs trail={[{ label: 'The process' }]} className="mb-6" />
             <p className="eyebrow">The making of a Kalamkari saree</p>
             <h1 className="mt-4 text-display-xl">
               Twenty-three steps.

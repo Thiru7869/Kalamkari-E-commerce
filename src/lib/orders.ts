@@ -40,6 +40,34 @@ export const STATUS_DESCRIPTIONS: Record<OrderStatus, string> = {
   CANCELLED: 'This order was cancelled. Nothing further will be charged.',
 };
 
+/**
+ * What is physically happening to the cloth at each stage.
+ *
+ * The status labels above name a state; these say what the state *is* for
+ * somebody who has never watched this being made. It matters most at
+ * IN_PRODUCTION, where a customer is otherwise looking at a progress bar that
+ * has not moved for three weeks and has no way to know that is normal.
+ *
+ * Every line describes a real operation from the twenty-three steps, in the
+ * order they actually occur. Nothing here promises a date.
+ */
+export const STATUS_NARRATIVES: Partial<Record<OrderStatus, string>> = {
+  CONFIRMED:
+    'The piece is set aside under your name. Nothing else in the store is the same drawing, so once it is yours it comes off the catalogue immediately.',
+  IN_PRODUCTION:
+    'Cloth is being prepared with myrobalan and buffalo milk, then drawn in fermented iron black before any colour arrives. Between stages it goes into the river and into the sun — most of the twenty-three steps are washing rather than painting, and the monsoon stops all of them.',
+  PACKED:
+    'It has had its final wash and sunning, been checked line by line, and folded into unbleached muslin. Nothing is wrapped in plastic.',
+  SHIPPED:
+    'On the road from Srikalahasti. Naturally dyed cloth travels well, but wash it alone the first few times when it reaches you.',
+  DELIVERED:
+    'It should soften and settle with washing — that is the cloth behaving correctly, not fading. The care guide explains what to expect over the first year.',
+};
+
+export function statusNarrative(status: string): string | null {
+  return STATUS_NARRATIVES[status as OrderStatus] ?? null;
+}
+
 /** The steps shown on the tracking timeline, in order. Cancelled is not a step. */
 export const TRACKING_STEPS: OrderStatus[] = [
   'CONFIRMED',

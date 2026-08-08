@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import Link from 'next/link';
 import { site } from '@/content/site';
 import { formatPrice } from '@/lib/utils';
@@ -13,6 +14,7 @@ export default function ShippingPage() {
   return (
     <div className="container py-14 md:py-20">
       <div className="mx-auto max-w-[46rem]">
+        <Breadcrumbs trail={[{ label: 'Shipping & returns' }]} className="mb-6" />
         <h1 className="text-display-lg">Shipping &amp; returns</h1>
 
         <section className="mt-12">

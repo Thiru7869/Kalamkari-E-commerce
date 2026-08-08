@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ProductGrid } from '@/components/shop/product-card';
 import { ShopFilters } from '@/components/shop/shop-filters';
+import { AppliedFilters } from '@/components/shop/applied-filters';
 import { ShopSort } from '@/components/shop/shop-sort';
 import { Pagination } from '@/components/shop/pagination';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import {
   getProducts,
   getCategories,
@@ -111,33 +113,16 @@ export default async function ShopPage({
     <>
       <header className="border-b border-border bg-cotton-100 pb-10 pt-12 md:pb-14 md:pt-16 dark:bg-card">
         <div className="container">
-          <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-            <ol className="flex flex-wrap items-center gap-1.5">
-              <li>
-                <Link href="/" className="hover:text-foreground">
-                  Home
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li>
-                {activeCategory ? (
-                  <Link href="/shop" className="hover:text-foreground">
-                    Shop
-                  </Link>
-                ) : (
-                  <span aria-current="page">Shop</span>
-                )}
-              </li>
-              {activeCategory && (
-                <>
-                  <li aria-hidden="true">/</li>
-                  <li aria-current="page" className="text-foreground">
-                    {activeCategory.name}
-                  </li>
-                </>
-              )}
-            </ol>
-          </nav>
+          <Breadcrumbs
+            trail={
+              activeCategory
+                ? [
+                    { label: 'Shop', href: '/shop' },
+                    { label: activeCategory.name },
+                  ]
+                : [{ label: 'Shop' }]
+            }
+          />
 
           <h1 className="mt-5 text-display-lg">
             {activeCollection
@@ -214,6 +199,13 @@ export default async function ShopPage({
           />
 
           <div>
+            <AppliedFilters
+              basePath={basePath}
+              fabrics={options.fabrics}
+              motifs={options.motifs}
+              className="mb-4 lg:mb-5"
+            />
+
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
               <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
                 {total === 0 ? (

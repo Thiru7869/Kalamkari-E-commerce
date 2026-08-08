@@ -201,8 +201,14 @@ export function ShopFilters({
 
   return (
     <>
-      {/* Phone: bottom sheet */}
-      <div className="lg:hidden">
+      {/*
+        Phone: a sticky trigger opening a bottom sheet.
+
+        Sticky because the catalogue scrolls past it immediately otherwise, and
+        a reader who has scrolled three rows down and wants to narrow the list
+        should not have to scroll back up to the top of the page to do it.
+      */}
+      <div className="sticky top-[4.25rem] z-30 -mx-5 bg-background/95 px-5 py-3 backdrop-blur-md lg:hidden">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" className="w-full">

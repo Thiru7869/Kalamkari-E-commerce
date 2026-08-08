@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { CommissionForm } from '@/components/forms/commission-form';
 import { site } from '@/content/site';
 
@@ -43,6 +44,7 @@ export default function CommissionPage() {
       <section className="border-b border-border bg-cotton-100 pb-14 pt-16 md:pb-20 md:pt-24 dark:bg-card">
         <div className="container">
           <div className="max-w-3xl">
+            <Breadcrumbs trail={[{ label: 'Custom' }]} className="mb-6" />
             <p className="eyebrow">Commissions</p>
             <h1 className="mt-4 text-display-xl">Have it painted for you</h1>
             <p className="mt-7 text-body-lg text-muted-foreground">

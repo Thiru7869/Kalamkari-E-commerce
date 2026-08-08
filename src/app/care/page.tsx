@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import Link from 'next/link';
 import { naturalDyes } from '@/content/process';
 
@@ -42,6 +43,7 @@ export default function CarePage() {
       <section className="border-b border-border bg-cotton-100 pb-12 pt-16 md:pb-16 md:pt-24 dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
+            <Breadcrumbs trail={[{ label: 'Care & washing' }]} className="mb-6" />
             <p className="eyebrow">Care</p>
             <h1 className="mt-4 text-display-xl">Looking after naturally dyed cloth</h1>
             <p className="mt-7 text-body-lg text-muted-foreground">

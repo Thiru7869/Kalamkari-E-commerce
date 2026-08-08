@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { MapPin, Clock, Mail, Phone, MessageCircle } from 'lucide-react';
 import { ContactForm } from '@/components/forms/contact-form';
 import { site, contactEmail, contactPhone, whatsappHref } from '@/content/site';
@@ -22,6 +23,7 @@ export default function ContactPage() {
       <section className="border-b border-border bg-cotton-100 pb-14 pt-16 md:pb-20 md:pt-24 dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
+            <Breadcrumbs trail={[{ label: 'Visit us' }]} className="mb-6" />
             <p className="eyebrow">Visit us</p>
             <h1 className="mt-4 text-display-xl">Come and see it being made</h1>
             <p className="mt-7 text-body-lg text-muted-foreground">

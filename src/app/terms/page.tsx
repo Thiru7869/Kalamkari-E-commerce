@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import Link from 'next/link';
 import { site } from '@/content/site';
 
@@ -12,6 +13,7 @@ export default function TermsPage() {
   return (
     <div className="container py-14 md:py-20">
       <div className="mx-auto max-w-[46rem]">
+        <Breadcrumbs trail={[{ label: 'Terms' }]} className="mb-6" />
         <h1 className="text-display-lg">Terms</h1>
 
         <div className="mt-12 flex flex-col gap-10">

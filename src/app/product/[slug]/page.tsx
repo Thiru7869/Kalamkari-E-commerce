@@ -8,6 +8,7 @@ import { AddToCart } from '@/components/shop/add-to-cart';
 import { WishlistButton } from '@/components/shop/wishlist-button';
 import { ProductCard } from '@/components/shop/product-card';
 import { ReviewSection } from '@/components/shop/review-section';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Badge, Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/primitives';
 import { getProductBySlug, getRelatedProducts, getReviewEligibility } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
@@ -70,25 +71,13 @@ export default async function ProductPage({ params }: { params: Params }) {
   return (
     <>
       <div className="container pt-6 md:pt-8">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-          <ol className="flex flex-wrap items-center gap-1.5">
-            <li>
-              <Link href="/" className="hover:text-foreground">Home</Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li>
-              <Link href="/shop" className="hover:text-foreground">Shop</Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li>
-              <Link href={`/shop/${product.category.slug}`} className="hover:text-foreground">
-                {product.category.name}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li aria-current="page" className="text-foreground">{product.name}</li>
-          </ol>
-        </nav>
+        <Breadcrumbs
+          trail={[
+            { label: 'Shop', href: '/shop' },
+            { label: product.category.name, href: `/shop/${product.category.slug}` },
+            { label: product.name },
+          ]}
+        />
       </div>
 
       <article className="container pb-16 pt-6 md:pb-24">
@@ -128,6 +117,29 @@ export default async function ProductPage({ params }: { params: Params }) {
                   ? 'Shipping included.'
                   : `Shipping ${formatPrice(site.shipping.flatRate)}.`}
               </p>
+
+              {/*
+                Why it costs what it costs, at the point the question is asked.
+                The site argues price-through-labour on every other page and
+                then showed a bare number here. Both figures are real columns on
+                the piece, not marketing: craftDays is what was recorded, and
+                the dye count is the length of the list below.
+              */}
+              {(product.craftDays || dyes.length > 0) && (
+                <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                  {product.craftDays
+                    ? `${product.craftDays} days of one person's hand-work`
+                    : 'Drawn freehand with a bamboo pen'}
+                  {dyes.length > 0 && (
+                    <>
+                      , in {dyes.length} natural {dyes.length === 1 ? 'dye' : 'dyes'} prepared
+                      separately
+                    </>
+                  )}
+                  . Nothing here was repeated from a block or a screen, so this is the price
+                  of the making rather than of a run.
+                </p>
+              )}
 
               <div className="mt-7 flex items-start gap-3">
                 <AddToCart productId={product.id} stock={product.stock} className="flex-1" />

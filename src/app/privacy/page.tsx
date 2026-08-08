@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import Link from 'next/link';
 import { contactEmail } from '@/content/site';
 
@@ -14,6 +15,7 @@ export default function PrivacyPage() {
   return (
     <div className="container py-14 md:py-20">
       <div className="mx-auto max-w-[46rem]">
+        <Breadcrumbs trail={[{ label: 'Privacy' }]} className="mb-6" />
         <h1 className="text-display-lg">Privacy</h1>
         <p className="mt-5 text-body-lg text-muted-foreground">
           A small family store does not need much data, and we do not collect much.

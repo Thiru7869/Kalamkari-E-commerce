@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -51,6 +52,10 @@ export default async function JournalPostPage({ params }: { params: Params }) {
       <article className="pb-16">
         <header className="border-b border-border bg-cotton-100 pb-12 pt-10 md:pb-16 md:pt-14 dark:bg-card">
           <div className="container">
+            <Breadcrumbs
+              trail={[{ label: 'Journal', href: '/journal' }, { label: post.title }]}
+              className="mb-5"
+            />
             <Link
               href="/journal"
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"

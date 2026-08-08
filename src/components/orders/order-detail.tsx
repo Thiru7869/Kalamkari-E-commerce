@@ -6,6 +6,7 @@ import {
   statusIndex,
   statusLabel,
   statusDescription,
+  statusNarrative,
   isCancelled,
 } from '@/lib/orders';
 import { formatPrice, formatDate } from '@/lib/utils';
@@ -108,9 +109,22 @@ export function OrderDetail({ order }: { order: OrderView }) {
                         {isCurrent && <span className="sr-only"> — current stage</span>}
                       </p>
                       {isCurrent && (
-                        <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">
-                          {statusDescription(step)}
-                        </p>
+                        <>
+                          <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">
+                            {statusDescription(step)}
+                          </p>
+                          {/*
+                            What is actually happening to the cloth. At
+                            IN_PRODUCTION this is the difference between a bar
+                            that has not moved for three weeks and a customer
+                            who knows that is exactly right.
+                          */}
+                          {statusNarrative(step) && (
+                            <p className="mt-2.5 max-w-md border-l-2 border-border pl-3.5 text-sm leading-relaxed text-muted-foreground">
+                              {statusNarrative(step)}
+                            </p>
+                          )}
+                        </>
                       )}
                     </div>
                   </li>

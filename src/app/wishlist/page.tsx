@@ -48,12 +48,19 @@ export default async function WishlistPage() {
         <div className="mx-auto max-w-md text-center">
           <Heart className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
           <h1 className="mt-5 text-display-md">Nothing saved yet</h1>
-          <p className="mt-4 text-muted-foreground">
-            Tap the heart on any piece to keep it here.
+          <p className="mt-4 leading-relaxed text-muted-foreground">
+            Tap the heart on any piece to keep it here. It is worth doing on this
+            catalogue in particular: almost everything is the only one of itself, so a
+            piece you are still thinking about on Friday may not be there on Monday.
           </p>
-          <Button asChild size="lg" className="mt-8">
-            <Link href="/shop">Browse the store</Link>
-          </Button>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button asChild size="lg">
+              <Link href="/shop">Browse the store</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/custom">Have one painted</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
