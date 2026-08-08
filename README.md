@@ -160,12 +160,39 @@ All narrative copy is in `src/content/`, not scattered through components:
 
 ---
 
+## The process page
+
+Two things move as the reader descends `/process`:
+
+1. **The wash behind the page** interpolates continuously through the seven pot
+   colours in the order the craft reaches them — kasim, madder, myrobalan,
+   indigo, green, catechu, and back to the myrobalan cream the cloth started
+   from. The tone is written to a CSS variable on scroll rather than to React
+   state; twenty-three steps must not re-render on every tick.
+2. **The cloth in the frame** moves through twelve states, from loom-white
+   cotton to a finished painted saree. It is the same layered SVG the home page
+   uses for its eight stages, extended with explicit layer control so one
+   drawing can be walked at two resolutions. Below `lg` it becomes a slim strip
+   rather than a pinned panel.
+
+Readability is not left to chance: the dye sits on a fixed layer *behind* the
+text, every block of prose sits on a themed card, and only the frame furniture
+sits on the dye directly — with a light/dark ink stated per tone rather than
+computed, because a luminance formula gets myrobalan gold wrong.
+
+`/process` no longer holds a WebGL context. The layered drawing shows the same
+cloth *with its motifs*, which the shader could not, and a long scroll page is
+the worst place to keep a canvas alive on a phone.
+
+---
+
 ## The 3D
 
-Three scenes, all built on one custom shader (`components/three/cloth-material.ts`) that makes a plane read as dyed cotton rather than a coloured polygon: a woven warp/weft grid, dye that bleeds along the weave instead of stopping at a hard edge, and ink whose density varies as a real pen running dry.
+The home hero, built on a custom shader (`components/three/cloth-material.ts`) that makes a plane read as dyed cotton rather than a coloured polygon: a woven warp/weft grid, dye that bleeds along the weave instead of stopping at a hard edge, and ink whose density varies as a real pen running dry.
 
 - **Home hero** — cloth hanging in the store, madder red striking across it as you scroll. It illustrates the single most counter-intuitive fact about the craft: colour arrives in a boiling bath, days after it was painted on as a clear liquid.
-- **`/process`** — one canvas, pinned, cross-fading through six states as you read: bare cloth → charcoal sketch → iron black → madder red → indigo → sun-washed. Six separate canvases would exhaust the browser's WebGL context limit on mobile.
+Its non-WebGL rendering is the same dye sequence as a five-stop gradient, slid
+by scroll, so the colour front travels rather than the surface simply darkening.
 
 **Constraints the 3D is held to:**
 
@@ -369,6 +396,46 @@ configuration is the one most worth exercising.
 
 First-load JS: 103 kB shared, 162–174 kB on the heaviest content routes and
 207 kB on the home page, with three.js in a lazy chunk.
+
+---
+
+## Browsing
+
+`/shop` is the working grid — everything, filterable, paginated, three across on
+a phone. Around it sit pages that are pages rather than filtered views:
+
+| Route | What it is |
+| --- | --- |
+| `/types/{sarees,dupattas,chunnis,paintings,home-decor,blouse-pieces}` | One per kind of thing the workshop makes. Carries the varieties: every fabric genuinely stocked in that category, grouped by family, counted live. Nothing is listed that cannot currently be supplied. |
+| `/collections/{featured-sarees,premium,new-arrivals}` | A collection makes a claim, and a claim needs somewhere to be stated and defended. A query string states nothing. |
+
+Chunnis and dupattas are one garment under two names. Both pages exist because
+both words are searched for, and each says plainly that the other is the same
+thing rather than splitting the stock into a fiction.
+
+**Ramayana, Mahabharata, Krishna Leela and Tree of Life are surfaced as
+commission-first** wherever they appear — on the type pages, on the collections,
+and above search results when the query names one. Each is weeks of one person's
+undivided attention and no composition is ever repeated, so whatever is in the
+store is what exists.
+
+---
+
+## First visit
+
+A welcome overlay, shown once and never again after dismissal, carrying the one
+fact that changes how the rest of the site reads. It traps focus, locks scroll,
+closes on Escape, and never appears on checkout, account or admin — or for
+somebody who has already scrolled past the doorway.
+
+Closing it starts a six-stop quick tour. Deliberately not a spotlight overlay:
+those dim the page, trap the pointer, and need positioning arithmetic that
+breaks at 360px. It is a small card plus a ring drawn on whatever it is
+describing, so the page stays fully usable. Steps whose target is absent on the
+current viewport are skipped rather than shown pointing at nothing.
+
+Both are code-split and never requested for a returning visitor. Dismissal is
+versioned so the copy can change later without either being stuck shut.
 
 ---
 

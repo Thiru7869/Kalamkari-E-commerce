@@ -113,10 +113,16 @@ uses for magic links.
 
 **All narrative copy lives in `src/content/`**, not in components:
 
-- `site.ts` — business identity, navigation, shipping. One source of truth.
-- `process.ts` — the 23 steps in six phases, the dye index, the "never use" list.
+- `site.ts` — business identity, navigation, announcements, search placeholders,
+  the Explore map. One source of truth.
+- `process.ts` — the 23 steps in six phases, the dye index, the seven-tone wash
+  behind /process, and the eight colour stories.
 - `family.ts` — the five family members and the three story chapters.
-- `assistant.ts` — the assistant's knowledge base, which also backs the offline
+- `catalogue.ts` — the editorial layer over the shop: the type and collection
+  pages, and the commission-first note on the narrative motifs.
+- `commission.ts` — the guided questions, the attachment limits, the timeline.
+- `welcome.ts` — the doorway and the six tour stops.
+- `assistant.ts` — Chitra's knowledge base, which also backs the offline
   answer engine.
 
 ### The editorial rule
@@ -192,6 +198,22 @@ Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
   triggers a re-render.
 - Lenis and GSAP share **one** rAF loop (GSAP's ticker drives Lenis). Lenis is
   not mounted at all under reduced motion, and touch scrolling is left native.
+
+## Interruptions
+
+The welcome overlay and the quick tour are the only two things on this site that
+interrupt. Both are governed by `src/components/welcome/first-visit.tsx`:
+
+- Never on `/checkout`, `/admin`, `/account`, `/signin` or `/orders`.
+- Never for somebody who has already scrolled past 200px — that is a reader, not
+  an arrival.
+- Never twice. Dismissal is stored under a version, so changing the copy is what
+  brings it back, not a cleared cache.
+
+The announcement bar is server-rendered and hidden *before paint* by an inline
+script in the root layout, not in an effect. Deciding it in an effect either
+shifts the page down 36px on every first load or flashes the bar at everybody
+who has closed it.
 
 ## Errors
 
