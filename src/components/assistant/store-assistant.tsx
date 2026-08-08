@@ -55,7 +55,7 @@ function newId() {
   return Math.random().toString(36).slice(2);
 }
 
-export function KalamAssistant() {
+export function StoreAssistant() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -204,6 +204,7 @@ export function KalamAssistant() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={panelId}
+        data-tour="assistant"
         className={cn(
           'group pointer-events-auto relative flex h-12 items-center gap-2.5 rounded-full pl-3.5 pr-4',
           'border border-primary/25 bg-primary text-primary-foreground',

@@ -8,6 +8,7 @@ import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { MobileTabBar } from '@/components/layout/mobile-tab-bar';
 import { FloatingDock } from '@/components/layout/floating-dock';
+import { FirstVisit } from '@/components/welcome/first-visit';
 import { site } from '@/content/site';
 import { absoluteUrl } from '@/lib/utils';
 import './globals.css';
@@ -152,6 +153,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SiteFooter />
             <MobileTabBar />
             <FloatingDock />
+            {/* The doorway, then the walk-through. Both code-split and never
+                requested for a returning visitor. */}
+            <FirstVisit />
           </SmoothScrollProvider>
 
           <Toaster

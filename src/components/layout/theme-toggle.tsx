@@ -19,7 +19,10 @@ import { cn } from '@/lib/utils';
  *    a label that changes between "switch to dark" and "switch to light" is
  *    read as a different control each time it is used.
  */
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle({
+  className,
+  ...rest
+}: { className?: string } & React.HTMLAttributes<HTMLButtonElement>) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -41,6 +44,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       type="button"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       aria-pressed={isDark}
+      {...rest}
       className={cn(
         'inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',

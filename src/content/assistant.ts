@@ -172,8 +172,18 @@ export const starterPrompts = [
   'Can you paint something to my own design?',
 ] as const;
 
+/**
+ * The assistant's name.
+ *
+ * Chitra — Telugu and Sanskrit for a picture or a painting, and the root of
+ * *chitrakara*, the painter. It is a real given name in this part of Andhra,
+ * which is the point: the visitor should feel handed to somebody at a counter
+ * rather than routed to a product. It also sits correctly beside "Kalamkari"
+ * itself — kalam is the pen, kari the craftsmanship, chitra the thing that
+ * results.
+ */
 export const assistantIdentity = {
-  name: 'Kalam',
+  name: 'Chitra',
   /** Shown under the name in the chat header. */
   role: `Store assistant · ${site.location.town}`,
   greeting:

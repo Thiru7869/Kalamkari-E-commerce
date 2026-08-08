@@ -22,13 +22,19 @@ import { cn } from '@/lib/utils';
 
 // The assistant pulls in a transcript, a streaming parser and its own icons.
 // None of that is needed for first paint, and it is never open on load.
-const KalamAssistant = dynamic(
-  () => import('@/components/assistant/kalam-assistant').then((m) => m.KalamAssistant),
+const StoreAssistant = dynamic(
+  () => import('@/components/assistant/store-assistant').then((m) => m.StoreAssistant),
   { ssr: false },
 );
 
-/** Routes where a floating chat launcher would be in the way, not helpful. */
-const SUPPRESSED_PREFIXES = ['/admin', '/checkout'];
+/**
+ * Routes where a floating chat launcher would be in the way, not helpful.
+ *
+ * Back-to-top is not suppressed anywhere: an admin order list and a checkout
+ * are both long enough to need it, and unlike the assistant it never covers
+ * anything the visitor is trying to read.
+ */
+const ASSISTANT_SUPPRESSED = ['/admin', '/checkout'];
 
 export function FloatingDock() {
   const pathname = usePathname();
@@ -36,8 +42,7 @@ export function FloatingDock() {
   // Matches the `md` breakpoint the tab bar uses, and stays in sync on rotate.
   const isCompact = useMediaQuery('(max-width: 767px)');
 
-  const suppressed = SUPPRESSED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  if (suppressed) return null;
+  const assistantSuppressed = ASSISTANT_SUPPRESSED.some((prefix) => pathname.startsWith(prefix));
 
   /*
     On a phone the tab bar already occupies the bottom of the screen
@@ -66,7 +71,7 @@ export function FloatingDock() {
       inert={retracted ? true : undefined}
     >
       <BackToTop />
-      <KalamAssistant />
+      {!assistantSuppressed && <StoreAssistant />}
     </div>
   );
 }

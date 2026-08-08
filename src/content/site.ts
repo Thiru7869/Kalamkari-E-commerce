@@ -131,6 +131,93 @@ export function socialLinks(): { label: string; href: string }[] {
     .map(([label, href]) => ({ label, href: href.trim() }));
 }
 
+/* -------------------------------------------------------------------------- */
+/* The announcement bar                                                       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * What the moving bar above the header says.
+ *
+ * Mostly craft facts rather than offers, on purpose. A bar that only ever
+ * shouts about discounts is a bar people learn to ignore; one that occasionally
+ * tells you the black is fermented for twenty-one days is one they read. Every
+ * line here is checkable against /process or the shipping page.
+ */
+export const announcements = [
+  `Free shipping in India above ₹${(site.shipping.freeAbove / 100).toLocaleString('en-IN')}`,
+  'Hand-painted in Srikalahasti · natural dyes only',
+  'Twenty-three steps, and the colour arrives at step sixteen',
+  'Almost every piece is one of one — the same drawing is never made twice',
+  'The black is fermented from rusted iron for twenty-one days',
+  `Dispatched in ${site.shipping.domesticDays}, folded in unbleached muslin`,
+  'No blocks · no screens · no chemical colour',
+  'Indigo is the one colour that is dipped, never painted',
+] as const;
+
+/* -------------------------------------------------------------------------- */
+/* The Explore panel                                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Ten sections, grouped, each with a line saying what it actually is.
+ *
+ * The hints matter more than the labels. "Care & washing" tells somebody
+ * nothing they did not guess; "why naturally dyed cloth is washed differently"
+ * tells them whether to open it.
+ */
+export const exploreSections = [
+  {
+    title: 'The work',
+    items: [
+      { label: 'Everything in the store', href: '/shop', hint: 'The full grid, filterable by cloth, story and price' },
+      { label: 'Sarees', href: '/types/sarees', hint: 'Nine yards, drawn end to end — and which cloth to choose' },
+      { label: 'Paintings', href: '/types/paintings', hint: 'Narrative panels, the tradition the craft grew out of' },
+      { label: 'New arrivals', href: '/collections/new-arrivals', hint: 'The most recent work to finish its twentieth washing' },
+    ],
+  },
+  {
+    title: 'The craft',
+    items: [
+      { label: 'The twenty-three steps', href: '/process', hint: 'The whole sequence, with the cloth changing as you read' },
+      { label: 'The vegetable palette', href: '/process#colours', hint: 'Eight colours, and where each one comes from' },
+      { label: 'Our story', href: '/our-story', hint: 'Five people in one house, and how the craft passes through it' },
+      { label: 'The journal', href: '/journal', hint: 'Notes on dye, motif and season — including how to spot a print' },
+    ],
+  },
+  {
+    title: 'Practical',
+    items: [
+      { label: 'Have a piece painted', href: '/custom', hint: 'Your subject, your cloth. No payment to start a conversation' },
+      { label: 'Care & washing', href: '/care', hint: 'Why naturally dyed cloth is washed differently, and how' },
+    ],
+  },
+] as const;
+
+/**
+ * What the search placeholder types through.
+ *
+ * The order is the order somebody narrows: the kind of thing first, then the
+ * cloth it is drawn on, then the story drawn on it. Every term below returns
+ * results against the seeded catalogue — a placeholder that suggests a search
+ * with nothing behind it is a small lie told eight times a minute.
+ */
+export const searchPlaceholders = [
+  'Search for sarees',
+  'Cotton saree',
+  'Tussar silk saree',
+  'Chanderi saree',
+  'Mulmul cotton saree',
+  'Search for dupattas',
+  'Search for chunnis',
+  'Search for paintings',
+  'Search for home decor',
+  'Blouse pieces',
+  'Tree of Life',
+  'Peacock',
+  'Indigo',
+  'Temple border',
+] as const;
+
 export type NavItem = {
   label: string;
   href: string;

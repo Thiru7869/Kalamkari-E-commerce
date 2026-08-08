@@ -151,6 +151,28 @@
     z-index: -1;
   }
 
+  /*
+    The ring the quick tour draws on whatever it is currently describing.
+
+    An outline rather than a box-shadow so it follows the element's own shape
+    and cannot be clipped by an ancestor's overflow — several of the targets
+    live inside scrolling rails. It sits outside the element rather than
+    inside it, so nothing shifts when it appears.
+  */
+  [data-tour-active] {
+    position: relative;
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 4px;
+    border-radius: calc(var(--radius) - 2px);
+    animation: tour-pulse 2.4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-tour-active] {
+      animation: none;
+    }
+  }
+
   /* Skip link — visible only on keyboard focus. */
   .skip-link {
     @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100]

@@ -98,6 +98,15 @@ export function DesktopNav({ items }: { items: NavItem[] }) {
               ) : (
                 <Link
                   href={item.href}
+              data-tour={
+                item.href === '/shop'
+                  ? 'shop'
+                  : item.href === '/process'
+                    ? 'process'
+                    : item.href === '/custom'
+                      ? 'custom'
+                      : undefined
+              }
                   className={cn(
                     'flex h-11 items-center rounded-sm px-3 text-sm font-medium transition-colors',
                     'hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',

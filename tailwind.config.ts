@@ -211,6 +211,18 @@ const config: Config = {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         },
+        // The quick tour's ring, breathing. Slow enough to read as attention
+        // rather than as an alarm.
+        'tour-pulse': {
+          '0%, 100%': { outlineColor: 'hsl(var(--primary) / 0.9)' },
+          '50%': { outlineColor: 'hsl(var(--primary) / 0.35)' },
+        },
+        // The announcement bar. Translated rather than animating `left`, so it
+        // stays on the compositor.
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.22s ease-out',
@@ -219,6 +231,8 @@ const config: Config = {
         'dye-bloom': 'dye-bloom 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         'rise-in': 'rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         shimmer: 'shimmer 1.8s infinite',
+        'tour-pulse': 'tour-pulse 2.4s ease-in-out infinite',
+        marquee: 'marquee var(--marquee-duration, 42s) linear infinite',
       },
     },
   },

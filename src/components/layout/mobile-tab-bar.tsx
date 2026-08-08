@@ -55,6 +55,7 @@ export function MobileTabBar() {
             <li key={href}>
               <Link
                 href={href}
+                data-tour={href === '/shop' ? 'shop' : href === '/custom' ? 'custom' : href === '/process' ? 'process' : undefined}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'relative flex h-[4.25rem] flex-col items-center justify-center gap-1 transition-colors',

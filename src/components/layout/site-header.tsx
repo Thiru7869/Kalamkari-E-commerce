@@ -9,6 +9,8 @@ import { DesktopNav } from './desktop-nav';
 import { Wordmark } from './wordmark';
 import { HeaderShell } from './header-shell';
 import { ThemeToggle } from './theme-toggle';
+import { AnnouncementBar } from './announcement-bar';
+import { ExploreMenu } from './explore-menu';
 
 async function CartBadge() {
   const count = await getCartCount();
@@ -33,17 +35,9 @@ export async function SiteHeader() {
 
   return (
     <HeaderShell>
-      {/*
-        The announcement bar states the one fact that most distinguishes this
-        store, on every page. It is not a promotion and does not rotate.
-      */}
-      <div className="border-b border-border/60 bg-kasim-900 text-cotton-200">
-        <div className="container flex h-9 items-center justify-center gap-2 text-center">
-          <p className="text-[0.6875rem] uppercase tracking-[0.14em]">
-            Hand-painted in {site.location.town} · Natural dyes only · No blocks, no prints
-          </p>
-        </div>
-      </div>
+      {/* Craft facts and shipping terms, moving. Pauses on hover and focus,
+          rotates rather than scrolls under reduced motion, and closes. */}
+      <AnnouncementBar />
 
       <div className="container flex h-16 items-center gap-3 md:h-20">
         <div className="flex items-center gap-1 md:hidden">
@@ -61,19 +55,24 @@ export async function SiteHeader() {
         <DesktopNav items={mainNav} />
 
         <div className="ml-auto flex items-center gap-0.5">
+          {/* Explore sits immediately before search, as the map before the
+              index — one opens everything, the other finds one thing. */}
+          <ExploreMenu />
+
           <Link
             href="/search"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5"
+            data-tour="search"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Search className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
             <span className="sr-only">Search</span>
           </Link>
 
-          <ThemeToggle className="hidden sm:inline-flex" />
+          <ThemeToggle className="hidden sm:inline-flex" data-tour="theme" />
 
           <Link
             href="/wishlist"
-            className="hidden h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 sm:inline-flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline-flex"
           >
             <Heart className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
             <span className="sr-only">Wishlist</span>
@@ -81,7 +80,7 @@ export async function SiteHeader() {
 
           <Link
             href="/cart"
-            className="relative inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5"
+            className="relative inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ShoppingBag className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
             <Suspense fallback={null}>

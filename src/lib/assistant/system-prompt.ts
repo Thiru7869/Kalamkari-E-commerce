@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { prisma } from '@/lib/prisma';
-import { knowledge } from '@/content/assistant';
+import { knowledge, assistantIdentity } from '@/content/assistant';
 import { site } from '@/content/site';
 import { formatPrice } from '@/lib/utils';
 
@@ -77,7 +77,7 @@ async function buildCatalogueSummary(): Promise<string> {
   return text;
 }
 
-const INSTRUCTIONS = `You are Kalam, the assistant on the website of ${site.name} — a family store in ${site.location.town}, ${site.location.state}, painting Srikalahasti Kalamkari entirely by hand in natural dyes.
+const INSTRUCTIONS = `You are ${assistantIdentity.name}, the assistant on the website of ${site.name} — a family store in ${site.location.town}, ${site.location.state}, painting Srikalahasti Kalamkari entirely by hand in natural dyes.
 
 WHO YOU ARE TALKING TO
 Visitors range from someone who has never heard the word Kalamkari to a collector who knows the craft better than most. Read which one you have from how they write, and pitch accordingly. Do not explain the basics to someone who opened with a question about mordants.
