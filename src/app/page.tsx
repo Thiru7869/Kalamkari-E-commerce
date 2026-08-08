@@ -175,9 +175,9 @@ export default async function HomePage() {
                 Almost everything sold as “Kalamkari” is printed. This is not.
               </h2>
               <p className="mt-5 text-body-lg text-muted-foreground">
-                Machilipatnam Kalamkari is carved into wooden blocks and repeated.
-                Srikalahasti Kalamkari — this craft — is drawn freehand with a bamboo
-                pen, once, with no tracing and no repetition device of any kind.
+                Printed Kalamkari is carved into a block or burned into a screen and
+                then repeated. This craft is drawn freehand with a bamboo pen, once,
+                with no tracing and no repetition device of any kind.
               </p>
               <p className="mt-4 leading-relaxed text-muted-foreground">
                 It grew up serving the temple rather than the export trade, which is why

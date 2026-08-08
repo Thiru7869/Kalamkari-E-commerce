@@ -51,7 +51,7 @@ export const knowledge: KnowledgeEntry[] = [
       'tell the difference', 'how to tell', 'fake', 'original', 'block printed',
     ],
     answer:
-      'Most cloth sold as "Kalamkari" is block-printed or screen-printed, and much of it uses chemical colour. There are two genuine traditions: Machilipatnam, which is carved into wooden blocks and repeated, and Srikalahasti, which is drawn freehand with a bamboo pen. Ours is the second. The tell is repetition — on a printed piece the same motif recurs identically; on ours, two peacocks on the same saree are never the same peacock. Look also at the back of the cloth: hand-drawn dye penetrates the weave, print sits on the surface.',
+      'Most cloth sold as "Kalamkari" is block-printed or screen-printed, and much of it uses chemical colour. There are two genuine traditions behind the name: one carved into wooden blocks and repeated, and one drawn freehand with a bamboo pen. Ours is the second, and it is what Srikalahasti is known for. The tell is repetition — on a printed piece the same motif recurs identically; on ours, two peacocks on the same saree are never the same peacock. Look also at the back of the cloth: hand-drawn dye penetrates the weave, print sits on the surface.',
     link: { label: 'Telling the difference', href: '/journal' },
   },
   {
