@@ -106,6 +106,9 @@ These are the only things standing between this and a live site. Each is deliber
 | Shipping rates | `src/content/site.ts` → `site.shipping` | In paise. |
 | Street address | `src/app/contact/page.tsx` | Currently town-level only. Add the full address if the store wants it published. |
 | Privacy & terms | `src/app/privacy`, `src/app/terms` | Written plainly as a starting point — have a lawyer review before trading. |
+| Award photographs | `src/content/family.ts` → `awards` | Ten containers, numbered. Point `image` at each certificate and add a `title` when the citation is confirmed — the grid, quick view and full-screen viewer already work. |
+| Workshop film | `src/app/our-story/page.tsx` → `WorkshopVideo` | Pass `src`. Until then the frame says plainly that the film is being cut, rather than showing a play button that does nothing. |
+| Comparison photographs | `src/app/our-story/page.tsx` → `evidence` | Four detail shots for the hand-against-printed carousel. Each caption already describes exactly what its frame needs to show. |
 | SMTP credentials | environment | Without them nothing is emailed; messages are printed to the server console instead. |
 | Razorpay keys + webhook secret | environment | Without them the online payment option is not offered and cash on delivery is used. |
 
@@ -423,7 +426,15 @@ store is what exists.
 
 ## First visit
 
-A welcome overlay, shown once and never again after dismissal, carrying the one
+A five-second loading sequence opens the site: Ganesha set out in line by a
+bamboo pen, and the colours arriving afterwards out of separate pots — the
+actual order of the twenty-three steps, and the figure a Srikalahasti artist
+begins a new cloth with. It is inline SVG in the same visual language as the
+saree canvas, driven by one rAF loop so the drawing, the dye and the wordmark
+cannot drift apart. Under reduced motion the finished frame is shown complete
+and held.
+
+Then a welcome overlay, shown once, carrying the one
 fact that changes how the rest of the site reads. It traps focus, locks scroll,
 closes on Escape, and never appears on checkout, account or admin — or for
 somebody who has already scrolled past the doorway.
@@ -434,8 +445,11 @@ breaks at 360px. It is a small card plus a ring drawn on whatever it is
 describing, so the page stays fully usable. Steps whose target is absent on the
 current viewport are skipped rather than shown pointing at nothing.
 
-Both are code-split and never requested for a returning visitor. Dismissal is
-versioned so the copy can change later without either being stuck shut.
+All three are code-split and none is requested twice in a session. Persistence
+is **sessionStorage**, not localStorage: the store wanted the welcome to return
+on a new visit, and a localStorage flag written during development is invisible
+and permanent — which is exactly why the welcome appeared to have stopped
+working.
 
 ---
 
