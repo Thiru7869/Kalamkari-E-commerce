@@ -236,7 +236,7 @@ export default async function HomePage() {
                 <RevealOnScroll delay={i * 0.05}>
                   <Link
                     href={`/shop/${category.slug}`}
-                    className="group relative flex h-full min-h-[8.5rem] flex-col justify-end overflow-hidden rounded-sm bg-kasim-800 p-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-[13rem] sm:p-5 md:min-h-[15rem] md:p-6"
+                    className="group relative flex h-full min-h-[8.5rem] flex-col justify-end overflow-hidden rounded-sm bg-kasim-800 p-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-[12rem] sm:p-5 md:min-h-[13.5rem] md:p-6"
                   >
                     <Image
                       src={category.heroImage}
@@ -409,7 +409,11 @@ export default async function HomePage() {
         <div className="container">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-20">
             <RevealOnScroll>
-              <div className="relative mx-auto aspect-[4/5] w-[62%] overflow-hidden rounded-sm bg-cotton-300 sm:w-[48%] lg:mx-0 lg:w-full">
+              {/* Capped rather than filling its column. At `lg:w-full` this
+                  portrait grew with the viewport until it was the tallest
+                  thing on the page, and the biography beside it — which is
+                  the point of the section — read as its caption. */}
+              <div className="relative mx-auto aspect-[4/5] w-[62%] overflow-hidden rounded-sm bg-cotton-300 sm:w-[48%] lg:mx-0 lg:w-full lg:max-w-[21rem] xl:max-w-[24rem]">
                 <Image
                   src={master.image}
                   alt={`${master.name} at work in the store in ${site.location.town}`}

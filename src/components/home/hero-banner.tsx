@@ -102,7 +102,15 @@ export function HeroBanner({
         the shop. Going straight to a listing on the first tap would skip the
         only part of this that is persuasive.
       */}
-      <div className="group relative aspect-[4/5] overflow-hidden rounded-sm bg-kasim-800 shadow-[0_28px_70px_-40px_rgb(0_0_0/0.85)]">
+      {/*
+        4:5 on a phone, where the panel is the whole screen and wants the
+        height. Squarer from `lg` up, where it sits beside the headline in a
+        two-column grid: at 4:5 a 40vw-wide panel is 50vh tall on its own, and
+        the column beside it ends up as a short paragraph floating against a
+        wall of image. Losing a sixth of the height is what lets the two
+        columns read as a spread rather than as a picture with a caption.
+      */}
+      <div className="group relative aspect-[4/5] overflow-hidden rounded-sm bg-kasim-800 shadow-[0_28px_70px_-40px_rgb(0_0_0/0.85)] lg:aspect-[5/5.6]">
         <button
           type="button"
           onClick={() => (opened ? router.push('/shop') : openFull(index))}

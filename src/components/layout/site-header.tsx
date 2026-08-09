@@ -12,6 +12,7 @@ import { ThemeToggle } from './theme-toggle';
 import { AnnouncementBar } from './announcement-bar';
 import { ExploreMenu } from './explore-menu';
 import { HeaderSearch } from '@/components/shop/header-search';
+import { SearchOverlay } from '@/components/shop/search-overlay';
 
 async function CartBadge() {
   const count = await getCartCount();
@@ -60,20 +61,26 @@ export async function SiteHeader() {
               index — one opens everything, the other finds one thing. */}
           <ExploreMenu />
 
-          {/* A real field from lg up, where there is room for one. Below that
-              the icon still goes to /search, which carries the same field at
-              full width. */}
+          {/*
+            Both of these open the panel over the current page rather than
+            navigating to /search. Looking something up should not cost the
+            visitor the page they were reading — and on a site made of
+            long-form pages, it used to cost them two navigations to change
+            their mind. /search is still there, and Enter still goes to it.
+          */}
           <div data-tour="search" className="hidden lg:block">
             <HeaderSearch className="mx-1" />
           </div>
 
-          <Link
-            href="/search"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
-          >
-            <Search className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
-            <span className="sr-only">Search</span>
-          </Link>
+          <SearchOverlay>
+            <button
+              type="button"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            >
+              <Search className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
+              <span className="sr-only">Search</span>
+            </button>
+          </SearchOverlay>
 
           <ThemeToggle className="hidden sm:inline-flex" data-tour="theme" />
 
