@@ -2,31 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  60-30-10, in the workshop's own materials.
+
+    60%  cotton    — the ground. `--background`, `--card`, `--muted`. This is
+                     myrobalan-treated cloth and it is never pure white,
+                     because the cloth never is.
+    30%  kasim     — the ink. `--foreground`, `--muted-foreground`, `--border`.
+                     Every word and every rule on the page.
+    10%  chay      — the madder. `--primary`, plus indigo as its cooler
+                     counterpart. Headings' second clause, prices, links,
+                     the mark under a name.
+
+  Gold sits outside the three entirely and is spent only on whatever is being
+  pointed at right now — see tailwind.config.
+
+  The numbers below were re-struck once, after the site had been read for a
+  while rather than looked at. Nothing was wrong with them and everything was
+  slightly asleep: the ink was carrying almost no chroma, the rules between
+  sections were faint enough that the page read as one continuous scroll, and
+  since roughly three hundred paragraphs on this site are set in
+  `--muted-foreground`, that one desaturated grey was most of what a visitor
+  actually saw. The ink now holds a little of the ground's warmth, the madder
+  is a touch more saturated, and the borders are visible. Body contrast went
+  from 5.6:1 to 6.6:1 in the process, which is the opposite of a cost.
+*/
 @layer base {
   :root {
-    /* Light theme = myrobalan-treated cotton. The background is never pure
-       white, because the cloth never is. */
+    /* 60 — the ground. */
     --background: 42 45% 96%;      /* cotton-100 */
-    --foreground: 40 8% 13%;       /* kasim-900, the outline black */
-
     --card: 40 50% 98%;
-    --card-foreground: 40 8% 13%;
-
     --popover: 40 50% 98%;
-    --popover-foreground: 40 8% 13%;
+    --secondary: 38 34% 87%;
+    --muted: 40 30% 90%;
 
-    /* Primary is the chay/madder red — the colour of the craft's signature. */
-    --primary: 8 61% 34%;          /* chay-600 */
+    /* 30 — the ink. Warmed and deepened: kasim is a blue-grey-brown, never a
+       neutral grey, and at 8% saturation it was reading as one. */
+    --foreground: 28 14% 12%;      /* kasim-900, the outline black */
+    --card-foreground: 28 14% 12%;
+    --popover-foreground: 28 14% 12%;
+    --secondary-foreground: 30 22% 20%;
+    --muted-foreground: 32 12% 34%;
+
+    /* 10 — the madder. The colour of the craft's signature, so it is allowed
+       to be a colour. */
+    --primary: 6 68% 36%;          /* chay-600 */
     --primary-foreground: 42 60% 97%;
 
-    --secondary: 38 30% 88%;
-    --secondary-foreground: 30 20% 22%;
-
-    --muted: 40 25% 91%;
-    --muted-foreground: 35 8% 38%;
-
-    /* Accent is indigo — the one colour that is dipped, not painted. */
-    --accent: 215 41% 29%;         /* indigo-600 */
+    /* Indigo — the one colour that is dipped, not painted. */
+    --accent: 214 46% 30%;         /* indigo-600 */
     --accent-foreground: 42 60% 97%;
 
     --destructive: 0 62% 40%;
@@ -37,34 +61,38 @@
     --gold: 39 63% 42%;
     --gold-foreground: 42 60% 97%;
 
-    --border: 38 22% 82%;
-    --input: 38 22% 80%;
-    --ring: 8 61% 34%;
+    /* Visible. A rule the reader cannot quite see is a section break that does
+       not happen, and a long page of them is why this site read as one
+       undifferentiated scroll. */
+    --border: 36 26% 78%;
+    --input: 36 26% 76%;
+    --ring: 6 68% 36%;
 
     --radius: 0.25rem; /* Hand-drawn work does not need rounded chrome. */
   }
 
   .dark {
-    /* Dark theme = the store at night, or an indigo vat. Not neutral grey. */
+    /* Dark theme = the store at night, or an indigo vat. Not neutral grey.
+       Same three proportions, same re-striking. */
     --background: 30 12% 8%;
     --foreground: 40 30% 92%;
 
-    --card: 30 10% 11%;
+    --card: 30 10% 12%;
     --card-foreground: 40 30% 92%;
 
-    --popover: 30 10% 11%;
+    --popover: 30 10% 12%;
     --popover-foreground: 40 30% 92%;
 
-    --primary: 10 48% 52%;         /* chay lifts in the dark to stay readable */
+    --primary: 9 55% 56%;          /* chay lifts in the dark to stay readable */
     --primary-foreground: 30 12% 8%;
 
-    --secondary: 30 8% 18%;
+    --secondary: 30 9% 19%;
     --secondary-foreground: 40 30% 92%;
 
-    --muted: 30 8% 16%;
-    --muted-foreground: 38 12% 65%;
+    --muted: 30 9% 17%;
+    --muted-foreground: 38 16% 69%;
 
-    --accent: 215 30% 60%;
+    --accent: 214 38% 64%;
     --accent-foreground: 30 12% 8%;
 
     --destructive: 0 55% 48%;
@@ -74,9 +102,9 @@
     --gold: 44 71% 62%;
     --gold-foreground: 30 12% 8%;
 
-    --border: 30 8% 22%;
-    --input: 30 8% 24%;
-    --ring: 10 48% 52%;
+    --border: 32 10% 25%;
+    --input: 32 10% 27%;
+    --ring: 9 55% 56%;
   }
 
   * {
@@ -107,6 +135,19 @@
     text-wrap: balance;
   }
 
+  /*
+    The two that carry a page get 600.
+
+    An old-style face loses weight as it gets larger — the thin strokes stay
+    thin while the thick ones grow — so a 500 set at `display-xl` reads lighter
+    on the page than the same 500 at `display-sm`, and the biggest words on the
+    site were the faintest. 600 restores the intended colour at display sizes.
+    h3 and h4 stay at 500: they run at text sizes, where 600 would shout.
+  */
+  h1, h2 {
+    font-weight: 600;
+  }
+
   p {
     text-wrap: pretty;
   }
@@ -133,6 +174,32 @@
      something about it, which is what carved capitals are for. */
   .eyebrow {
     @apply font-inscription text-eyebrow uppercase tracking-[0.2em] text-muted-foreground;
+  }
+
+  /*
+    The tick before it.
+
+    Twenty-eight of these label the sections of the site, and a run of small
+    tracked capitals with nothing to anchor them reads as caption text rather
+    than as the top of something. One drawn rule turns each into a heading —
+    the same mark a plate gets in a printed book.
+
+    `currentColor` rather than the madder: three of the twenty-eight sit on
+    photographs and override their own colour, and a fixed madder tick would
+    disappear into a dark image on exactly those three. Inheriting means the
+    mark is legible wherever the label is, which is the only property it needs.
+    Inline-block with a vertical-align so it centres against the capitals and
+    follows the label when a section is centred.
+  */
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    margin-right: 0.6875rem;
+    vertical-align: 0.28em;
+    background-color: currentColor;
+    opacity: 0.55;
   }
 
   /* A hairline rule that reads like a drawn line rather than a CSS border. */
