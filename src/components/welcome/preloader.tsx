@@ -1,63 +1,74 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { GaneshaMark } from './ganesha-mark';
 import { site } from '@/content/site';
 import { cn } from '@/lib/utils';
 
 /**
- * The five seconds before the site.
+ * The doorway before the doorway.
  *
- * A loading screen is normally an apology for a slow page. This one is the
- * shortest possible statement of what the store does: a figure set out in line
- * by a bamboo pen, and the colours arriving afterwards out of separate pots —
- * which is the actual order of the twenty-three steps, and the single fact the
- * rest of the site spends a thousand words on.
+ * Three acts, strictly in order, because the sequence is a sentence and the
+ * clauses do not commute:
  *
- * Ganesha because he is the figure a Srikalahasti artist begins a new cloth
- * with.
+ *   1. the film   — the workshop itself, moving, before a single word
+ *   2. the name   — held alone on a dark ground, arriving out of a slow push in
+ *   3. the site   — handed over to the welcome, which is the first thing that
+ *                   actually speaks to the visitor
  *
- * It is driven by one rAF loop writing to component state at a coarse
- * granularity rather than by CSS keyframes, because the drawing and the dye
- * have to stay in step with each other and with the wordmark — three
- * independent animations would drift.
+ * Act 2 does not begin until the film has genuinely ended, and the hand-over to
+ * act 3 does not happen until the name has finished settling. That ordering is
+ * the whole point: a name that appears over a still-playing film is a title
+ * card, and a welcome that appears over a still-moving name is a pop-up.
  *
- * Under reduced motion none of it runs: the finished frame is shown complete,
- * held briefly, and the site follows.
+ * Nothing here is load-bearing. Autoplay may be refused, the file may stall on
+ * a bad connection, `ended` may never fire on a codec the browser half-supports
+ * — every one of those paths falls through to the name, which is the part that
+ * matters. See `settleVideo`.
+ *
+ * Under reduced motion the film is never requested at all. The visitor gets the
+ * finished Ganesha frame — the drawing complete, every pot arrived — beside the
+ * name, held long enough to read. Nothing is lost but the movement.
  */
 
-const DURATION_MS = 5000;
+/** Where the film lives. Muted, short, and decorative by construction. */
+const VIDEO_SRC = '/video/opening.mp4';
 
-/** When each part of the sequence happens, as a fraction of the whole. */
-const TIMELINE = {
-  drawFrom: 0.02,
-  drawTo: 0.62,
-  colourFrom: 0.34,
-  colourTo: 0.86,
-  wordmarkAt: 0.66,
-};
+/**
+ * The longest the film is allowed to hold the visitor.
+ *
+ * `ended` is not a guarantee. A partially-supported codec can play to the last
+ * frame and simply stop; a stalled download can sit at 90% forever. Without a
+ * ceiling either case is an infinite loading screen, which is the one failure
+ * mode a loading screen may never have.
+ */
+const VIDEO_CEILING_MS = 14000;
 
-function easeOutCubic(t: number) {
-  return 1 - Math.pow(1 - t, 3);
-}
+/** How long the name is held on screen before the welcome takes over. */
+const NAME_MS = 2600;
 
-function span(t: number, from: number, to: number) {
-  return Math.min(1, Math.max(0, (t - from) / (to - from)));
-}
+/** The reduced-motion hold: long enough to read the name, short enough to pass. */
+const STATIC_MS = 1600;
+
+/** The cross-fade out. Short — the site is already mounted behind this. */
+const LEAVE_MS = 480;
+
+type Act = 'film' | 'name';
 
 export function Preloader({ onDone }: { onDone: () => void }) {
-  const [progress, setProgress] = useState(0);
-  const [reduced, setReduced] = useState(false);
+  const [reduced, setReduced] = useState<boolean | null>(null);
+  const [act, setAct] = useState<Act>('film');
   const [leaving, setLeaving] = useState(false);
-  const doneRef = useRef(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  /** Guards the hand-over. Several paths race to end the film; one may win. */
+  const settled = useRef(false);
 
   useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(query.matches);
+    setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }, []);
 
-  // The scroll position is restored by the browser on reload; while this is up
-  // the page behind must not move under it.
+  // The browser restores scroll position on reload; while this is up, the page
+  // behind it must not move underneath.
   useEffect(() => {
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
@@ -66,146 +77,160 @@ export function Preloader({ onDone }: { onDone: () => void }) {
     };
   }, []);
 
+  /** End act 1 and begin act 2. Idempotent — every failure path calls it. */
+  const settleVideo = useCallback(() => {
+    if (settled.current) return;
+    settled.current = true;
+    setAct('name');
+  }, []);
+
+  /** Begin the fade, then hand over to the welcome. */
+  const finish = useCallback(() => {
+    setLeaving(true);
+    window.setTimeout(onDone, LEAVE_MS);
+  }, [onDone]);
+
+  // ---- Act 1 → Act 2 ------------------------------------------------------
+  // Autoplay is requested explicitly rather than left to the `autoPlay`
+  // attribute, because the returned promise is the only way to find out that it
+  // was refused. A refusal is not an error here; it just means act 1 is over
+  // before it started.
   useEffect(() => {
-    // Reduced motion: the finished frame, held long enough to be seen, then on.
+    if (reduced !== false || act !== 'film') return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    const ceiling = window.setTimeout(settleVideo, VIDEO_CEILING_MS);
+
+    void video.play().catch(settleVideo);
+
+    return () => window.clearTimeout(ceiling);
+  }, [reduced, act, settleVideo]);
+
+  // ---- Act 2 → the welcome ------------------------------------------------
+  useEffect(() => {
+    if (reduced === null) return;
+
+    // Reduced motion: one still frame, one name, then through.
     if (reduced) {
-      setProgress(1);
-      const id = window.setTimeout(() => {
-        setLeaving(true);
-        window.setTimeout(onDone, 260);
-      }, 1200);
+      const id = window.setTimeout(finish, STATIC_MS);
       return () => window.clearTimeout(id);
     }
 
-    let frame = 0;
-    const start = performance.now();
+    if (act !== 'name') return;
 
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / DURATION_MS);
-      setProgress(t);
+    const id = window.setTimeout(finish, NAME_MS);
+    return () => window.clearTimeout(id);
+  }, [reduced, act, finish]);
 
-      if (t < 1) {
-        frame = requestAnimationFrame(tick);
-        return;
-      }
-      if (doneRef.current) return;
-      doneRef.current = true;
+  // Nothing is committed until the motion preference is known. Rendering the
+  // film first and pulling it a frame later is worse than one blank frame.
+  if (reduced === null) return null;
 
-      // Lift, then hand over. The fade is short: the visitor has already
-      // waited five seconds and the site is behind it, ready.
-      setLeaving(true);
-      window.setTimeout(onDone, 420);
-    };
-
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [reduced, onDone]);
-
-  const draw = easeOutCubic(span(progress, TIMELINE.drawFrom, TIMELINE.drawTo));
-  const colour = span(progress, TIMELINE.colourFrom, TIMELINE.colourTo);
-  const wordmark = span(progress, TIMELINE.wordmarkAt, 1);
+  const showFilm = !reduced && act === 'film';
 
   return (
     <div
       className={cn(
-        'fixed inset-0 z-[90] flex flex-col items-center justify-center',
-        'bg-cotton-100 dark:bg-kasim-950',
-        'transition-opacity duration-[420ms] ease-out',
+        'fixed inset-0 z-[90] flex flex-col items-center justify-center overflow-hidden',
+        'bg-kasim-950',
+        'transition-opacity ease-out',
         leaving ? 'pointer-events-none opacity-0' : 'opacity-100',
       )}
+      style={{ transitionDuration: `${LEAVE_MS}ms` }}
       role="status"
       aria-live="polite"
-      aria-label={`${site.name} — loading`}
+      aria-label={`${site.name} — opening`}
     >
-      {/* The frame the drawing sits in: the same double rule as the panels
-          elsewhere on the site, so this is recognisably the same house. */}
-      <div className="relative w-[min(62vw,17rem)] max-w-full">
-        <div className="rounded-sm border border-foreground/12 p-2">
-          <div className="overflow-hidden rounded-[2px] border border-foreground/10 bg-cotton-50 dark:bg-cotton-100">
-            <GaneshaMark draw={draw} colour={colour} />
+      {/* ---- Act 1: the film ------------------------------------------- */}
+      {showFilm && (
+        <>
+          <video
+            ref={videoRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            // Muted is not a preference — it is the condition under which a
+            // browser will autoplay at all.
+            muted
+            playsInline
+            disablePictureInPicture
+            preload="auto"
+            aria-hidden="true"
+            onEnded={settleVideo}
+            // A file that cannot be decoded or fetched must not strand anyone.
+            onError={settleVideo}
+            onStalled={settleVideo}
+          >
+            <source src={VIDEO_SRC} type="video/mp4" />
+          </video>
+
+          {/* A vignette, so the skip control keeps its contrast over whatever
+              frame happens to be under it. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-t from-kasim-950/70 via-transparent to-kasim-950/40"
+          />
+
+          {/*
+            WCAG 2.2.2. The film starts on its own and runs well past five
+            seconds, so there has to be a way out of it that is not the back
+            button. It is quiet, but it is real, and it is focusable first.
+          */}
+          <button
+            type="button"
+            onClick={settleVideo}
+            className="absolute bottom-7 right-6 z-10 flex h-11 items-center rounded-sm border border-cotton-100/25 bg-kasim-950/40 px-4 font-inscription text-[0.6875rem] uppercase tracking-[0.22em] text-cotton-100/85 backdrop-blur-sm transition-colors hover:border-cotton-100/50 hover:text-cotton-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cotton-100 focus-visible:ring-offset-2 focus-visible:ring-offset-kasim-950"
+          >
+            Skip
+          </button>
+        </>
+      )}
+
+      {/* ---- Reduced motion: the finished frame, standing in for the film -- */}
+      {reduced && (
+        <div className="relative w-[min(52vw,13rem)] max-w-full">
+          <div className="rounded-sm border border-cotton-100/15 p-2">
+            <div className="overflow-hidden rounded-[2px] border border-cotton-100/10 bg-cotton-100">
+              <GaneshaMark draw={1} colour={1} />
+            </div>
           </div>
         </div>
+      )}
 
-        {/*
-          The nib. It rides the drawing progress along the frame's edge, so
-          there is visibly a pen doing the work rather than lines appearing.
-          Hidden once the drawing is finished and the pots take over.
-        */}
-        {!reduced && draw > 0.02 && draw < 0.99 && (
+      {/* ---- Act 2: the name ------------------------------------------- */}
+      {!showFilm && (
+        <div
+          className={cn(
+            'relative w-[min(90vw,42rem)] px-4 text-center',
+            reduced ? 'mt-8' : 'motion-safe:animate-name-arrive',
+          )}
+        >
+          <p className="font-display text-[2rem] font-semibold leading-[1.04] tracking-[-0.014em] text-cotton-50 sm:text-[2.9rem] md:text-[3.6rem]">
+            <span className="block">Sri Vijaya Lakshmi</span>
+            <span className="mt-1 block text-chay-300">Fine Kalamkari Arts</span>
+          </p>
+
+          {/* The rule the pen leaves under the name, drawn rather than placed:
+              it grows outward from the centre as the name settles. */}
           <span
             aria-hidden="true"
-            className="absolute -left-1 h-6 w-[2px] rounded-full bg-kasim-900 dark:bg-cotton-200"
+            className={cn(
+              'mx-auto mt-5 block h-[2px] w-full max-w-[26rem] origin-center',
+              !reduced && 'motion-safe:animate-rule-draw',
+            )}
             style={{
-              top: `${6 + draw * 84}%`,
-              boxShadow: '0 0 10px 2px hsl(var(--primary) / 0.35)',
+              backgroundImage:
+                'linear-gradient(to right, transparent, hsl(var(--gold) / 0.9) 18%, hsl(var(--gold) / 0.9) 82%, transparent)',
             }}
           />
-        )}
-      </div>
 
-      {/* ---- The wordmark, written rather than placed --------------------- */}
-      <div
-        className="mt-8 w-[min(88vw,34rem)] text-center"
-        style={{
-          opacity: wordmark,
-          transform: `translateY(${(1 - wordmark) * 10}px)`,
-          transition: reduced ? 'none' : 'opacity 300ms linear, transform 300ms ease-out',
-        }}
-      >
-        <BambooWordmark progress={wordmark} />
-
-        <p className="mt-3 font-inscription text-[0.625rem] uppercase tracking-[0.3em] text-muted-foreground sm:text-[0.6875rem]">
-          {site.location.town} · {site.location.state}
-        </p>
-      </div>
-
-      {/* Progress, as a drawn rule rather than a bar. */}
-      <div className="mt-7 h-px w-[min(70vw,16rem)] overflow-hidden bg-foreground/10">
-        <span
-          className="block h-full bg-primary"
-          style={{ width: `${progress * 100}%`, transition: 'width 120ms linear' }}
-        />
-      </div>
+          <p className="mt-4 font-inscription text-[0.6875rem] uppercase tracking-[0.32em] text-cotton-200/70 sm:text-[0.75rem]">
+            {site.location.town} · {site.location.state}
+          </p>
+        </div>
+      )}
 
       <p className="sr-only">Loading {site.name}</p>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* The wordmark                                                               */
-/* -------------------------------------------------------------------------- */
-
-/**
- * The store's name, set as if drawn with the kalam.
- *
- * A bamboo pen makes a stroke that swells where the hand slows and thins where
- * it lifts, so the two lines are set in the display face with a heavy optical
- * weight, a drawn rule under them that grows as the name arrives, and the
- * madder-red serif accent the rest of the site uses for the second clause of a
- * heading. It is type, not an image: it stays sharp, it is selectable, and a
- * screen reader gets the name rather than nothing.
- */
-function BambooWordmark({ progress }: { progress: number }) {
-  return (
-    <div>
-      <p className="font-display text-[1.6rem] font-semibold leading-[1.06] tracking-[-0.012em] sm:text-[2.1rem] md:text-[2.5rem]">
-        <span className="block">Sri Vijaya Lakshmi</span>
-        <span className="mt-0.5 block text-primary">Fine Kalamkari Arts</span>
-      </p>
-
-      {/* The rule the pen leaves under the name. Grows with the wordmark, and
-          tapers at both ends the way a real stroke lifts off the cloth. */}
-      <span
-        aria-hidden="true"
-        className="mx-auto mt-3 block h-[2px]"
-        style={{
-          width: `${Math.round(progress * 100)}%`,
-          maxWidth: '100%',
-          backgroundImage:
-            'linear-gradient(to right, transparent, hsl(var(--primary) / 0.85) 18%, hsl(var(--primary) / 0.85) 82%, transparent)',
-        }}
-      />
     </div>
   );
 }

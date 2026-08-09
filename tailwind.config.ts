@@ -111,6 +111,21 @@ const config: Config = {
           900: '#544736',
         },
 
+        /**
+         * Gold — struck from myrobalan, and the site's one *pointing* colour.
+         *
+         * It is deliberately not in the 60-30-10 body of the page. Madder does
+         * the 10%; gold sits outside the scheme entirely and is spent only on
+         * things that single something out for the visitor right now: the quick
+         * tour's ring, the rule under the name in the opening, the active mark
+         * in a sub-navigation. Using it anywhere decorative would cost it the
+         * only property that makes it useful.
+         */
+        gold: {
+          DEFAULT: 'hsl(var(--gold))',
+          foreground: 'hsl(var(--gold-foreground))',
+        },
+
         // shadcn/ui token surface, mapped onto the dye palette above.
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -212,10 +227,46 @@ const config: Config = {
           '100%': { transform: 'translateX(100%)' },
         },
         // The quick tour's ring, breathing. Slow enough to read as attention
-        // rather than as an alarm.
+        // rather than as an alarm. Struck in gold rather than madder: madder is
+        // the site's primary and is already on every heading and price, so a
+        // madder ring reads as part of the page instead of as a pointer at it.
         'tour-pulse': {
-          '0%, 100%': { outlineColor: 'hsl(var(--primary) / 0.9)' },
-          '50%': { outlineColor: 'hsl(var(--primary) / 0.35)' },
+          '0%, 100%': { outlineColor: 'hsl(var(--gold) / 0.95)' },
+          '50%': { outlineColor: 'hsl(var(--gold) / 0.4)' },
+        },
+        // The preloader's name, arriving out of a slow cinematic push-in. The
+        // scale is small on purpose: a big zoom is a title sequence, a small one
+        // is a camera settling.
+        'name-arrive': {
+          from: { opacity: '0', transform: 'scale(1.12)', filter: 'blur(6px)' },
+          '60%': { opacity: '1' },
+          to: { opacity: '1', transform: 'scale(1)', filter: 'blur(0px)' },
+        },
+        // The rule under the name, drawn outward from the centre.
+        'rule-draw': {
+          from: { transform: 'scaleX(0)' },
+          to: { transform: 'scaleX(1)' },
+        },
+        /**
+         * The wordmark's pen, re-laying its line every couple of seconds.
+         *
+         * The *stroke* moves, never the letters. Animating the name itself —
+         * a sheen across the glyphs, a colour cycle, a breath of scale — buys
+         * a moment of interest at the cost of the one thing a wordmark has to
+         * do, which is sit still and be read. So the ornament carries all of
+         * it: the line the kalam leaves is drawn on, held, and lifted, and the
+         * name underneath never changes weight or colour.
+         *
+         * Two thirds of the cycle is the rest between passes. Continuous
+         * movement in a fixed header is a distraction; a mark that happens and
+         * then stops is a detail somebody notices once and then stops seeing.
+         */
+        'kalam-trail': {
+          '0%': { strokeDashoffset: '48', opacity: '0' },
+          '18%': { opacity: '0.55' },
+          '46%': { strokeDashoffset: '0', opacity: '0.55' },
+          '66%': { strokeDashoffset: '0', opacity: '0.55' },
+          '86%, 100%': { strokeDashoffset: '0', opacity: '0' },
         },
         // The announcement bar. Translated rather than animating `left`, so it
         // stays on the compositor.
@@ -232,6 +283,9 @@ const config: Config = {
         'rise-in': 'rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         shimmer: 'shimmer 1.8s infinite',
         'tour-pulse': 'tour-pulse 2.4s ease-in-out infinite',
+        'name-arrive': 'name-arrive 1.5s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'rule-draw': 'rule-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both',
+        'kalam-trail': 'kalam-trail 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite',
         marquee: 'marquee var(--marquee-duration, 42s) linear infinite',
       },
     },

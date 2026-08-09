@@ -23,13 +23,27 @@ export function Wordmark({ compact = false }: { compact?: boolean }) {
           strokeLinejoin="round"
         />
         <path d="M14.9 6.3l2.8 2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-        {/* The line it leaves. */}
+        {/*
+          The line it leaves — the one moving thing in the header.
+
+          It re-draws roughly every two seconds and then lifts, so the mark
+          reads as a pen still working rather than as a logo. The animation is
+          confined to this path: the name beside it never changes weight,
+          colour or position, so nothing a visitor is reading moves.
+
+          `motion-safe:` is doing real work here rather than decorating the
+          class list — under reduced motion the path simply renders at its
+          resting opacity, complete, exactly as it did before.
+        */}
         <path
           d="M3.4 21c2.6-1.5 5.2-1.5 7.8 0s5.2 1.5 7.8 0"
           stroke="currentColor"
           strokeWidth="1.4"
           strokeLinecap="round"
           opacity="0.55"
+          pathLength="48"
+          strokeDasharray="48"
+          className="motion-safe:animate-kalam-trail"
         />
       </svg>
 

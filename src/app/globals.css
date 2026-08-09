@@ -32,6 +32,11 @@
     --destructive: 0 62% 40%;
     --destructive-foreground: 42 60% 97%;
 
+    /* Gold, struck from myrobalan. Not part of the 60-30-10 scheme — it is
+       reserved for whatever is being pointed at right now. See tailwind.config. */
+    --gold: 39 63% 42%;
+    --gold-foreground: 42 60% 97%;
+
     --border: 38 22% 82%;
     --input: 38 22% 80%;
     --ring: 8 61% 34%;
@@ -64,6 +69,10 @@
 
     --destructive: 0 55% 48%;
     --destructive-foreground: 40 30% 92%;
+
+    /* Gold lifts in the dark for the same reason madder does. */
+    --gold: 44 71% 62%;
+    --gold-foreground: 30 12% 8%;
 
     --border: 30 8% 22%;
     --input: 30 8% 24%;
@@ -158,12 +167,22 @@
     and cannot be clipped by an ancestor's overflow — several of the targets
     live inside scrolling rails. It sits outside the element rather than
     inside it, so nothing shifts when it appears.
+
+    Struck in gold, not in madder. Madder is the site's primary: it is already
+    on every heading, every price and every link, so a madder ring reads as
+    more of the page rather than as a finger pointing at one part of it. Gold
+    appears nowhere else in the running design, which is precisely what makes
+    it legible as "this, now". The wash behind it lifts the target off the
+    surrounding page without hiding anything.
   */
   [data-tour-active] {
     position: relative;
-    outline: 2px solid hsl(var(--primary));
+    outline: 2px solid hsl(var(--gold));
     outline-offset: 4px;
     border-radius: calc(var(--radius) - 2px);
+    box-shadow:
+      0 0 0 6px hsl(var(--gold) / 0.14),
+      0 12px 40px -12px hsl(var(--gold) / 0.5);
     animation: tour-pulse 2.4s ease-in-out infinite;
   }
 
