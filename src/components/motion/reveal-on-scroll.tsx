@@ -21,7 +21,7 @@ export function RevealOnScroll({
   className,
   delay = 0,
   /** Distance travelled, in px. Kept small — this is punctuation, not a stunt. */
-  distance = 16,
+  distance = 20,
   as: Tag = 'div',
 }: {
   children: React.ReactNode;
@@ -43,16 +43,28 @@ export function RevealOnScroll({
     const rect = el.getBoundingClientRect();
     if (rect.top < window.innerHeight * 0.92) return;
 
+    /*
+      A rise and a very slight settle.
+
+      The scale is 0.988 — small enough that nobody can name it and large
+      enough that the block reads as arriving rather than as appearing. It
+      matters most on a phone, where the page is a single stacked column and a
+      pure fade at twenty pixels is easy to scroll straight past without the
+      eye registering that a new section has started. Anything more than a
+      percent and a half turns a page of a dozen of these into a slideshow.
+    */
     el.style.opacity = '0';
-    el.style.transform = `translateY(${distance}px)`;
-    el.style.transition = `opacity 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s`;
+    el.style.transform = `translateY(${distance}px) scale(0.988)`;
+    el.style.transition =
+      `opacity 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s, ` +
+      `transform 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s`;
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
+          el.style.transform = 'translateY(0) scale(1)';
           observer.disconnect();
         }
       },

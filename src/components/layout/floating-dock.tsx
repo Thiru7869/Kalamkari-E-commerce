@@ -29,20 +29,32 @@ const StoreAssistant = dynamic(
 );
 
 /**
- * Routes where a floating chat launcher would be in the way, not helpful.
+ * The only place the assistant does not appear.
  *
- * Back-to-top is not suppressed anywhere: an admin order list and a checkout
- * are both long enough to need it, and unlike the assistant it never covers
- * anything the visitor is trying to read.
+ * Admin is a different application wearing the same layout — a staff order
+ * list, not a page of the shop — and the assistant knows nothing about it. It
+ * would answer questions about sarees to somebody trying to refund one.
+ *
+ * Checkout used to be on this list, on the reasoning that a chat launcher
+ * interrupts a purchase. It is off it now: the questions that stop a checkout
+ * are "is this actually in stock", "how long will it take" and "can it ship
+ * there", and the assistant answers all three from the same notes the family
+ * wrote. Somewhere to ask at the moment of doubt is worth more than a clear
+ * corner, and the dock already yields on a phone the moment the visitor
+ * scrolls down.
+ *
+ * Back-to-top is not suppressed anywhere at all: every one of these pages is
+ * long enough to need it, and unlike the assistant it never covers anything.
  */
-const ASSISTANT_SUPPRESSED = ['/admin', '/checkout'];
+const ASSISTANT_SUPPRESSED = ['/admin'];
 
 /**
  * Where the next step is a conversation rather than a purchase.
  *
- * On these four the WhatsApp button replaces the chat launcher rather than
- * joining it — two ways to start the same conversation, stacked in the same
- * corner, is how a page ends up with two floating buttons on top of each other.
+ * WhatsApp *joins* the assistant on these rather than replacing it. They are
+ * two different offers — one reaches the family, the other answers now — and
+ * the column below stacks them with a gap, so the old worry about two floating
+ * buttons landing on top of each other does not apply to a flex column.
  */
 const WHATSAPP_ROUTES = ['/journal', '/contact', '/custom'];
 
@@ -53,8 +65,7 @@ export function FloatingDock() {
   const isCompact = useMediaQuery('(max-width: 767px)');
 
   const wantsWhatsApp = WHATSAPP_ROUTES.some((prefix) => pathname.startsWith(prefix));
-  const assistantSuppressed =
-    wantsWhatsApp || ASSISTANT_SUPPRESSED.some((prefix) => pathname.startsWith(prefix));
+  const assistantSuppressed = ASSISTANT_SUPPRESSED.some((prefix) => pathname.startsWith(prefix));
 
   /*
     On a phone the tab bar already occupies the bottom of the screen

@@ -108,9 +108,21 @@ export function QuickTour({ onClose }: { onClose: () => void }) {
         'motion-safe:animate-rise-in',
       )}
     >
-      <div className="overflow-hidden rounded-sm border border-border bg-background shadow-[0_28px_70px_-30px_rgb(0_0_0/0.7)]">
+      {/*
+        The card is struck in the same gold as the ring it is pointing with.
+
+        Without that they are two unrelated pieces of chrome that happen to be
+        on screen together, and the reader has to work out which highlighted
+        thing this panel is talking about. One colour, used in one place, for
+        one purpose: the ring says "this", the card says what "this" is.
+      */}
+      <div className="overflow-hidden rounded-sm border border-gold/45 bg-background shadow-[0_28px_70px_-30px_rgb(0_0_0/0.7)]">
         {/* Head */}
-        <div className="flex items-center gap-2 border-b border-border bg-muted/50 px-4 py-2.5">
+        <div className="flex items-center gap-2 border-b border-gold/30 bg-gold/[0.10] px-4 py-2.5">
+          <span
+            aria-hidden="true"
+            className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold"
+          />
           <span className="tabular font-inscription text-[0.625rem] uppercase tracking-[0.18em] text-muted-foreground">
             A quick look · {index + 1} of {total}
           </span>
