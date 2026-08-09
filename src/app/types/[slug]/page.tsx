@@ -9,6 +9,9 @@ import { NarrativeNote } from '@/components/shop/narrative-note';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { KnowMore } from '@/components/ui/know-more';
 import { Button } from '@/components/ui/button';
+import { TypeBanner, type BannerSlide } from '@/components/shop/type-banner';
+import { ClothSubnav, type ClothLink } from '@/components/shop/cloth-subnav';
+import { primaryImage } from '@/lib/serialize';
 import {
   getTypeVarieties,
   getTypeMotifs,
@@ -87,6 +90,41 @@ export default async function TypePage({ params }: { params: Params }) {
   const narrative = motifs.filter((m) => isNarrativeMotif(m.slug));
   const otherMotifs = motifs.filter((m) => !isNarrativeMotif(m.slug));
 
+  /*
+    The banner.
+
+    The opening frame is the category's own photograph — the one image here
+    that is about the kind of thing rather than about one piece. Everything
+    after it is a piece currently in the store, captioned and linked, so the
+    carousel is a window onto the stock rather than an ornament above it. With
+    nothing finished in this category the banner is that single frame, which
+    is the honest state and not a broken carousel.
+  */
+  const bannerSlides: BannerSlide[] = [
+    {
+      src: `/images/products/hero-${type.category}.jpg`,
+      alt: `Hand-painted Kalamkari ${type.label.toLowerCase()} from the workshop in ${site.location.town}.`,
+    },
+    ...items.slice(0, 5).map((product) => ({
+      src: primaryImage(product.images),
+      alt: product.name,
+      caption: product.name,
+      href: `/product/${product.slug}`,
+    })),
+  ];
+
+  /* The cloth rail: every variety this category actually holds, in the order
+     the type wants its families, with live counts. */
+  const clothGroups = families.map((family) => ({
+    family,
+    cloths: (varieties.get(family) ?? []).map<ClothLink>((fabric) => ({
+      slug: fabric.slug,
+      name: fabric.name,
+      count: fabric._count.products,
+      family,
+    })),
+  }));
+
   return (
     <>
       {/* ------------------------------------------------------------------ */}
@@ -98,6 +136,11 @@ export default async function TypePage({ params }: { params: Params }) {
             trail={[{ label: 'Shop', href: '/shop' }, { label: type.label }]}
             className="mb-6"
           />
+
+          {/* The banner sits above the heading rather than beside it: these
+              pages are most often arrived at from a search engine, and the
+              first thing that should happen is seeing the work. */}
+          <TypeBanner slides={bannerSlides} className="mb-10" />
 
           <div className="max-w-3xl">
             <p className="eyebrow">{type.eyebrow}</p>
@@ -155,6 +198,14 @@ export default async function TypePage({ params }: { params: Params }) {
         </div>
       </header>
 
+      {/* Every cloth this category actually holds, one tap from the top.
+          Kalamkari is chosen by cloth more often than by anything else. */}
+      <ClothSubnav
+        category={type.category}
+        groups={clothGroups}
+        familyLabels={FAMILY_LABELS}
+      />
+
       {/* ------------------------------------------------------------------ */}
       {/* What this kind of piece is                                          */}
       {/* ------------------------------------------------------------------ */}
@@ -180,6 +231,19 @@ export default async function TypePage({ params }: { params: Params }) {
                   <p key={i} className="leading-relaxed text-muted-foreground">
                     {para}
                   </p>
+                ))}
+
+                {/* The two questions that actually follow "what is this" for
+                    each kind of piece — usually what it costs and why, and
+                    what living with it is like. Behind the same disclosure,
+                    so the default view stays skimmable. */}
+                {type.deepDive.map((section) => (
+                  <section key={section.title} className="mt-2">
+                    <h3 className="font-display text-lg leading-snug">{section.title}</h3>
+                    <p className="mt-2 leading-relaxed text-muted-foreground">
+                      {section.body}
+                    </p>
+                  </section>
                 ))}
               </KnowMore>
             </RevealOnScroll>

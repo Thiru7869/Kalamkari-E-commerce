@@ -51,7 +51,14 @@ export function WorkshopVideo({
         className,
       )}
     >
-      <div className="relative aspect-video w-full">
+      {/*
+        Not 16:9. The frame stands in a side column beside a headline and two
+        paragraphs, and a widescreen crop there is a 200px-tall letterbox with
+        a stack of empty banner above it. Squarer from `lg` up fills the column
+        it was given; 16:10 on a phone, where it is full width and a taller
+        crop would push the first chapter off the screen.
+      */}
+      <div className="relative aspect-[16/10] w-full lg:aspect-[4/3]">
         {src ? (
           <>
             <video
@@ -89,7 +96,7 @@ export function WorkshopVideo({
               src={poster}
               alt={`The workshop in ${site.location.town}`}
               fill
-              sizes="(min-width: 1024px) 28vw, 80vw"
+              sizes="(min-width: 1280px) 30rem, (min-width: 1024px) 24rem, 92vw"
               className="object-cover opacity-80"
             />
             <div

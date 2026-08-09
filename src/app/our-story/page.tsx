@@ -68,7 +68,7 @@ export default function OurStoryPage() {
           className="object-cover opacity-25"
         />
         <div className="container relative">
-          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-end lg:gap-12">
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-end lg:gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:gap-16">
             <div>
               <p className="eyebrow text-cotton-200/70">
                 {site.location.town} · {site.location.state}
@@ -84,8 +84,17 @@ export default function OurStoryPage() {
               </p>
             </div>
 
-            {/* Set to the right and kept modest — background to the section
-                rather than the subject of it. Nothing autoplays. */}
+            {/*
+              Set to the right of the heading — background to the section
+              rather than the subject of it. Nothing autoplays.
+
+              Still secondary, no longer marooned. A 16:9 frame in a 22rem
+              column is about 200px tall standing next to a headline and two
+              paragraphs, which left a column of empty banner above it that
+              read as a layout fault rather than as restraint. It is wider now
+              and, more importantly, less letterboxed — see the aspect note in
+              WorkshopVideo.
+            */}
             <WorkshopVideo poster="/images/store/store-wide.jpg" className="mt-10 lg:mt-0" />
           </div>
         </div>
