@@ -38,7 +38,7 @@ export default function ProcessPage() {
           {/* The heading and the household, side by side. The collage fills the
               space the heading leaves at the top right on wide screens, and
               drops under it below lg rather than shrinking to nothing. */}
-          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start lg:gap-12 xl:gap-16">
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)] lg:items-start lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-14">
           <div className="max-w-3xl">
             <Breadcrumbs trail={[{ label: 'The process' }]} className="mb-6" />
             <p className="eyebrow">The making of a Kalamkari saree</p>

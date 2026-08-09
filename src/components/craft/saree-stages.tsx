@@ -122,6 +122,17 @@ export type JourneyStage = {
   title: string;
   /** The real step numbers, of twenty-three, that this stage covers. */
   steps: string;
+  /**
+   * The first of those steps, as a number.
+   *
+   * Held separately from `steps` rather than parsed back out of it. `steps` is
+   * display copy — it says "Step 1" or "Steps 9–11" with an en dash — and the
+   * process page uses this value to scroll the article to the matching
+   * paragraph when the reader steps the frame by hand. Deriving a scroll
+   * target by parsing prose works right up until somebody writes "Steps 9 and
+   * 11", at which point the page quietly jumps to the wrong chapter.
+   */
+  startsAtStep: number;
   /** One line, shown under the frame. Longer prose lives in the phase text. */
   caption: string;
   layers: ClothLayers;
@@ -151,6 +162,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Loom',
     title: 'Off the loom',
     steps: 'Step 1',
+    startsAtStep: 1,
     caption: 'Stiff with mill starch. It repels dye and drinks ink — nothing can be done to it yet.',
     layers: { ...NONE },
   },
@@ -159,6 +171,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Washed',
     title: 'Beaten at the river',
     steps: 'Steps 2–3',
+    startsAtStep: 2,
     caption: 'Washed against stone in the Swarnamukhi until the water runs clear, then dried on sand.',
     layers: { ...NONE },
   },
@@ -167,6 +180,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Myrobalan',
     title: 'Myrobalan and buffalo milk',
     steps: 'Steps 4–5',
+    startsAtStep: 4,
     caption: 'The ground turns cream. That colour is the nut, not a dye — and the tannin now waiting in the fibre is what will later turn black.',
     layers: { ...NONE, prepared: true },
   },
@@ -175,6 +189,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Burnished',
     title: 'Smoothed over stone',
     steps: 'Step 6',
+    startsAtStep: 6,
     caption: 'Raised fibres flattened. A pen dragged across an unsmoothed cloth catches and skips.',
     layers: { ...NONE, prepared: true },
   },
@@ -183,6 +198,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Charcoal',
     title: 'The story set out in charcoal',
     steps: 'Steps 7–8',
+    startsAtStep: 7,
     caption: 'Burnt tamarind twigs. Several days of decisions on a nine-yard cloth, with nothing undoable.',
     layers: { ...NONE, prepared: true, drawn: true },
   },
@@ -191,6 +207,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Kasim',
     title: 'The iron liquor strikes',
     steps: 'Steps 9–11',
+    startsAtStep: 9,
     caption: 'A pale brown liquid drawn with a bamboo kalam turns black in the cloth, not in the pot.',
     layers: { ...NONE, prepared: true, drawn: true, blackened: true },
   },
@@ -199,6 +216,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Washed',
     title: 'The charcoal washed away',
     steps: 'Step 12',
+    startsAtStep: 12,
     caption: 'Everything that did not bind goes downstream. A finished black drawing on cream — and no other colour at all.',
     layers: { ...NONE, prepared: true, drawn: true, blackened: true },
   },
@@ -207,6 +225,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Alum',
     title: 'Painting in a colour you cannot see',
     steps: 'Steps 13–15',
+    startsAtStep: 13,
     caption: 'Every area that will be red is painted with clear alum. Days of work go down invisibly.',
     layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true },
   },
@@ -215,6 +234,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Madder',
     title: 'The bath where the red arrives',
     steps: 'Steps 16–17',
+    startsAtStep: 16,
     caption: 'Boiled in madder root. Colour binds only where the alum went, and washes out everywhere else.',
     layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true },
   },
@@ -223,6 +243,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Yellow',
     title: 'Myrobalan gold, painted on',
     steps: 'Steps 18–19',
+    startsAtStep: 18,
     caption: 'A soft mustard from flower and pomegranate rind, fixed by a day in the sun. Never a bright lemon.',
     layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true },
   },
@@ -231,6 +252,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Indigo',
     title: 'The one colour that is dipped',
     steps: 'Steps 20–21',
+    startsAtStep: 20,
     caption: 'Waxed, lowered into the vat, and blue as the air reaches it. Laid over the yellow it makes the green.',
     layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true, indigo: true },
   },
@@ -239,6 +261,7 @@ export const journeyStages: JourneyStage[] = [
     short: 'Sun',
     title: 'Twenty washings, and the river',
     steps: 'Steps 22–23',
+    startsAtStep: 22,
     caption: 'Most of them to take colour away rather than add it. The ground clears, the cloth softens, the piece is done.',
     layers: {
       prepared: true,

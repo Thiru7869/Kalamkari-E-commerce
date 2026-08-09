@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SareeCanvas, journeyStages, JOURNEY_COUNT } from '@/components/craft/saree-stages';
 import type { ProcessPhase, DyeTone } from '@/content/process';
+import { scrollTo } from '@/lib/smooth-scroll';
 import { cn } from '@/lib/utils';
 
 /**
@@ -54,6 +55,14 @@ export function ProcessJourney({
    */
   const [manual, setManual] = useState(false);
   const manualRef = useRef(false);
+  /**
+   * The current stage, readable from callbacks that must not re-subscribe.
+   *
+   * `stepTo` is handed to the frame and to the rail; if it closed over `stage`
+   * it would be a new function on every one of the twelve stage changes, and
+   * every consumer would re-render with it for no benefit.
+   */
+  const stageRef = useRef(0);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -114,6 +123,7 @@ export function ProcessJourney({
             JOURNEY_COUNT - 1,
             Math.floor(self.progress * JOURNEY_COUNT),
           );
+          stageRef.current = next;
           setStage((prev) => (prev === next ? prev : next));
         },
       });
@@ -166,6 +176,40 @@ export function ProcessJourney({
     return () => ctx.revert();
   }, [tones]);
 
+  /**
+   * Step the frame by hand, and bring the article with it.
+   *
+   * The frame and the prose are two views of one sequence, so moving one and
+   * leaving the other behind is a bug rather than a missing nicety: the reader
+   * clicks to stage nine, the caption says the madder bath, and the twelve
+   * paragraphs beside it are still describing charcoal.
+   *
+   * Scroll is taken out of the loop first (`manualRef`) and only then is the
+   * page moved. The order matters — the scroll this triggers would otherwise
+   * be read as the reader travelling and would immediately overwrite the very
+   * stage they just asked for.
+   */
+  const stepTo = useCallback((next: number) => {
+    const clamped = Math.max(0, Math.min(JOURNEY_COUNT - 1, next));
+    if (clamped === stageRef.current) return;
+
+    manualRef.current = true;
+    setManual(true);
+    setStage(clamped);
+    stageRef.current = clamped;
+
+    scrollTo(`#step-${journeyStages[clamped].startsAtStep}`);
+  }, []);
+
+  /** Hand the frame back to the page, from wherever the reader now is. */
+  const release = useCallback(() => {
+    manualRef.current = false;
+    setManual(false);
+    // Re-measure so the cloth snaps to the reader's actual position rather
+    // than resuming from whichever stage they had stepped to by hand.
+    ScrollTrigger.refresh();
+  }, []);
+
   const current = journeyStages[stage];
 
   return (
@@ -194,7 +238,7 @@ export function ProcessJourney({
       </div>
 
       <div className="container">
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:gap-16">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,35rem)] xl:gap-14">
           {/* ---------------------------------------------------------------- */}
           {/* Left: the reading                                                */}
           {/* ---------------------------------------------------------------- */}
@@ -294,10 +338,14 @@ export function ProcessJourney({
           {/* ---------------------------------------------------------------- */}
           {/* Right: the cloth, framed and sticky                              */}
           {/* ---------------------------------------------------------------- */}
-          <aside
-            className="sticky top-24 hidden h-fit py-16 lg:block"
-            aria-hidden="true"
-          >
+          {/*
+            No longer `aria-hidden`. The frame's controls now move the article
+            itself, which makes them navigation rather than decoration — and a
+            control that relocates the reader must be reachable by keyboard and
+            announced. The canvas inside it stays hidden; the drawing carries
+            no information the prose does not.
+          */}
+          <aside className="sticky top-20 hidden h-fit py-10 lg:block">
             <ClothFrame
               stage={stage}
               ink={ink}
@@ -305,15 +353,8 @@ export function ProcessJourney({
               activePhase={activePhase}
               scrolling={scrolling}
               manual={manual}
-              onStep={(next) => {
-                manualRef.current = true;
-                setManual(true);
-                setStage(Math.max(0, Math.min(JOURNEY_COUNT - 1, next)));
-              }}
-              onRelease={() => {
-                manualRef.current = false;
-                setManual(false);
-              }}
+              onStep={stepTo}
+              onRelease={release}
             />
           </aside>
         </div>
@@ -431,8 +472,24 @@ function ClothFrame({
               'overflow-hidden rounded-[1px] border transition-colors duration-700',
               light ? 'border-cotton-100/25' : 'border-kasim-900/15',
             )}
+            // The drawing itself carries nothing the prose does not. The panel
+            // around it is no longer hidden wholesale — the controls in it are
+            // real navigation now — so the canvas opts out on its own.
+            aria-hidden="true"
           >
-            <div className="relative aspect-[46/60] w-full bg-cotton-100 dark:bg-kasim-800">
+            {/*
+              Sized from the *viewport height*, not from the column width.
+
+              The cloth is a tall portrait in a sticky panel, so width-driven
+              sizing is the wrong control: widening the column to enlarge the
+              drawing makes it taller faster than it makes it bigger, and past
+              a certain point the caption underneath is pushed below the fold
+              at the very moment the frame pins. Deriving the width from a
+              capped height instead means the frame grows on a large screen
+              and is guaranteed to fit on a short one, with the aspect ratio
+              intact in both cases.
+            */}
+            <div className="relative mx-auto aspect-[46/60] h-[min(58vh,32rem)] max-w-full bg-cotton-100 dark:bg-kasim-800 xl:h-[min(62vh,40rem)]">
               <SareeCanvas
                 stage={0}
                 layers={current.layers}
@@ -450,7 +507,11 @@ function ClothFrame({
           className={cn(control, 'left-5')}
         >
           <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-          <span className="sr-only">Previous stage of the cloth</span>
+          <span className="sr-only">
+            {stage === 0
+              ? 'Previous stage of the cloth'
+              : `Go to stage ${journeyStages[stage - 1].n}, ${journeyStages[stage - 1].title}`}
+          </span>
         </button>
 
         <button
@@ -460,7 +521,11 @@ function ClothFrame({
           className={cn(control, 'right-5')}
         >
           <ChevronRight className="h-5 w-5" aria-hidden="true" />
-          <span className="sr-only">Next stage of the cloth</span>
+          <span className="sr-only">
+            {stage === JOURNEY_COUNT - 1
+              ? 'Next stage of the cloth'
+              : `Go to stage ${journeyStages[stage + 1].n}, ${journeyStages[stage + 1].title}`}
+          </span>
         </button>
 
         {manual && (
@@ -482,7 +547,10 @@ function ClothFrame({
         )}
       </div>
 
-      <div className="mt-4 px-1">
+      {/* The caption repeats, word for word, what the live region above the
+          article already announces on every stage change. Exposing both would
+          read the same sentence twice. */}
+      <div className="mt-4 px-1" aria-hidden="true">
         <p
           className={cn(
             'tabular font-inscription text-[0.6875rem] uppercase tracking-[0.18em] transition-colors duration-700',

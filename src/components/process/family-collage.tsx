@@ -14,15 +14,32 @@ import { cn } from '@/lib/utils';
  * find out.
  *
  * The arrangement is the household's own: the two founders on the first row,
- * their three children on the second, each named. Off-white ground and
- * hairline rules rather than cards, so it reads as a plate in a book rather
- * than as a widget, and sits quietly beside the heading instead of competing
- * with it.
+ * their three children on the second. Off-white ground and hairline rules
+ * rather than cards, so it reads as a plate in a book rather than as a widget.
+ *
+ * **Everybody in the plate is named.** The founders' row used to be captionless
+ * on the grounds that five captions would crowd it, which quietly made the two
+ * people who started the workshop the only anonymous faces on a page about who
+ * does the work. The plate was given more room instead — the honest fix, since
+ * the problem was never the captions but the size.
  *
  * Sized to the space it is given: the two portraits are wider than tall, the
  * three below are square, and both rows share one gap so the grid is even at
  * every width.
  */
+
+/**
+ * How a member is captioned inside the plate.
+ *
+ * Given name only. Every one of the five carries an initial and a surname, and
+ * at plate width a full name wraps to two or three lines and the row stops
+ * being a row. The full name and the full role are on the portrait's `alt` and
+ * on /our-story, which is where somebody who wants them is going.
+ */
+function givenName(name: string) {
+  const parts = name.split(' ');
+  return parts.length > 1 ? parts.slice(1).join(' ') : name;
+}
 export function FamilyCollage({ className }: { className?: string }) {
   const founders = family.filter((m) => m.role === 'Founder');
   const children = family.filter((m) => m.role !== 'Founder');
@@ -34,35 +51,38 @@ export function FamilyCollage({ className }: { className?: string }) {
         className,
       )}
     >
-      <figcaption className="px-0.5 pb-3">
-        <p className="eyebrow text-[0.5625rem] md:text-[0.625rem]">The hands</p>
-        <p className="mt-1.5 font-display text-[0.9375rem] leading-snug md:text-base">
+      <figcaption className="px-0.5 pb-3.5">
+        <p className="eyebrow text-[0.625rem]">The hands</p>
+        <p className="mt-1.5 font-display text-base leading-snug md:text-lg">
           One household in {site.location.town}
         </p>
       </figcaption>
 
-      {/* Row one — the founders. Wider than tall, and unnamed here: they are
-          named in full on the story page, and two captions plus three below
-          would crowd a plate this size. */}
-      <div className="grid grid-cols-2 gap-2 md:gap-2.5">
+      {/* Row one — the two who started it. Wider than tall, and now named. */}
+      <div className="grid grid-cols-2 gap-2 md:gap-3">
         {founders.map((member) => (
-          <div
-            key={member.id}
-            className="relative aspect-[4/3] overflow-hidden rounded-[2px] bg-cotton-300"
-          >
-            <Image
-              src={member.image}
-              alt={`${member.name}, ${member.role.toLowerCase()}`}
-              fill
-              sizes="(min-width: 1024px) 12vw, 40vw"
-              className="object-cover"
-            />
+          <div key={member.id}>
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[2px] bg-cotton-300">
+              <Image
+                src={member.image}
+                alt={`${member.name}, ${member.role.toLowerCase()}`}
+                fill
+                sizes="(min-width: 1024px) 15vw, 45vw"
+                className="object-cover"
+              />
+            </div>
+            <p className="mt-2 text-center text-[0.6875rem] font-medium leading-tight md:text-xs">
+              {givenName(member.name)}
+              <span className="mt-0.5 block font-normal text-[0.625rem] uppercase tracking-[0.12em] text-muted-foreground">
+                {member.role}
+              </span>
+            </p>
           </div>
         ))}
       </div>
 
-      {/* Row two — the three who paint, named. */}
-      <div className="mt-2 grid grid-cols-3 gap-2 md:mt-2.5 md:gap-2.5">
+      {/* Row two — the three who paint. */}
+      <div className="mt-3 grid grid-cols-3 gap-2 md:mt-4 md:gap-3">
         {children.map((member) => (
           <div key={member.id}>
             <div className="relative aspect-square overflow-hidden rounded-[2px] bg-cotton-300">
@@ -70,14 +90,12 @@ export function FamilyCollage({ className }: { className?: string }) {
                 src={member.image}
                 alt={`${member.name}, ${member.role}`}
                 fill
-                sizes="(min-width: 1024px) 8vw, 28vw"
+                sizes="(min-width: 1024px) 10vw, 30vw"
                 className="object-cover"
               />
             </div>
-            <p className="mt-1.5 text-center text-[0.625rem] leading-tight text-muted-foreground md:text-[0.6875rem]">
-              {/* Given name only: three full names at this width wrap to three
-                  lines each and the row stops being a row. */}
-              {member.name.split(' ').slice(1).join(' ')}
+            <p className="mt-2 text-center text-[0.6875rem] font-medium leading-tight md:text-xs">
+              {givenName(member.name)}
             </p>
           </div>
         ))}
