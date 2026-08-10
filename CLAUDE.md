@@ -222,6 +222,45 @@ Two shapes account for most of it, and both were live here:
 Sections that genuinely need to clip a bleeding decoration carry
 `overflow-hidden` themselves, where the intent is local and visible.
 
+**A section that clips is a section that can hide a layout bug.** The hero
+carried `overflow-hidden` for its 3D canvas, and behind it the banner's six
+tick labels — `flex-1` with `min-width: auto`, each holding a `truncate`
+(therefore `nowrap`) label — held a combined min-content of 456px against a
+350px column. The document measured clean and nothing scrolled sideways. What
+actually happened was that 86px of the headline and body copy were clipped, so
+every line of the hero paragraph lost its last few letters, and two of the six
+ticks were laid out past the right edge where nobody could reach them.
+
+So there are two failures to look for, not one, and
+
+```bash
+npm run audit:layout          # dev server or `npm start` must be running
+```
+
+checks both across every important route at 320/375/390/430px: documents that
+scroll sideways, and elements that clip their own text. It excludes `sr-only`
+(a 1×1 box hiding a sentence is the point) and anything with
+`text-overflow: ellipsis` (clipping *with* a mark is a decision; clipping
+silently is the bug). It exits non-zero, so it can gate a build.
+
+## `cn()` and the custom font sizes
+
+**Every custom key in `theme.extend.fontSize` must also be listed in
+`extendTailwindMerge` in `src/lib/utils.ts`.**
+
+tailwind-merge resolves conflicts by class *group*, and `text-*` is two groups
+sharing a prefix: `font-size` and `text-color`. It tells them apart from a list
+of known size keys — the stock Tailwind scale, which has never heard of
+`display-xl`. So `cn('text-display-xl', 'text-cotton-50')` filed the size as a
+colour, found a conflict, and returned only `text-cotton-50`.
+
+It fails silently and only through `cn()`. A plain
+`className="text-display-xl text-cotton-50"` string is never merged and renders
+correctly, which is why it survived: it appears only where a component merges a
+caller's classes. The symptom is a heading quietly inheriting 16px — the home
+page `h1` and the `two-crafts` `h2` were both rendering *smaller than the body
+copy underneath them*. `src/lib/utils.test.ts` pins every key.
+
 ## Accessibility
 
 Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
@@ -283,6 +322,7 @@ npm test
 npm run build
 npm start          # one terminal
 npm run smoke      # another
+npm run audit:layout
 ```
 
 CI runs exactly this. The smoke test exists because two real bugs passed
