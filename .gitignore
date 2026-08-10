@@ -13,10 +13,13 @@ next-env.d.ts
 dist/
 
 # environment — never commit real keys
+# Everything named .env* is ignored, then .env.example is exempted back in.
+# The blanket rule matters more than the specific ones: .env.development,
+# .env.staging and an ad-hoc .env.render are each one `git add .` away from
+# putting a live database password in the history.
 .env
-.env.local
-.env.production
-.env*.local
+.env.*
+!.env.example
 
 # database
 *.db
