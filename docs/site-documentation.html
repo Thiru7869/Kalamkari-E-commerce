@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<title>Sri Vijaya Lakshmi Fine Kalamkari Arts — Site Documentation</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+
+  :root {
+    --chay:      #8E2F22;
+    --chay-400:  #C66857;
+    --indigo:    #2C4268;
+    --myro:      #B9862A;
+    --kasim:     #22201D;
+    --kasim-500: #615C54;
+    --cotton:    #FAF6EC;
+    --cotton-300:#EBE0CD;
+    --pachcha:   #526138;
+    --geru:      #AC5F39;
+    --rule:      #D9CDB8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: "Segoe UI", Calibri, system-ui, sans-serif;
+    color: var(--kasim);
+    font-size: 9.6pt;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  h1, h2, h3, h4 { font-family: Cambria, Georgia, serif; font-weight: 600; }
+
+  h1 { font-size: 26pt; line-height: 1.1; margin: 0 0 4pt; letter-spacing: -0.01em; }
+  h2 {
+    font-size: 15pt; margin: 22pt 0 7pt; padding-bottom: 3pt;
+    border-bottom: 1.5pt solid var(--chay); color: var(--chay);
+    break-after: avoid;
+  }
+  h3 { font-size: 11pt; margin: 13pt 0 4pt; color: var(--indigo); break-after: avoid; }
+  h4 { font-size: 9.6pt; margin: 9pt 0 3pt; color: var(--kasim-500); break-after: avoid; }
+
+  p { margin: 0 0 6pt; }
+  ul, ol { margin: 0 0 7pt; padding-left: 15pt; }
+  li { margin-bottom: 2.5pt; }
+
+  code, .mono {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 8.4pt;
+    background: #F3EEE3;
+    padding: 0.5pt 2.5pt;
+    border-radius: 2pt;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 5pt 0 9pt; font-size: 8.6pt; }
+  th, td { border: 0.5pt solid var(--rule); padding: 3.2pt 5pt; text-align: left; vertical-align: top; }
+  th { background: #F3EEE3; font-weight: 600; }
+  td.num, th.num { text-align: right; font-family: Consolas, monospace; }
+
+  .cover {
+    border-left: 3pt solid var(--chay);
+    padding-left: 11pt;
+    margin-bottom: 16pt;
+  }
+  .cover .sub { font-family: Cambria, Georgia, serif; font-size: 12pt; font-style: italic; color: var(--kasim-500); }
+  .meta { font-size: 8.2pt; color: var(--kasim-500); margin-top: 7pt; }
+
+  .callout {
+    border-left: 2.5pt solid var(--indigo);
+    background: #F4F6F9;
+    padding: 6pt 9pt;
+    margin: 7pt 0 9pt;
+    break-inside: avoid;
+  }
+  .callout.warn { border-left-color: var(--geru); background: #FBF3EE; }
+  .callout.good { border-left-color: var(--pachcha); background: #F2F5EC; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .swatch-grid { display: flex; flex-wrap: wrap; gap: 3pt; margin: 4pt 0 8pt; }
+  .swatch { width: 47pt; break-inside: avoid; }
+  .swatch .chip { height: 24pt; border: 0.4pt solid rgba(0,0,0,0.16); border-radius: 2pt; }
+  .swatch .hex { font-family: Consolas, monospace; font-size: 6.4pt; display: block; margin-top: 1.5pt; }
+  .swatch .step { font-size: 6.4pt; color: var(--kasim-500); }
+
+  figure { margin: 0 0 9pt; break-inside: avoid; }
+  figure img { width: 100%; border: 0.5pt solid var(--rule); border-radius: 2pt; display: block; }
+  figcaption { font-size: 7.8pt; color: var(--kasim-500); margin-top: 3pt; }
+  .shots { display: flex; gap: 8pt; align-items: flex-start; }
+  .shots figure { flex: 1; }
+
+  .page-break { break-before: page; }
+  .avoid-break { break-inside: avoid; }
+
+  .before-after td:nth-child(2) { color: #8A3B2E; }
+  .before-after td:nth-child(3) { color: #3F5230; }
+
+  .tag {
+    display: inline-block; font-size: 7pt; text-transform: uppercase;
+    letter-spacing: 0.08em; padding: 1pt 4pt; border-radius: 2pt;
+    background: var(--pachcha); color: #fff; vertical-align: 1.5pt;
+  }
+  .tag.open { background: var(--geru); }
+  footer.note { margin-top: 14pt; padding-top: 6pt; border-top: 0.5pt solid var(--rule); font-size: 8pt; color: var(--kasim-500); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Sri Vijaya Lakshmi Fine&nbsp;Kalamkari&nbsp;Arts</h1>
+  <div class="sub">Front-end remediation and polish — engineering documentation</div>
+  <div class="meta">
+    Repository <span class="mono">Thiru7869/Kalamkari-E-commerce</span> · branch <span class="mono">master</span><br>
+    Next.js 15.5 · React 19 · Tailwind 3.4 · Prisma 6 · PostgreSQL · Vercel<br>
+    Commits <span class="mono">e8b390c</span> · <span class="mono">627116f</span> · <span class="mono">b206bba</span> · <span class="mono">1501592</span>
+  </div>
+</div>
+
+<h2>1 · What this site is</h2>
+
+<p>A storefront and long-form editorial site for a family workshop in Srikalahasti, Andhra Pradesh, that
+paints Srikalahasti Kalamkari entirely by hand — bamboo <em>kalam</em>, fermented iron black, madder red,
+vat indigo. The site's commercial job is to sell one-of-one pieces. Its rhetorical job is harder and more
+important: to establish, before anything is sold, that this is <em>not</em> the block- or screen-printed
+cloth the word "Kalamkari" now usually refers to in a marketplace listing.</p>
+
+<p>That single claim shapes the architecture. The 23-step process page, the hand-versus-printed comparison,
+the dye index and the family chapters are not marketing decoration; they are the evidence for the claim, and
+the site is largely built to carry them. This work was therefore done as remediation and refinement inside
+the existing design language, not a redesign — the layout structure, information architecture, editorial
+voice and content model are unchanged throughout.</p>
+
+<h2>2 · Scope and outcome</h2>
+
+<table>
+  <tr><th style="width:34%">Objective</th><th style="width:12%">Status</th><th>Outcome</th></tr>
+  <tr><td>Fix mobile horizontal overflow</td><td><span class="tag">Done</span></td>
+      <td>3 root causes fixed at source. 60/60 route×width combinations clean on the production build. No <code>overflow-x: hidden</code> added.</td></tr>
+  <tr><td>Fix oversized components</td><td><span class="tag">Done</span></td>
+      <td>Type scale and vertical rhythm rebuilt as fluid ramps; buttons and launcher trimmed. Home page 390px: 11,063px → 10,651px despite <em>adding</em> a video panel.</td></tr>
+  <tr><td>Production-only scaling</td><td><span class="tag">Done</span></td>
+      <td>Root cause identified as a flat-floor <code>clamp()</code>, not a build difference. All verification run against <code>next build</code> + <code>next start</code>.</td></tr>
+  <tr><td>Video + social in welcome block</td><td><span class="tag open">Partial</span></td>
+      <td>Video shipped and fitted. Social row built and wired, but renders nothing until real handles are supplied — see §7.</td></tr>
+  <tr><td>Richer Kalamkari palette</td><td><span class="tag">Done</span></td>
+      <td>Two missing dye families added (<code>pachcha</code>, <code>geru</code>) plus a semantic <code>--success</code> token. Existing AA-verified ratios deliberately untouched.</td></tr>
+  <tr><td>Animations and transitions</td><td><span class="tag">Done</span></td>
+      <td>Staggered page-load entrance, shared-loop parallax, button press. All compositor-only, all reduced-motion aware.</td></tr>
+  <tr><td>Push to GitHub</td><td><span class="tag">Done</span></td>
+      <td>4 commits pushed to <code>master</code>; Vercel production deploy triggered.</td></tr>
+</table>
+
+<div class="callout good">
+  <p><strong>Gate passed before push.</strong> <code>typecheck</code> ✓ · <code>lint</code> ✓ (0 warnings) ·
+  <code>test</code> ✓ (82/82, 6 files) · <code>build</code> ✓ · <code>smoke</code> ✓ (12/12 purchase-path checks) ·
+  <code>audit:layout</code> ✓ (60/60 combinations).</p>
+</div>
+
+<h2>3 · The overflow bugs, and why they were invisible</h2>
+
+<p>The brief described content "spilling slightly to the right". Measurement found two <em>different</em>
+failures, and the more serious one did not scroll at all.</p>
+
+<h3>3.1 — The hero was clipping its own text</h3>
+
+<p>The hero section carries <code>overflow-hidden</code> for its 3D canvas. Behind that rule, the hero banner's
+six slide-tick buttons were <code>flex-1</code> — which sets <code>flex: 1 1 0%</code> but says nothing about how far
+an item may <em>shrink</em>. <code>min-width</code> still defaults to <code>auto</code>, so a flex item will not go below its own
+min-content, and each tick's label carried <code>truncate</code>, which includes <code>white-space: nowrap</code> and therefore
+makes its min-content the <strong>entire untruncated label</strong>.</p>
+
+<table>
+  <tr><th>Measurement at 390px viewport</th><th class="num">Before</th><th class="num">After</th></tr>
+  <tr><td>Tick row min-content width</td><td class="num">456px</td><td class="num">— (shrinks)</td></tr>
+  <tr><td>Hero <code>section.scrollWidth</code> (box is 390px)</td><td class="num">476px</td><td class="num">390px</td></tr>
+  <tr><td>Content clipped and unreachable</td><td class="num">86px</td><td class="num">0px</td></tr>
+  <tr><td>Slide ticks laid out off-screen</td><td class="num">2 of 6</td><td class="num">0 of 6</td></tr>
+</table>
+
+<p>Because the section clipped rather than scrolled, <code>document.documentElement.scrollWidth</code> measured clean.
+What the visitor actually saw was every line of the hero paragraph losing its last few letters —
+"<span class="mono">in colours fermente</span>" — and two of the six slide controls simply not existing.</p>
+
+<p><strong>Fix:</strong> <code>min-w-0</code> on the tick buttons, so <code>truncate</code> can finally do the job it was added for;
+and the labels hidden below <code>sm</code>, where ~50px each would render "Blouse pieces" as "Blo…". The
+accessible name is preserved on the button's <code>aria-label</code>, and the active slide's name is already set over
+the panel above.</p>
+
+<h3>3.2 — Pagination pushed /shop past a 320px viewport</h3>
+
+<p>"Previous" and "Next" are roughly 99px and 74px of unbreakable text. With the numbered buttons at 44px each,
+the row's min-content exceeded the 280px available inside the container at 320px, pushing the document 12px wide.
+Collapsed to icon-only below <code>sm</code>, with <code>sr-only</code> names and the 44px targets intact.</p>
+
+<h3>3.3 — Every input carried a hidden 223px floor</h3>
+
+<p>An <code>&lt;input&gt;</code> with no <code>size</code> attribute defaults to <code>size="20"</code> — about 223px of
+<em>intrinsic</em> width. That figure still counts toward a flex or grid container's min-content even when the
+input itself is <code>w-full</code> and perfectly happy to be 40px wide. The container refuses to shrink, and the
+overflow then surfaces somewhere else entirely.</p>
+
+<p><strong>Fix:</strong> defaulted <code>size={1}</code> at the <code>Input</code> primitive rather than at each call site, so every
+input on the site is immune. It remains overridable.</p>
+
+<div class="callout warn">
+  <p><strong><code>overflow-x: hidden</code> was not added, and must not be.</strong> The project's own conventions
+  record that such a rule previously hid a broken header rather than preventing one, and that <code>overflow</code> on the
+  body makes it a scroll container — which breaks <code>position: sticky</code> on descendants and changes what
+  <code>scrollIntoView</code> does. Section 3.1 is precisely why: a clipping rule converts a visible bug into an
+  invisible one. Every fix above addresses the cause.</p>
+</div>
+
+<h3>3.4 — The regression harness</h3>
+
+<p><code>scripts/audit-layout.mjs</code> (<code>npm run audit:layout</code>) drives headless Chromium over ten routes at
+320 / 375 / 390 / 430px and reports <em>both</em> failure modes: documents that scroll sideways, and elements that
+clip their own text. It reports the shallowest offending element rather than the deepest, because the shallow
+one is the cause and everything under it is a symptom. It exits non-zero so it can gate a build.</p>
+
+<p>Two exclusions matter, and both were learned from false positives during this work:
+<code>sr-only</code> elements (a 1×1px box hiding a whole sentence is the point of the pattern), and anything with
+<code>text-overflow: ellipsis</code> — clipping <em>with</em> a mark is a decision, clipping silently is the bug.</p>
+
+<h2 class="page-break">4 · The sizing problem</h2>
+
+<h3>4.1 — Root cause: a clamp with no intercept</h3>
+
+<p>The brief reported that components looked too large on both desktop and mobile, and larger still after
+deploying. The cause was one malformed pattern repeated across the whole type scale:</p>
+
+<p class="mono" style="background:#F3EEE3;padding:6pt 8pt;border-radius:2pt;">
+display-xl: clamp(3rem, 8.6vw, 6rem)
+</p>
+
+<p>A <code>clamp()</code> whose middle term is a bare <code>vw</code> value has a flat floor. <code>8.6vw</code> does not reach
+<code>3rem</code> until a <strong>558px</strong> viewport — so every phone on earth received an identical 48px headline,
+with no scaling whatsoever across the entire mobile range. On a 390px screen that spent four lines and 196px of
+vertical space on six words. This is also why the problem appeared worse "in production": it is not a build
+difference, it is that the scale simply stops responding below 558px regardless of environment.</p>
+
+<p>Every size is now a genuine linear ramp — <code>Nvw + Crem</code> — solved through two points: a comfortable size
+at 320px and the intended size at 1440px. The ceilings came down too; the desktop headline was also larger
+than the writing beneath it deserved.</p>
+
+<table>
+  <tr>
+    <th>Token</th><th class="num">320px</th><th class="num">390px</th><th class="num">1024px</th>
+    <th class="num">1440px</th><th class="num">was @390</th><th class="num">was max</th>
+  </tr>
+  <tr><td><code>display-xl</code></td><td class="num">34</td><td class="num">37</td><td class="num">65</td><td class="num">84</td><td class="num">48</td><td class="num">96</td></tr>
+  <tr><td><code>display-lg</code></td><td class="num">28</td><td class="num">30</td><td class="num">48</td><td class="num">60</td><td class="num">40</td><td class="num">70</td></tr>
+  <tr><td><code>display-md</code></td><td class="num">24</td><td class="num">25</td><td class="num">35</td><td class="num">42</td><td class="num">31</td><td class="num">48</td></tr>
+  <tr><td><code>display-sm</code></td><td class="num">20</td><td class="num">21</td><td class="num">26</td><td class="num">30</td><td class="num">24</td><td class="num">33</td></tr>
+  <tr><td><code>body-lg</code></td><td class="num">16</td><td class="num">16</td><td class="num">17</td><td class="num">18</td><td class="num">17</td><td class="num">19</td></tr>
+  <tr><td><code>eyebrow</code></td><td class="num">11</td><td class="num">11</td><td class="num">11</td><td class="num">11</td><td class="num">12</td><td class="num">12</td></tr>
+</table>
+
+<p>The eyebrow reduction is small but visible: at 12px with <code>0.2em</code> tracking, a three-part location label
+("Srikalahasti · Tirupati district · Andhra Pradesh") wrapped to two lines on every phone, which reads as a
+caption rather than as the label above a headline. It is now 11px, the tracking opens up from <code>sm</code>, and
+the least useful token is dropped on the narrowest screens.</p>
+
+<h3>4.2 — A vertical rhythm, replacing fifteen ad-hoc pairs</h3>
+
+<p>There were <strong>fifteen distinct <code>py-* md:py-*</code> pairs across fifty-two sections</strong>, ranging from
+<code>py-6 md:py-10</code> to <code>py-24 md:py-32</code>. Nobody chose fifteen tiers; they accumulated one section at a
+time, with the result that two sections of equal importance could differ by 32px for no reason a reader could infer.</p>
+
+<table>
+  <tr><th>Tier</th><th>Definition</th><th class="num">320px</th><th class="num">768px</th><th class="num">1440px</th><th>Replaces</th></tr>
+  <tr><td><code>.section-y-sm</code></td><td class="mono">clamp(1.75rem, 3.5vw + 0.65rem, 2.75rem)</td><td class="num">28</td><td class="num">37</td><td class="num">44</td><td>py-6/8/10 md:py-10/12/14</td></tr>
+  <tr><td><code>.section-y</code></td><td class="mono">clamp(2.75rem, 5.5vw + 1rem, 4.5rem)</td><td class="num">44</td><td class="num">58</td><td class="num">72</td><td>py-11/12/14/16 md:py-16/20/24</td></tr>
+  <tr><td><code>.section-y-lg</code></td><td class="mono">clamp(3.5rem, 7vw + 1.3rem, 5.75rem)</td><td class="num">56</td><td class="num">74</td><td class="num">92</td><td>py-16/20/24 md:py-24/28/32</td></tr>
+</table>
+
+<p>Fluid rather than breakpoint-stepped, so the rhythm tracks the type scale — which is also fluid — instead of
+jumping at 768px while the headings glide. The top end comes down as well: 128px of air above a heading is a
+landing page, not a page somebody is reading.</p>
+
+<h3>4.3 — Controls</h3>
+
+<table class="before-after">
+  <tr><th>Element</th><th>Before</th><th>After</th><th>Reason</th></tr>
+  <tr><td>Button <code>lg</code></td><td>52px tall, 32px sides, 16px text</td><td>48px tall, 24px sides, 15px text</td>
+      <td>Two stacked CTAs were 116px of solid chrome under the headline. Still well past the 44px target.</td></tr>
+  <tr><td>Button <code>default</code></td><td>44px, 20px sides</td><td>44px, 16px sides</td><td>Height is the accessibility floor, not a preference — unchanged.</td></tr>
+  <tr><td>Assistant launcher</td><td>132px labelled pill</td><td>48px circle below <code>sm</code></td>
+      <td>Fixed bottom-right over a 390px screen, it was drawn <em>on top of</em> the hero's primary call to action.</td></tr>
+  <tr><td>Desktop nav items</td><td>Two-word labels wrapped</td><td><code>whitespace-nowrap</code></td><td>A wrapped label made a 44px nav item 60px tall and dragged the header with it.</td></tr>
+</table>
+
+<h3>4.4 — Net effect</h3>
+
+<table>
+  <tr><th>Home page total height</th><th class="num">Before</th><th class="num">After</th><th class="num">Change</th></tr>
+  <tr><td>390px viewport</td><td class="num">11,063px</td><td class="num">10,651px</td><td class="num">−3.7%</td></tr>
+  <tr><td>320px viewport</td><td class="num">not captured</td><td class="num">11,073px</td><td class="num">—</td></tr>
+  <tr><td>1280px viewport</td><td class="num">not captured</td><td class="num">9,517px</td><td class="num">—</td></tr>
+</table>
+
+<p style="font-size:8.2pt;color:#615C54;">Only the 390px figure was measured on both sides; the other two rows
+record the current state, and a baseline was not taken before the change. They are listed as unknown rather
+than estimated.</p>
+
+<p>The 390px figure also <em>understates</em> the change, because a <strong>video panel was added</strong> to the
+welcome block in the same pass — roughly 200px of new content on a phone. Net of that addition the reading
+surfaces lost closer to 5–6%. In any case the intent was never to compress the page but to restore hierarchy:
+the type is smaller <em>relative to the screen</em>, and the relationship between heading, body and control is
+once again legible at a glance. The clearest single measure of that is the hero headline, which went from four
+lines and 196px of a 390px screen to a properly scaled 37px sitting above 16px body copy.</p>
+
+<h2 class="page-break">5 · A latent bug found along the way</h2>
+
+<div class="callout warn">
+  <p><strong><code>cn()</code> was silently deleting font sizes.</strong> This was already live on the deployed site
+  and was not part of the brief. It is the single highest-impact fix in this batch.</p>
+</div>
+
+<p><code>tailwind-merge</code> resolves conflicts by class <em>group</em>, and <code>text-*</code> is two groups sharing one
+prefix: <code>font-size</code> and <code>text-color</code>. It separates them using a list of known size keys — the stock
+Tailwind scale, which has never heard of <code>display-xl</code>. So <code>cn('text-display-xl', 'text-cotton-50')</code>
+filed the size as a colour, found it in conflict with the real colour, and returned only the colour.</p>
+
+<p>The class then vanished and the heading inherited 16px from the body. It fails <em>silently</em>, and only
+through <code>cn()</code> — a plain <code>className="text-display-xl text-cotton-50"</code> string is never merged and renders
+correctly, which is exactly why it survived review. It appears only where a component merges a caller's classes.</p>
+
+<table>
+  <tr><th>Element</th><th class="num">Rendered</th><th class="num">Intended</th></tr>
+  <tr><td><code>two-crafts</code> section <code>&lt;h2&gt;</code> (live on production)</td><td class="num">16px</td><td class="num">25px</td></tr>
+  <tr><td>Home <code>&lt;h1&gt;</code>, once wrapped for the entrance animation</td><td class="num">16px</td><td class="num">37px</td></tr>
+</table>
+
+<p>The <code>two-crafts</code> heading was rendering <strong>smaller than the body copy underneath it</strong> on the live site.
+<code>extendTailwindMerge</code> in <code>src/lib/utils.ts</code> now declares every custom <code>fontSize</code> key, and
+<code>src/lib/utils.test.ts</code> pins each one against a merged text colour — so adding a key to
+<code>tailwind.config.ts</code> without adding it there fails the suite rather than quietly shrinking a heading.</p>
+
+<h2>6 · Colour</h2>
+
+<p>The existing palette is sampled from the workshop's actual materials rather than "inspired by" the craft, and
+its 60-30-10 distribution (cotton ground / kasim ink / chay accent) was already AA-verified and documented.
+<strong>Those ratios were deliberately left untouched</strong> — re-tuning a working, measured system would have put
+its contrast guarantees at risk for no gain. The work here was to add the two dye families that were genuinely
+missing and to give them a job.</p>
+
+<h3>6.1 — Existing families (unchanged)</h3>
+
+<h4>chay — alizarin from madder root over an alum mordant. The craft's signature; the site's primary.</h4>
+<div class="swatch-grid">
+  <div class="swatch"><div class="chip" style="background:#FBF1EE"></div><span class="step">50</span><span class="hex">#FBF1EE</span></div>
+  <div class="swatch"><div class="chip" style="background:#E9BCB1"></div><span class="step">200</span><span class="hex">#E9BCB1</span></div>
+  <div class="swatch"><div class="chip" style="background:#C66857"></div><span class="step">400 · coral</span><span class="hex">#C66857</span></div>
+  <div class="swatch"><div class="chip" style="background:#A94434"></div><span class="step">500</span><span class="hex">#A94434</span></div>
+  <div class="swatch"><div class="chip" style="background:#8E2F22"></div><span class="step">600 · primary</span><span class="hex">#8E2F22</span></div>
+  <div class="swatch"><div class="chip" style="background:#74251B"></div><span class="step">700</span><span class="hex">#74251B</span></div>
+  <div class="swatch"><div class="chip" style="background:#451813"></div><span class="step">900</span><span class="hex">#451813</span></div>
+</div>
+
+<h4>indigo — vat indigo, the one colour applied by dipping rather than by pen. The site's cool counterpart.</h4>
+<div class="swatch-grid">
+  <div class="swatch"><div class="chip" style="background:#EEF2F7"></div><span class="step">50</span><span class="hex">#EEF2F7</span></div>
+  <div class="swatch"><div class="chip" style="background:#B0C3D8"></div><span class="step">200</span><span class="hex">#B0C3D8</span></div>
+  <div class="swatch"><div class="chip" style="background:#55719E"></div><span class="step">400</span><span class="hex">#55719E</span></div>
+  <div class="swatch"><div class="chip" style="background:#3A5680"></div><span class="step">500</span><span class="hex">#3A5680</span></div>
+  <div class="swatch"><div class="chip" style="background:#2C4268"></div><span class="step">600 · accent</span><span class="hex">#2C4268</span></div>
+  <div class="swatch"><div class="chip" style="background:#1B2942"></div><span class="step">800 · midnight</span><span class="hex">#1B2942</span></div>
+  <div class="swatch"><div class="chip" style="background:#0B1320"></div><span class="step">950</span><span class="hex">#0B1320</span></div>
+</div>
+
+<h4>myrobalan — karakkaya over alum. The yellow, the antique brass, and the buff ground the cloth starts from.</h4>
+<div class="swatch-grid">
+  <div class="swatch"><div class="chip" style="background:#FCF7EA"></div><span class="step">50</span><span class="hex">#FCF7EA</span></div>
+  <div class="swatch"><div class="chip" style="background:#EFD794"></div><span class="step">200</span><span class="hex">#EFD794</span></div>
+  <div class="swatch"><div class="chip" style="background:#E3BE59"></div><span class="step">300</span><span class="hex">#E3BE59</span></div>
+  <div class="swatch"><div class="chip" style="background:#D4A337"></div><span class="step">400</span><span class="hex">#D4A337</span></div>
+  <div class="swatch"><div class="chip" style="background:#B9862A"></div><span class="step">500 · brass</span><span class="hex">#B9862A</span></div>
+  <div class="swatch"><div class="chip" style="background:#775021"></div><span class="step">700</span><span class="hex">#775021</span></div>
+</div>
+
+<h4>katha — catechu bark brown · kasim — fermented iron liquor, the outline black · cotton — undyed and myrobalan-treated cloth</h4>
+<div class="swatch-grid">
+  <div class="swatch"><div class="chip" style="background:#DAC3AC"></div><span class="step">katha 200</span><span class="hex">#DAC3AC</span></div>
+  <div class="swatch"><div class="chip" style="background:#8C603F"></div><span class="step">katha 500</span><span class="hex">#8C603F</span></div>
+  <div class="swatch"><div class="chip" style="background:#463022"></div><span class="step">katha 800</span><span class="hex">#463022</span></div>
+  <div class="swatch"><div class="chip" style="background:#615C54"></div><span class="step">kasim 500</span><span class="hex">#615C54</span></div>
+  <div class="swatch"><div class="chip" style="background:#22201D"></div><span class="step">kasim 900 · ink</span><span class="hex">#22201D</span></div>
+  <div class="swatch"><div class="chip" style="background:#FDFBF6;"></div><span class="step">cotton 50</span><span class="hex">#FDFBF6</span></div>
+  <div class="swatch"><div class="chip" style="background:#FAF6EC"></div><span class="step">cotton 100</span><span class="hex">#FAF6EC</span></div>
+  <div class="swatch"><div class="chip" style="background:#EBE0CD"></div><span class="step">cotton 300</span><span class="hex">#EBE0CD</span></div>
+</div>
+
+<h3>6.2 — Added: pachcha (forest / olive green)</h3>
+
+<p>There is no green dye in this workshop. Green is obtained the way it has always been obtained here: a yellow
+ground struck from myrobalan or pomegranate rind, then dipped in the indigo vat, so the blue lies over the
+yellow and the eye resolves the pair. The ramp therefore sits <em>between</em> the myrobalan and indigo hues rather
+than on a pure green — a saturated emerald would be a colour this cloth cannot produce, and putting one on the
+site would contradict the claim the site exists to make.</p>
+
+<div class="swatch-grid">
+  <div class="swatch"><div class="chip" style="background:#F2F5EC"></div><span class="step">50</span><span class="hex">#F2F5EC</span></div>
+  <div class="swatch"><div class="chip" style="background:#E1E8D4"></div><span class="step">100</span><span class="hex">#E1E8D4</span></div>
+  <div class="swatch"><div class="chip" style="background:#C4D0AC"></div><span class="step">200</span><span class="hex">#C4D0AC</span></div>
+  <div class="swatch"><div class="chip" style="background:#A3B481"></div><span class="step">300 · dark ui</span><span class="hex">#A3B481</span></div>
+  <div class="swatch"><div class="chip" style="background:#84975E"></div><span class="step">400</span><span class="hex">#84975E</span></div>
+  <div class="swatch"><div class="chip" style="background:#697B47"></div><span class="step">500 · olive</span><span class="hex">#697B47</span></div>
+  <div class="swatch"><div class="chip" style="background:#526138"></div><span class="step">600 · success</span><span class="hex">#526138</span></div>
+  <div class="swatch"><div class="chip" style="background:#414D2E"></div><span class="step">700</span><span class="hex">#414D2E</span></div>
+  <div class="swatch"><div class="chip" style="background:#2B3220"></div><span class="step">900 · forest</span><span class="hex">#2B3220</span></div>
+</div>
+
+<h3>6.3 — Added: geru (terracotta / burnt sienna)</h3>
+
+<p>Red ochre earth. <code>chay</code> is a dyed red and <code>katha</code> is a bark brown; neither is the warm
+burnt-sienna a finished cloth goes when the alum was laid thin. This ramp fills that gap and tints the site's
+warm surfaces — section grounds, borders on cloth-coloured cards, the wash behind a quotation.</p>
+
+<div class="swatch-grid">
+  <div class="swatch"><div class="chip" style="background:#FBF3EE"></div><span class="step">50</span><span class="hex">#FBF3EE</span></div>
+  <div class="swatch"><div class="chip" style="background:#F5E2D5"></div><span class="step">100</span><span class="hex">#F5E2D5</span></div>
+  <div class="swatch"><div class="chip" style="background:#E8C3AB"></div><span class="step">200</span><span class="hex">#E8C3AB</span></div>
+  <div class="swatch"><div class="chip" style="background:#D89F7C"></div><span class="step">300</span><span class="hex">#D89F7C</span></div>
+  <div class="swatch"><div class="chip" style="background:#C57B53"></div><span class="step">400 · sienna</span><span class="hex">#C57B53</span></div>
+  <div class="swatch"><div class="chip" style="background:#AC5F39"></div><span class="step">500 · terracotta</span><span class="hex">#AC5F39</span></div>
+  <div class="swatch"><div class="chip" style="background:#8D4A2C"></div><span class="step">600</span><span class="hex">#8D4A2C</span></div>
+  <div class="swatch"><div class="chip" style="background:#5A3020"></div><span class="step">800</span><span class="hex">#5A3020</span></div>
+</div>
+
+<h3>6.4 — Usage rules</h3>
+
+<table>
+  <tr><th style="width:20%">Colour</th><th style="width:40%">Use for</th><th>Never use for</th></tr>
+  <tr><td><strong>chay</strong> (primary)</td><td>Calls to action, prices, links, the heading's second clause, the mark under a name.</td><td>Large fills. It is the 10% of a 60-30-10, and spending it widely costs it its meaning.</td></tr>
+  <tr><td><strong>indigo</strong> (accent)</td><td>The cool counterweight — secondary buttons, the top of the hero scrim, dark section grounds.</td><td>Competing with chay for the primary action.</td></tr>
+  <tr><td><strong>myrobalan</strong></td><td>Warm highlights on dark grounds, step numerals, captions over photographs.</td><td>Body text on cream — insufficient contrast.</td></tr>
+  <tr><td><strong>gold</strong> (token)</td><td>Strictly the one <em>pointing</em> colour: the quick tour's ring, the active sub-nav mark. Sits outside 60-30-10.</td><td>Anything decorative. Decorative use destroys the only property that makes it useful.</td></tr>
+  <tr><td><strong>pachcha</strong> → <code>--success</code></td><td>States meaning <em>confirmed</em>: in stock, paid, dispatched, a step completed.</td><td>"Go" or "good". It is not a traffic light, and it is never a call to action.</td></tr>
+  <tr><td><strong>geru</strong></td><td>Warm surfaces, grounds, hairline borders on cloth-coloured cards.</td><td>Text at small sizes on cream. Use <code>geru-700</code>+ if text is required.</td></tr>
+  <tr><td><strong>kasim</strong></td><td>All body text and rules — the 30%.</td><td>Pure black. Kasim is a warm blue-grey-brown and never a neutral grey.</td></tr>
+</table>
+
+<h4>Semantic tokens added</h4>
+<table>
+  <tr><th>Token</th><th>Light</th><th>Dark</th><th>Rationale</th></tr>
+  <tr><td><code>--success</code></td><td class="mono">hsl(82 27% 27%)</td><td class="mono">hsl(80 25% 61%)</td><td>Lifts in the dark for the same reason madder and gold do — the light value is invisible on kasim.</td></tr>
+  <tr><td><code>--success-foreground</code></td><td class="mono">hsl(42 60% 97%)</td><td class="mono">hsl(30 12% 8%)</td><td>Inverts with the token.</td></tr>
+</table>
+
+<h4>Measured contrast (WCAG 2.2)</h4>
+<table>
+  <tr><th>Pair</th><th class="num">Ratio</th><th class="num">AA (4.5:1)</th><th class="num">AAA (7:1)</th></tr>
+  <tr><td>success on background — light</td><td class="num">7.21:1</td><td class="num">Pass</td><td class="num">Pass</td></tr>
+  <tr><td>success on card — light</td><td class="num">7.47:1</td><td class="num">Pass</td><td class="num">Pass</td></tr>
+  <tr><td>success on background — dark</td><td class="num">8.25:1</td><td class="num">Pass</td><td class="num">Pass</td></tr>
+  <tr><td>success on card — dark</td><td class="num">7.42:1</td><td class="num">Pass</td><td class="num">Pass</td></tr>
+  <tr><td>primary on background (existing)</td><td class="num">7.18:1</td><td class="num">Pass</td><td class="num">Pass</td></tr>
+  <tr><td>foreground on background (existing)</td><td class="num">15.34:1</td><td class="num">Pass</td><td class="num">Pass</td></tr>
+  <tr><td>muted-foreground on background (existing)</td><td class="num">6.54:1</td><td class="num">Pass</td><td class="num">—</td></tr>
+</table>
+
+<h2 class="page-break">7 · The welcome block</h2>
+
+<p>The block is the first thing on the site and its job is to be a doorway, not a banner. A visitor arriving
+here has usually just left a marketplace listing selling a printed polyester saree as "Kalamkari".</p>
+
+<h3>7.1 — Image → film</h3>
+
+<p>The still portrait has become a short muted film. The reasoning is specific rather than decorative: a
+photograph of a person at a table and a <em>moving hand drawing a line</em> are not the same argument, and the
+line is the entire claim of this site. The existing <code>/video/opening.mp4</code> asset is reused rather than
+re-cut.</p>
+
+<table>
+  <tr><th style="width:26%">Property</th><th>Behaviour</th></tr>
+  <tr><td>Playback</td><td>Muted, looping, <code>playsInline</code>, autoplay attempted on mount.</td></tr>
+  <tr><td>Reduced motion</td><td>The file is <strong>never requested</strong>. The poster frame stands in its place and the block is otherwise identical. The media query is <em>subscribed</em>, not sampled — a visitor who changes the setting while the page is open gets the change.</td></tr>
+  <tr><td>Loading</td><td><code>preload="metadata"</code>. The poster carries the first impression, and a 3MB download must never compete with the hero image for LCP.</td></tr>
+  <tr><td>Autoplay refusal</td><td>If <code>play()</code> rejects — data saver, battery saver, a policy muting did not satisfy — the control resolves to a visible play button rather than a frozen frame with no way in.</td></tr>
+  <tr><td>Accessibility</td><td>The <code>&lt;video&gt;</code> is <code>aria-hidden</code> and untabbable; the always-painted poster carries the alt text, so the frame is described once rather than twice. The toggle is a 44px control with an <code>sr-only</code> label.</td></tr>
+  <tr><td>Fitting</td><td>Aspect ratio is fixed at both sizes, so the block's height never depends on the file.</td></tr>
+</table>
+
+<h4>Why it fits without extra scrolling</h4>
+<p>Two constraints do the work. The ratio is <strong>21:9 on a phone</strong>, where the film sits above the greeting
+and every pixel of height it takes is a pixel the welcome loses; and <strong>4:5 from <code>sm</code></strong>, where it is
+a column beside the words and a letterbox would leave a stripe floating in white space. The film's column is
+capped in <code>rem</code> (10rem, 11.5rem at <code>lg</code>) and never in fractions — given a <code>1fr</code> column it grew to
+260px on a laptop and the greeting beside it became its caption, inverting what the block is for.</p>
+
+<table>
+  <tr><th>Viewport</th><th class="num">Film</th><th class="num">Block height</th><th class="num">Fits above fold</th></tr>
+  <tr><td>390 × 844 (phone)</td><td class="num">350 × 150</td><td class="num">~357px</td><td class="num">Yes — block ends at ~422px</td></tr>
+  <tr><td>1280 × 800 (laptop)</td><td class="num">160 × 200</td><td class="num">~232px</td><td class="num">Yes</td></tr>
+</table>
+
+<h3>7.2 — Social links <span class="tag open">Needs your handles</span></h3>
+
+<p>The social row is built, styled and wired into the block, directly under the invitation. It reads through the
+existing <code>socialLinks()</code> and <code>whatsappHref()</code> helpers, which is the site's established rule for every
+contact channel: <strong>an unpublished channel renders as nothing.</strong></p>
+
+<div class="callout warn">
+  <p><strong>It currently renders nothing, by design.</strong> <code>site.social.instagram</code>,
+  <code>.facebook</code>, <code>.youtube</code> and <code>site.contact.whatsapp</code> are all empty strings in
+  <code>src/content/site.ts</code>. Placeholder URLs were explicitly not invented: on a live storefront a dead
+  social link is worse than an absent one, because the visitor who taps it concludes the shop is abandoned.
+  The "Find us" label is inside the same conditional, since an empty heading with nothing under it is its own
+  kind of broken.</p>
+</div>
+
+<h4>To switch it on</h4>
+<p>Edit <code>src/content/site.ts</code> only — no component changes are needed anywhere:</p>
+<pre class="mono" style="background:#F3EEE3;padding:7pt 9pt;border-radius:2pt;font-size:8pt;line-height:1.45;margin:4pt 0 7pt;">social: {
+  instagram: 'https://instagram.com/&lt;handle&gt;',
+  facebook:  'https://facebook.com/&lt;page&gt;',
+  youtube:   'https://youtube.com/@&lt;channel&gt;',
+},
+contact: {
+  whatsapp: '919876543210',   // digits only, country code first
+},</pre>
+<p>The icons — Instagram, Facebook, YouTube, WhatsApp — appear immediately in the welcome block and in the
+footer, each as a 40px target with an <code>sr-only</code> name. Channels left empty stay hidden individually, so
+you can publish one without publishing all four.</p>
+
+<h2>8 · Motion</h2>
+
+<p>Everything below animates <code>transform</code> and <code>opacity</code> only, so it stays on the compositor.
+Nothing animates layout properties, and nothing writes scroll position into React state.</p>
+
+<table>
+  <tr><th style="width:20%">Mechanism</th><th style="width:24%">Spec</th><th>Notes</th></tr>
+  <tr><td><strong>Page-load entrance</strong><br><code>Entrance</code></td>
+      <td>opacity 0→1, translateY 14px→0<br>700ms · <code>cubic-bezier(.22,1,.36,1)</code><br>70ms stagger</td>
+      <td>A stylesheet animation, not a component with behaviour — no <code>use client</code>, nothing to hydrate. <code>animation-fill-mode: both</code> is load-bearing: with <code>forwards</code>, a delayed animation sits at its normal state through the delay then snaps to the first keyframe, so a staggered row would flash fully-formed and blink out before arriving.</td></tr>
+  <tr><td><strong>Scroll reveal</strong><br><code>RevealOnScroll</code> (existing)</td>
+      <td>opacity 0→1, translateY 20px→0, scale .988→1<br>700ms</td>
+      <td>IntersectionObserver, self-disconnecting. Deliberately skips above-the-fold content — it hides the element in an effect, and an effect runs after a paint.</td></tr>
+  <tr><td><strong>Parallax</strong><br><code>Parallax</code></td>
+      <td>translate3d, offset = −(distance from viewport centre) × speed. Default speed 0.08.</td>
+      <td>One rAF and one scroll listener for the whole page; reads batched ahead of writes; membership gated by IntersectionObserver; listeners refcounted so the first component to unmount cannot take the scroll handler away from the rest.</td></tr>
+  <tr><td><strong>Button press</strong></td>
+      <td>translateY −1px on hover, 0 on <code>:active</code>, 150ms ease-out</td>
+      <td>Explicit transition property list rather than <code>transition-all</code>, so a hover can never accidentally animate a width. The transform is <code>motion-safe</code>; the colour change is not, because it carries the information.</td></tr>
+  <tr><td><strong>Page transition</strong> (existing)</td><td>8px rise, 400ms</td>
+      <td>Entrance only, no exit — an exit has to delay the navigation to play. Runs after the new page has committed.</td></tr>
+  <tr><td><strong>Card hover</strong> (existing)</td><td>image <code>scale(1.05)</code>, 700ms</td><td>Under <code>motion-safe:</code>.</td></tr>
+</table>
+
+<h4>The LCP rule</h4>
+<div class="callout">
+  <p><code>Entrance step={0}</code> carries <strong>no delay at all</strong>, and the hero <code>&lt;h1&gt;</code> uses it.
+  An element still at <code>opacity: 0</code> is not eligible to be the Largest Contentful Paint, so a 300ms stagger on
+  the wrong element buys a pleasant arrival and pays for it in the metric that decides whether anyone waits to see
+  the page. The eyebrow leads visually but costs nothing to hold back, so it takes the later step instead.</p>
+</div>
+
+<h4>Reduced motion</h4>
+<p>The site's existing contract is preserved and extended: decorative motion stops, but scroll-driven
+<em>content</em> still resolves to its final state — a visitor who asks for less motion must not lose information.
+<code>Entrance</code> applies its class only under <code>motion-safe:</code>, so content is simply present rather than
+hidden. <code>Parallax</code> is never mounted. The welcome film never downloads. Media queries are subscribed rather
+than sampled once on mount.</p>
+
+<h2 class="page-break">9 · Responsive behaviour</h2>
+
+<table>
+  <tr><th>Breakpoint</th><th>Behaviour</th></tr>
+  <tr><td><strong>320–639px</strong></td>
+      <td>Single column. Welcome film 21:9 above the greeting. Hero slide-tick labels hidden (rules remain as position indicators). Pagination icon-only. Assistant launcher a 48px circle. Location eyebrow drops the district. Category collage stays 2-up — letting it fall to one column would turn a composition into a list.</td></tr>
+  <tr><td><strong>640–767px</strong></td>
+      <td>Welcome film becomes a 4:5 column beside the greeting. Tick labels, pagination words and the launcher label return. Eyebrow tracking opens to 0.2em.</td></tr>
+  <tr><td><strong>768–1023px</strong></td>
+      <td>Phone tab bar gives way to the desktop nav; the floating dock stops retracting on scroll. Category collage still 2-up.</td></tr>
+  <tr><td><strong>1024px+</strong></td>
+      <td>Hero becomes a two-column spread. Collage goes 3-up. Hero banner shows its two offset "stacked cloth" panels. Film column caps at 11.5rem.</td></tr>
+</table>
+
+<h4>Verification matrix — production build (<code>next build</code> + <code>next start</code>)</h4>
+<table>
+  <tr><th>Route</th><th class="num">320</th><th class="num">360</th><th class="num">375</th><th class="num">390</th><th class="num">414</th><th class="num">430</th></tr>
+  <tr><td><code>/</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/shop</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/shop/sarees</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/process</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/our-story</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/journal</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/custom</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/contact</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/cart</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+  <tr><td><code>/search?q=saree</code></td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+</table>
+<p style="font-size:8.2pt;color:#615C54;">✓ = zero document overflow <em>and</em> zero silently-clipped text. 60/60 combinations.</p>
+
+<h2>10 · Key sections, as they now render</h2>
+
+<div class="shots">
+  <figure>
+    <img src="../.shots/final/390-home.png" alt="Home page at 390px">
+    <figcaption><strong>Home, 390px.</strong> Welcome film as a 21:9 band with the greeting below; hero headline at 37px in a clear hierarchy above 16px body copy; assistant launcher reduced to a circle clear of the primary call to action.</figcaption>
+  </figure>
+  <figure>
+    <img src="../.shots/final/390-process.png" alt="Process page at 390px">
+    <figcaption><strong>The process, 390px.</strong> The 23-step sequence — the site's evidentiary centrepiece — on the new vertical rhythm.</figcaption>
+  </figure>
+</div>
+
+<figure>
+  <img src="../.shots/final/1280-home.png" alt="Home page at 1280px">
+  <figcaption><strong>Home, 1280px.</strong> The welcome film runs at 160×200 in a rem-capped column, so the greeting stays the subject rather than becoming its caption. Desktop nav labels no longer wrap.</figcaption>
+</figure>
+
+<div class="shots">
+  <figure>
+    <img src="../.shots/final/1280-shop.png" alt="Shop at 1280px">
+    <figcaption><strong>Shop, 1280px.</strong></figcaption>
+  </figure>
+  <figure>
+    <img src="../.shots/final/1280-our-story.png" alt="Our story at 1280px">
+    <figcaption><strong>Our story, 1280px.</strong></figcaption>
+  </figure>
+</div>
+
+<h2 class="page-break">11 · Technical stack and packages</h2>
+
+<h4>Added</h4>
+<table>
+  <tr><th>Package</th><th>Version</th><th>Scope</th><th>Why</th></tr>
+  <tr><td><code>playwright</code></td><td>latest</td><td>devDependency</td>
+      <td>Headless Chromium for the layout audit and screenshot scripts. Not shipped — it has no effect on the client bundle.</td></tr>
+</table>
+
+<div class="callout">
+  <p><strong>No runtime dependency was added.</strong> Framer Motion was considered and rejected: the site already
+  had a coherent motion system (IntersectionObserver reveals, GSAP + Lenis for the genuinely scroll-linked work on
+  <code>/process</code>, WAAPI page transitions), and the two pieces that were missing — a staggered entrance and a
+  parallax primitive — are ~40 and ~90 lines respectively. Adding a ~34KB animation runtime to a site whose whole
+  argument is craft economy, in order to duplicate a system already present, would have cost bundle size and
+  consistency for nothing.</p>
+</div>
+
+<h4>Unchanged stack</h4>
+<p>Next.js 15.5 (App Router) · React 19 · TypeScript 5.7 · Tailwind 3.4 · Prisma 6 / PostgreSQL · Auth.js v5 ·
+Radix UI primitives · three.js + React Three Fiber (code-split, capability-gated) · GSAP + Lenis · Razorpay ·
+Nodemailer · Vitest · Zod.</p>
+
+<h4>New scripts</h4>
+<table>
+  <tr><th>Command</th><th>Purpose</th></tr>
+  <tr><td><code>npm run audit:layout</code></td><td>Overflow and clipped-text audit across routes × phone widths. Exits non-zero; suitable as a CI gate.</td></tr>
+  <tr><td><code>npm run shots</code></td><td>Full-page or above-fold screenshots at a chosen width.</td></tr>
+  <tr><td><code>node scripts/probe-sizes.mjs [w] [route]</code></td><td>Computed font sizes, padding and box metrics for a route.</td></tr>
+  <tr><td><code>node scripts/probe-hero.mjs [w] [route] [sel]</code></td><td>Walks a subtree reporting each element's min-content — the tool that located the 456px tick row.</td></tr>
+</table>
+
+<h4>Files added</h4>
+<ul>
+  <li><code>src/components/home/welcome-film.tsx</code> — the fitted, reduced-motion-aware film</li>
+  <li><code>src/components/motion/entrance.tsx</code> — staggered page-load entrance</li>
+  <li><code>src/components/motion/parallax.tsx</code> — shared-loop parallax primitive</li>
+  <li><code>scripts/audit-layout.mjs</code>, <code>scripts/shots.mjs</code>, <code>scripts/probe-sizes.mjs</code>, <code>scripts/probe-hero.mjs</code></li>
+</ul>
+
+<h2>12 · Deployment</h2>
+
+<table>
+  <tr><th style="width:22%">Item</th><th>Detail</th></tr>
+  <tr><td>Repository</td><td><code>https://github.com/Thiru7869/Kalamkari-E-commerce.git</code></td></tr>
+  <tr><td>Branch</td><td><code>master</code> — pushed <code>9e848b7..1501592</code></td></tr>
+  <tr><td>Commits</td><td><code>e8b390c</code> cn() font-size fix · <code>627116f</code> overflow + audit tooling · <code>b206bba</code> type scale and rhythm · <code>1501592</code> welcome film, motion, palette</td></tr>
+  <tr><td>Hosting</td><td>Vercel, auto-deploying from <code>master</code>. The push above triggers a production build.</td></tr>
+  <tr><td>Build command</td><td><code>prisma generate &amp;&amp; prisma migrate deploy &amp;&amp; next build &amp;&amp; node scripts/snapshot-actions.mjs</code></td></tr>
+  <tr><td>Database</td><td>PostgreSQL. Two URLs: <code>DATABASE_URL</code> pooled for queries, <code>DIRECT_DATABASE_URL</code> unpooled for migrations only — a transaction pooler cannot hold the advisory lock <code>prisma migrate</code> takes.</td></tr>
+  <tr><td>Migrations</td><td>None in this change set. It is presentation-layer only; no schema, query or server-action signature was touched.</td></tr>
+  <tr><td>Env vars</td><td>No new variables. Nothing to configure in Vercel before or after this deploy.</td></tr>
+  <tr><td>Rollback</td><td><code>git revert 1501592 b206bba 627116f e8b390c</code>, or redeploy <code>9e848b7</code> from the Vercel dashboard. No data migration to unwind.</td></tr>
+</table>
+
+<h4>Verifying the deploy</h4>
+<ol>
+  <li>Wait for the Vercel build to go green.</li>
+  <li>Run the audit against production: <code>npm run audit:layout -- --base=https&#58;//&lt;your-domain&gt;</code>. Expect <em>"No horizontal overflow, and nothing clipping its own text, at any width."</em></li>
+  <li>On a real phone, load the home page and confirm the hero paragraph's lines end in whole words, and that the
+      slide ticks under the banner number six.</li>
+  <li>Check the welcome film autoplays muted, and that it is replaced by a still under Reduce Motion.</li>
+</ol>
+
+<h2>13 · Recommended next steps</h2>
+
+<table>
+  <tr><th style="width:16%">Priority</th><th style="width:30%">Item</th><th>Detail</th></tr>
+  <tr><td><strong>High</strong></td><td>Supply the social handles</td>
+      <td>The only part of the brief left visibly incomplete. One edit to <code>src/content/site.ts</code> — see §7.2. The same file also holds the empty <code>contact.email</code> and <code>contact.phone</code>, which are suppressing contact channels site-wide.</td></tr>
+  <tr><td><strong>High</strong></td><td>Replace the placeholder imagery</td>
+      <td>Most of <code>public/images/products/</code> is generated placeholder cloth. The site's entire argument is that the line is drawn by hand, and that argument cannot be made by a diagonal-stripe placeholder. This is now the largest gap between what the site claims and what it shows.</td></tr>
+  <tr><td><strong>High</strong></td><td>Add <code>audit:layout</code> to CI</td>
+      <td>Both overflow bugs fixed here passed <code>tsc</code>, <code>eslint</code> and <code>next build</code>. Only running the page finds them — the same reasoning that already justifies the smoke test.</td></tr>
+  <tr><td>Medium</td><td>Encode the film properly</td>
+      <td><code>opening.mp4</code> is 2.9MB and serves both the preloader and the welcome block. A WebM/AV1 sibling with an <code>&lt;source&gt;</code> ladder, plus a 480p variant for narrow viewports, would cut it substantially. A dedicated 10–15 second front-room loop would also serve the welcome block better than the opening titles.</td></tr>
+  <tr><td>Medium</td><td>Real-device pass</td>
+      <td>Verification here was headless Chromium at device-emulated widths. iOS Safari differs in ways emulation does not model — <code>100dvh</code> behaviour, autoplay policy, and the safe-area insets the tab bar depends on.</td></tr>
+  <tr><td>Medium</td><td>Lighthouse / field CWV</td>
+      <td>LCP was reasoned about carefully but not measured on production hardware. Worth a baseline now that the type scale and entrance have changed.</td></tr>
+  <tr><td>Low</td><td>Apply <code>Parallax</code> deliberately</td>
+      <td>The primitive is built and unused. The natural candidates are the process section's dark ground and the family portrait — one or two placements, at speed ≤ 0.1.</td></tr>
+  <tr><td>Low</td><td>Extend <code>pachcha</code> and <code>geru</code> into stock and order states</td>
+      <td><code>--success</code> is defined and contrast-verified but lightly used. Order timeline steps and in-stock badges are the honest places for it.</td></tr>
+  <tr><td>Low</td><td>Skeletons for the shop grid</td>
+      <td>The <code>shimmer</code> keyframe already exists and is unused. The shop and search results are the two places a visitor waits.</td></tr>
+</table>
+
+<h2>14 · Notes on what was deliberately not done</h2>
+
+<ul>
+  <li><strong>The 60-30-10 ratios were not re-tuned.</strong> They are already AA-verified, documented, and were
+      re-struck once before after the site had been read rather than looked at. Widening the palette is additive;
+      re-balancing a working measured system would have risked its contrast guarantees for no gain.</li>
+  <li><strong>No layout was redesigned.</strong> Every change is size, spacing, colour or motion. Section order,
+      component structure, information architecture and editorial voice are untouched.</li>
+  <li><strong>No copy claims were invented.</strong> The site makes a specific factual claim on every page, and the
+      project's editorial rule is that a feature the site does not have is never described and a fact that is not
+      known is absent rather than guessed. The green added to the palette is documented as indigo over a yellow
+      ground because that is how Kalamkari green is actually made.</li>
+  <li><strong>No <code>overflow-x: hidden</code>.</strong> See §3.</li>
+</ul>
+
+<footer class="note">
+  Sri Vijaya Lakshmi Fine Kalamkari Arts — front-end remediation documentation.
+  All figures in this document were measured against the production build (<code>next build</code> + <code>next start</code>),
+  not the development server. Contrast ratios computed to WCAG 2.2 relative-luminance.
+</footer>
+
+</body>
+</html>
