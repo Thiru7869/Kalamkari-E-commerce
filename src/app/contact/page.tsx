@@ -35,7 +35,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="py-14 md:py-20">
+      <section className="section-y">
         <div className="container">
           <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-20">
             <div>

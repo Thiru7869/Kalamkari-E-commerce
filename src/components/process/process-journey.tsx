@@ -254,7 +254,7 @@ export function ProcessJourney({
                 key={phase.id}
                 id={`phase-${phase.id}`}
                 data-phase={phase.id}
-                className="relative scroll-mt-24 py-16 md:py-24"
+                className="relative scroll-mt-24 section-y-lg"
               >
                 <div className="rounded-sm border border-border/70 bg-background/95 p-6 shadow-[0_20px_60px_-40px_rgb(0_0_0/0.55)] backdrop-blur-md md:p-10">
                   <div className="flex items-baseline gap-4">

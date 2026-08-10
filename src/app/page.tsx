@@ -13,6 +13,7 @@ import { ProductCard } from '@/components/shop/product-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/primitives';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
+import { Entrance } from '@/components/motion/entrance';
 import { getFeaturedProducts, getCategories } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { site } from '@/content/site';
@@ -152,26 +153,41 @@ export default async function HomePage() {
           }}
         />
 
-        <div className="container relative py-14 md:py-24">
+        <div className="container relative section-y">
           <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.85fr)] lg:gap-16">
             <div className="max-w-2xl">
-              <p className="eyebrow text-cotton-200/90">
-                {site.location.town} · {site.location.district} · {site.location.state}
-              </p>
+              {/* The district is dropped below `sm`. Three place-names in
+                  tracked capitals wrap to two lines on every phone, and a
+                  two-line eyebrow reads as a caption rather than as the label
+                  above a headline. Town and state locate the store on their
+                  own; the district is the token a reader can most afford to
+                  lose. */}
+              {/*
+                The hero arrives in four beats. The headline is `step={0}` and
+                therefore has no delay at all — it is the LCP element on this
+                page, and an element still at `opacity: 0` is not eligible to
+                be the largest contentful paint. The eyebrow leads visually but
+                costs nothing to hold back, so it takes the later step instead.
+              */}
+              <Entrance as="p" step={1} className="eyebrow text-cotton-200/90">
+                {site.location.town}
+                <span className="hidden sm:inline"> · {site.location.district}</span> ·{' '}
+                {site.location.state}
+              </Entrance>
 
-              <h1 className="mt-5 text-display-xl text-cotton-50">
+              <Entrance as="h1" className="mt-5 text-display-xl text-cotton-50">
                 Every line drawn by hand.
                 <span className="block text-myrobalan-300">Every colour from the earth.</span>
-              </h1>
+              </Entrance>
 
-              <p className="mt-6 max-w-xl text-body-lg text-cotton-100/90">
+              <Entrance as="p" step={2} className="mt-6 max-w-xl text-body-lg text-cotton-100/90">
                 We are a family store painting Srikalahasti Kalamkari the way it has always
                 been done — with a bamboo pen, on cloth prepared with myrobalan and buffalo
                 milk, in colours fermented and boiled from iron, madder root and indigo.
                 Twenty-three steps. Nothing synthetic at any of them.
-              </p>
+              </Entrance>
 
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Entrance step={3} className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg">
                   <Link href="/shop">
                     See what is in the store
@@ -186,10 +202,12 @@ export default async function HomePage() {
                 >
                   <Link href="/process">Watch how it is made</Link>
                 </Button>
-              </div>
+              </Entrance>
             </div>
 
-            <HeroBanner className="mx-auto w-full max-w-sm lg:max-w-none" slides={bannerSlides} />
+            <Entrance step={4}>
+              <HeroBanner className="mx-auto w-full max-w-sm lg:max-w-none" slides={bannerSlides} />
+            </Entrance>
           </div>
         </div>
       </section>
@@ -202,7 +220,7 @@ export default async function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* Categories                                                          */}
       {/* ------------------------------------------------------------------ */}
-      <section className="py-11 md:py-16">
+      <section className="section-y">
         <div className="container">
           <RevealOnScroll>
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -278,7 +296,7 @@ export default async function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* Three ways in: Featured, Premium, Custom                            */}
       {/* ------------------------------------------------------------------ */}
-      <section className="py-12 md:py-20">
+      <section className="section-y">
         <div className="container">
           <RevealOnScroll>
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -306,7 +324,7 @@ export default async function HomePage() {
       {/* Featured pieces                                                     */}
       {/* ------------------------------------------------------------------ */}
       {featured.length > 0 && (
-        <section className="border-y border-border bg-cotton-100 py-16 md:py-24 dark:bg-card">
+        <section className="border-y border-border bg-cotton-100 section-y-lg dark:bg-card">
           <div className="container">
             <RevealOnScroll>
               <p className="eyebrow">In the store now</p>
@@ -405,7 +423,7 @@ export default async function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* The family                                                          */}
       {/* ------------------------------------------------------------------ */}
-      <section className="py-16 md:py-24">
+      <section className="section-y-lg">
         <div className="container">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-20">
             <RevealOnScroll>
@@ -472,7 +490,7 @@ export default async function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* Visit                                                               */}
       {/* ------------------------------------------------------------------ */}
-      <section className="border-t border-border bg-cotton-100 py-16 md:py-20 dark:bg-card">
+      <section className="border-t border-border bg-cotton-100 section-y dark:bg-card">
         <div className="container">
           <RevealOnScroll className="mx-auto max-w-2xl text-center">
             <MapPin className="mx-auto h-6 w-6 text-primary" aria-hidden="true" />

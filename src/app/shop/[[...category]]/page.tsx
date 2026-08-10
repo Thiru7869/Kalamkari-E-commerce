@@ -157,7 +157,7 @@ export default async function ShopPage({
         </div>
       </header>
 
-      <div className="container py-6 md:py-10">
+      <div className="container section-y-sm">
         <div className="lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
           {/* Desktop keeps the inline sidebar; the sheet trigger inside this
               component is hidden above lg. */}

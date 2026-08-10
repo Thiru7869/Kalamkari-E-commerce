@@ -39,7 +39,7 @@ export default async function ConfirmationPage({ params }: { params: Params }) {
   if (!isOwner) notFound();
 
   return (
-    <div className="container py-12 md:py-16">
+    <div className="container section-y">
       <div className="mx-auto max-w-2xl text-center">
         <CheckCircle2 className="mx-auto h-10 w-10 text-primary" aria-hidden="true" />
         <h1 className="mt-5 text-display-lg">Thank you</h1>

@@ -53,7 +53,7 @@ export default function CarePage() {
         </div>
       </section>
 
-      <div className="container py-14 md:py-20">
+      <div className="container section-y">
         <div className="mx-auto max-w-[46rem]">
           <ol className="flex flex-col gap-9">
             {rules.map((rule, i) => (

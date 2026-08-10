@@ -78,7 +78,7 @@ export function ReviewSection({
   return (
     <section
       id="reviews"
-      className="scroll-mt-24 border-t border-border bg-cotton-100 py-14 md:py-20 dark:bg-card"
+      className="scroll-mt-24 border-t border-border bg-cotton-100 section-y dark:bg-card"
     >
       <div className="container">
         <div className="flex flex-wrap items-end justify-between gap-6">

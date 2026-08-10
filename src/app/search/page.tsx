@@ -47,7 +47,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
   ]);
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container section-y-sm">
       <h1 className="text-display-lg">Search</h1>
 
       <SearchForm defaultValue={query} className="mt-6 max-w-xl" />

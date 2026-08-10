@@ -54,7 +54,7 @@ export default async function TrackOrderPage({ searchParams }: { searchParams: S
   const notFound = Boolean(parsed?.success) && !order;
 
   return (
-    <div className="container py-12 md:py-16">
+    <div className="container section-y">
       <div className="mx-auto max-w-2xl">
         <h1 className="text-display-lg">Track an order</h1>
 

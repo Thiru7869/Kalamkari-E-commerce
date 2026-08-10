@@ -209,7 +209,7 @@ export default async function TypePage({ params }: { params: Params }) {
       {/* ------------------------------------------------------------------ */}
       {/* What this kind of piece is                                          */}
       {/* ------------------------------------------------------------------ */}
-      <section className="py-14 md:py-20">
+      <section className="section-y">
         <div className="container">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-20">
             <RevealOnScroll>
@@ -278,7 +278,7 @@ export default async function TypePage({ params }: { params: Params }) {
       {/* A few pieces                                                        */}
       {/* ------------------------------------------------------------------ */}
       {items.length > 0 && (
-        <section className="border-t border-border py-12 md:py-16">
+        <section className="border-t border-border section-y">
           <div className="container">
             <RevealOnScroll>
               <SectionHeader
@@ -300,7 +300,7 @@ export default async function TypePage({ params }: { params: Params }) {
       {/* ------------------------------------------------------------------ */}
       <section
         id="varieties"
-        className="scroll-mt-24 border-y border-border bg-cotton-100 py-14 md:py-20 dark:bg-card"
+        className="scroll-mt-24 border-y border-border bg-cotton-100 section-y dark:bg-card"
       >
         <div className="container">
           <RevealOnScroll>
@@ -380,7 +380,7 @@ export default async function TypePage({ params }: { params: Params }) {
       {/* What is drawn on them                                               */}
       {/* ------------------------------------------------------------------ */}
       {motifs.length > 0 && (
-        <section className="py-14 md:py-20">
+        <section className="section-y">
           <div className="container">
             <RevealOnScroll>
               <SectionHeader
@@ -430,7 +430,7 @@ export default async function TypePage({ params }: { params: Params }) {
       {/* ------------------------------------------------------------------ */}
       {/* The other types                                                     */}
       {/* ------------------------------------------------------------------ */}
-      <section className="border-t border-border bg-cotton-100 py-14 md:py-20 dark:bg-card">
+      <section className="border-t border-border bg-cotton-100 section-y dark:bg-card">
         <div className="container">
           <h2 className="text-display-sm">The rest of what the workshop makes</h2>
           <ul className="mt-7 flex flex-wrap gap-3">

@@ -47,7 +47,7 @@ export function TwoCrafts() {
   return (
     <section
       className={cn(
-        'relative isolate overflow-hidden border-b border-border py-14 md:py-20',
+        'relative isolate overflow-hidden border-b border-border section-y',
         // With no colour chosen the section keeps the site's own surface.
         !dye && 'bg-cotton-100 dark:bg-card',
       )}

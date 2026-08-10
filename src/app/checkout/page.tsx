@@ -45,7 +45,7 @@ export default async function CheckoutPage() {
         </div>
       </div>
 
-      <div className="container py-8 md:py-12">
+      <div className="container section-y-sm">
         <h1 className="text-display-md">Checkout</h1>
 
         <div className="mt-8 lg:grid lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-12">

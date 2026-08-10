@@ -92,7 +92,7 @@ export default function ProcessPage() {
       {/* ------------------------------------------------------------------ */}
       {/* Dye reference                                                       */}
       {/* ------------------------------------------------------------------ */}
-      <section id="dyes" className="scroll-mt-24 border-y border-border bg-cotton-100 py-16 md:py-24 dark:bg-card">
+      <section id="dyes" className="scroll-mt-24 border-y border-border bg-cotton-100 section-y-lg dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
             <p className="eyebrow">The reference</p>
@@ -160,7 +160,7 @@ export default function ProcessPage() {
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      <section className="py-16 md:py-24">
+      <section className="section-y-lg">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-display-md">Now that you know what it takes</h2>

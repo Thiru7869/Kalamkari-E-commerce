@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="container py-14 md:py-20">
+    <div className="container section-y">
       <div className="mx-auto max-w-[46rem]">
         <Breadcrumbs trail={[{ label: 'Terms' }]} className="mb-6" />
         <h1 className="text-display-lg">Terms</h1>

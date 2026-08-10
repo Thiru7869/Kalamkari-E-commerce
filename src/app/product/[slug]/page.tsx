@@ -319,7 +319,7 @@ export default async function ProductPage({ params }: { params: Params }) {
       </Suspense>
 
       {related.length > 0 && (
-        <section className="border-t border-border py-16 md:py-20">
+        <section className="border-t border-border section-y">
           <div className="container">
             <h2 className="text-display-sm">Painted in the same tradition</h2>
             <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-4 md:gap-x-6">

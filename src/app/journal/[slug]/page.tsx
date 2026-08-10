@@ -160,7 +160,7 @@ export default async function JournalPostPage({ params }: { params: Params }) {
       </article>
 
       {more.length > 0 && (
-        <section className="border-t border-border bg-cotton-100 py-14 md:py-20 dark:bg-card">
+        <section className="border-t border-border bg-cotton-100 section-y dark:bg-card">
           <div className="container">
             <h2 className="text-display-sm">More from the journal</h2>
             <ul className="mt-8 grid gap-8 md:grid-cols-3">

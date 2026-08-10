@@ -13,7 +13,7 @@ export default function PrivacyPage() {
   const email = contactEmail();
 
   return (
-    <div className="container py-14 md:py-20">
+    <div className="container section-y">
       <div className="mx-auto max-w-[46rem]">
         <Breadcrumbs trail={[{ label: 'Privacy' }]} className="mb-6" />
         <h1 className="text-display-lg">Privacy</h1>

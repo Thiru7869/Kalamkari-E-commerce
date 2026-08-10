@@ -85,7 +85,7 @@ export function ColourWalk({ colours }: { colours: ColourStory[] }) {
   return (
     <section
       id="colours"
-      className="scroll-mt-24 border-y border-border bg-cotton-100 py-14 md:py-24 dark:bg-card"
+      className="scroll-mt-24 border-y border-border bg-cotton-100 section-y dark:bg-card"
       aria-labelledby="colour-walk-heading"
     >
       <div className="container">

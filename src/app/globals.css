@@ -61,6 +61,13 @@
     --gold: 39 63% 42%;
     --gold-foreground: 42 60% 97%;
 
+    /* Pachcha — indigo laid over a myrobalan yellow, which is the only way
+       this cloth makes a green. The one semantic colour on the site: it means
+       "confirmed", never "good", and never "go". 7.2:1 on the cotton ground,
+       7.5:1 on card; the dark value is 8.3:1 and 7.4:1. */
+    --success: 82 27% 27%;
+    --success-foreground: 42 60% 97%;
+
     /* Visible. A rule the reader cannot quite see is a section break that does
        not happen, and a long page of them is why this site read as one
        undifferentiated scroll. */
@@ -101,6 +108,10 @@
     /* Gold lifts in the dark for the same reason madder does. */
     --gold: 44 71% 62%;
     --gold-foreground: 30 12% 8%;
+
+    /* And so does pachcha. At its light value it is invisible on kasim. */
+    --success: 80 25% 61%;
+    --success-foreground: 30 12% 8%;
 
     --border: 32 10% 25%;
     --input: 32 10% 27%;
@@ -186,11 +197,44 @@
 }
 
 @layer components {
+  /*
+    Vertical rhythm — three tiers, and only three.
+
+    There were fifteen distinct `py-* md:py-*` pairs across fifty-two sections,
+    ranging from `py-6 md:py-10` to `py-24 md:py-32`. Nobody chose fifteen
+    tiers; they accumulated one section at a time, and the result is that two
+    sections of the same importance sitting next to each other could differ by
+    32px for no reason a reader could infer.
+
+    Fluid rather than breakpoint-stepped, so the rhythm tracks the type scale
+    (which is also fluid) instead of jumping at 768px while the headings glide.
+    The top end comes down as well: 128px of air above a heading is a landing
+    page, not a page somebody is reading.
+
+                  320px    768px    1440px      replaces
+      -y-sm        28px     37px      44px      py-6/8/10 md:py-10/12/14
+      -y           44px     58px      72px      py-11/12/14/16 md:py-16/20/24
+      -y-lg        56px     74px      92px      py-16/20/24 md:py-24/28/32
+  */
+  .section-y-sm {
+    padding-block: clamp(1.75rem, 3.5vw + 0.65rem, 2.75rem);
+  }
+  .section-y {
+    padding-block: clamp(2.75rem, 5.5vw + 1rem, 4.5rem);
+  }
+  .section-y-lg {
+    padding-block: clamp(3.5rem, 7vw + 1.3rem, 5.75rem);
+  }
+
   /* The section eyebrow used across the site: small, tracked, in kasim grey.
      Set in the inscriptional face — these labels name a thing rather than say
-     something about it, which is what carved capitals are for. */
+     something about it, which is what carved capitals are for.
+
+     The tracking opens up from `sm`. At 11px on a 320px screen, 0.2em is what
+     pushed a three-part location label onto a second line; the letters have
+     room to breathe again once there is a screen to breathe into. */
   .eyebrow {
-    @apply font-inscription text-eyebrow uppercase tracking-[0.2em] text-muted-foreground;
+    @apply font-inscription text-eyebrow uppercase tracking-[0.14em] text-muted-foreground sm:tracking-[0.2em];
   }
 
   /*

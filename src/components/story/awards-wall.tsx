@@ -34,7 +34,7 @@ export function AwardsWall() {
 
   return (
     <section
-      className="border-t border-border py-14 md:py-20"
+      className="border-t border-border section-y"
       aria-labelledby="awards-heading"
     >
       <div className="container">

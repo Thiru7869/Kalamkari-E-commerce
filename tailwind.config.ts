@@ -98,6 +98,59 @@ const config: Config = {
           900: '#22201D',
           950: '#141312',
         },
+        /**
+         * pachcha — the green, and the only colour on the cloth that is made
+         * of two other colours.
+         *
+         * There is no green dye in this workshop. Green is obtained the way it
+         * has always been obtained here: a yellow ground struck from myrobalan
+         * or pomegranate rind, then dipped in the indigo vat, so the blue lies
+         * over the yellow and the eye resolves the pair. That is why these
+         * swatches sit between the `myrobalan` and `indigo` ramps rather than
+         * on a pure green hue — a saturated emerald would be a colour this
+         * cloth cannot produce.
+         *
+         * Used for the states that mean "this is settled": in stock, verified,
+         * a step completed. Never for a call to action — madder does that.
+         */
+        pachcha: {
+          50: '#F2F5EC',
+          100: '#E1E8D4',
+          200: '#C4D0AC',
+          300: '#A3B481',
+          400: '#84975E',
+          500: '#697B47',
+          600: '#526138',
+          700: '#414D2E',
+          800: '#353E27',
+          900: '#2B3220',
+          950: '#161A11',
+        },
+
+        /**
+         * geru — red ochre earth, the warm terracotta between madder and
+         * catechu.
+         *
+         * `chay` is a dyed red and `katha` is a bark brown; neither is the
+         * warm burnt-sienna the ground of a finished cloth actually goes when
+         * the alum was laid thin. This ramp fills that gap, and is what the
+         * site's warm surfaces are tinted with — section grounds, borders on
+         * cloth-coloured cards, the wash behind a quotation.
+         */
+        geru: {
+          50: '#FBF3EE',
+          100: '#F5E2D5',
+          200: '#E8C3AB',
+          300: '#D89F7C',
+          400: '#C57B53',
+          500: '#AC5F39',
+          600: '#8D4A2C',
+          700: '#713B25',
+          800: '#5A3020',
+          900: '#48281C',
+          950: '#28140E',
+        },
+
         cotton: {
           50: '#FDFBF6',
           100: '#FAF6EC',
@@ -124,6 +177,19 @@ const config: Config = {
         gold: {
           DEFAULT: 'hsl(var(--gold))',
           foreground: 'hsl(var(--gold-foreground))',
+        },
+
+        /**
+         * The settled state, in pachcha green. Theme-aware, because a green
+         * that reads on cream is invisible on kasim black — it lifts in the
+         * dark exactly as madder and gold do.
+         *
+         * This is the site's only *semantic* colour: it means "confirmed",
+         * not "good". In stock, paid, dispatched, a step completed.
+         */
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
         },
 
         // shadcn/ui token surface, mapped onto the dye palette above.
@@ -172,18 +238,55 @@ const config: Config = {
         // Telugu, for the few places the local name of a thing is the true name.
         telugu: ['var(--font-telugu)', 'var(--font-body)', 'sans-serif'],
       },
+      /**
+       * The type scale, re-struck to fit a phone.
+       *
+       * The previous scale was built from `clamp(min, Nvw, max)` with no
+       * intercept, which has a specific failure mode: below the width where
+       * `Nvw` overtakes `min`, the type stops responding at all and sits flat
+       * on its floor. `display-xl` was `clamp(3rem, 8.6vw, 6rem)`, and 8.6vw
+       * does not reach 3rem until 558px — so every phone on earth got the
+       * same 48px headline, and 48px on a 390px screen spent four lines and
+       * 196px of vertical space on six words.
+       *
+       * Each line below is instead a real linear ramp, `Nvw + Crem`, solved
+       * through two points: a comfortable size at 320px and the intended size
+       * at 1440px. The type now actually scales across the whole range, the
+       * floors are reachable sizes rather than parked ones, and the ceilings
+       * come down too — the desktop headline was also larger than the writing
+       * underneath it deserved.
+       *
+       *                 320px      390px     1024px     1440px    (was 390 / max)
+       *   display-xl     34px       37px       65px       84px     (48 / 96)
+       *   display-lg     28px       30px       48px       60px     (40 / 70)
+       *   display-md     24px       25px       35px       42px     (31 / 48)
+       *   display-sm     20px       21px       26px       30px     (24 / 33)
+       *   body-lg        16px       16px       17px       18px     (17 / 19)
+       */
       fontSize: {
-        // Cormorant sets optically smaller than a grotesque at the same px, and
-        // its old-style forms want *positive* tracking at display sizes rather
-        // than the negative tracking a geometric sans needs. Both are corrected
-        // here so the scale reads at the same visual weight as before.
-        'display-xl': ['clamp(3rem, 8.6vw, 6rem)', { lineHeight: '1.02', letterSpacing: '-0.012em' }],
-        'display-lg': ['clamp(2.5rem, 6.4vw, 4.4rem)', { lineHeight: '1.06', letterSpacing: '-0.01em' }],
-        'display-md': ['clamp(1.95rem, 4.8vw, 3rem)', { lineHeight: '1.13', letterSpacing: '-0.006em' }],
-        'display-sm': ['clamp(1.5rem, 3.2vw, 2.05rem)', { lineHeight: '1.22', letterSpacing: '-0.002em' }],
-        'body-lg': ['clamp(1.0625rem, 1.4vw, 1.1875rem)', { lineHeight: '1.7' }],
-        'body-base': ['1rem', { lineHeight: '1.65' }],
-        'eyebrow': ['0.75rem', { lineHeight: '1.4', letterSpacing: '0.16em' }],
+        'display-xl': [
+          'clamp(2.125rem, 4.46vw + 1.23rem, 5.25rem)',
+          { lineHeight: '1.04', letterSpacing: '-0.012em' },
+        ],
+        'display-lg': [
+          'clamp(1.75rem, 2.86vw + 1.18rem, 3.75rem)',
+          { lineHeight: '1.08', letterSpacing: '-0.01em' },
+        ],
+        'display-md': [
+          'clamp(1.5rem, 1.61vw + 1.18rem, 2.625rem)',
+          { lineHeight: '1.16', letterSpacing: '-0.006em' },
+        ],
+        'display-sm': [
+          'clamp(1.25rem, 0.89vw + 1.07rem, 1.875rem)',
+          { lineHeight: '1.25', letterSpacing: '-0.002em' },
+        ],
+        'body-lg': ['clamp(1rem, 0.18vw + 0.96rem, 1.125rem)', { lineHeight: '1.65' }],
+        'body-base': ['1rem', { lineHeight: '1.62' }],
+        // 11px, and the tracking comes down with it. At 12px/0.2em the location
+        // eyebrow — "Srikalahasti · Tirupati district · Andhra Pradesh" — wrapped
+        // to two lines on every phone, which is a caption pretending to be a
+        // label. `.eyebrow` in globals.css sets the tracking per breakpoint.
+        'eyebrow': ['0.6875rem', { lineHeight: '1.45', letterSpacing: '0.14em' }],
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -281,6 +384,19 @@ const config: Config = {
         'draw-stroke': 'draw-stroke 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         'dye-bloom': 'dye-bloom 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         'rise-in': 'rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+        /*
+          The staggered page-load entrance. `both` rather than `forwards` is
+          the whole difference: a delayed animation with `forwards` sits at its
+          *normal* state until its delay elapses and then snaps to the first
+          keyframe, so a staggered row would flash fully-formed and then blink
+          out before arriving. `both` applies `from` through the delay too.
+
+          Pure CSS, deliberately. The equivalent in JavaScript has to hide the
+          element in an effect, which runs after a paint has already happened —
+          the same flicker, only harder to see coming. A stylesheet animation's
+          first keyframe is in place before the first paint.
+        */
+        'enter-rise': 'rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
         shimmer: 'shimmer 1.8s infinite',
         'tour-pulse': 'tour-pulse 2.4s ease-in-out infinite',
         'name-arrive': 'name-arrive 1.5s cubic-bezier(0.16, 1, 0.3, 1) both',

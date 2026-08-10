@@ -35,7 +35,7 @@ export default async function JournalPage() {
         </div>
       </section>
 
-      <div className="container py-12 md:py-16">
+      <div className="container section-y">
         {posts.length === 0 ? (
           <div className="py-20 text-center">
             <h2 className="font-display text-2xl">Nothing written here yet</h2>

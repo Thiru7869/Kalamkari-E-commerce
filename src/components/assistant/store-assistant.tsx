@@ -206,7 +206,20 @@ export function StoreAssistant() {
         aria-controls={panelId}
         data-tour="assistant"
         className={cn(
-          'group pointer-events-auto relative flex h-12 items-center gap-2.5 rounded-full pl-3.5 pr-4',
+          /*
+            A circle on a phone, a labelled pill from `sm` up.
+
+            The pill is 132px wide, and it is fixed over the bottom-right of a
+            390px screen — which is exactly where the hero's primary call to
+            action sits when the page is at rest. "Ask Lakshmi" was drawn on
+            top of "See what is in the store", so the one control the whole
+            hero is built to earn was partly buried by a launcher for a
+            secondary one. A 48px circle clears it, and costs nothing: the
+            label is still announced, and there is room for the words again as
+            soon as there is a screen wide enough to spare them.
+          */
+          'group pointer-events-auto relative flex h-12 items-center justify-center rounded-full',
+          'w-12 sm:w-auto sm:justify-start sm:gap-2.5 sm:pl-3.5 sm:pr-4',
           'border border-primary/25 bg-primary text-primary-foreground',
           'shadow-[0_8px_24px_-10px_hsl(var(--primary)/0.7)]',
           'transition-transform duration-300 ease-out hover:scale-[1.03]',
@@ -215,11 +228,11 @@ export function StoreAssistant() {
         )}
       >
         {open ? (
-          <X className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
+          <X className="h-[1.15rem] w-[1.15rem] shrink-0" aria-hidden="true" />
         ) : (
-          <MessageCircle className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
+          <MessageCircle className="h-[1.15rem] w-[1.15rem] shrink-0" aria-hidden="true" />
         )}
-        <span className="font-inscription text-[0.8125rem] tracking-[0.06em]">
+        <span className="sr-only font-inscription text-[0.8125rem] tracking-[0.06em] sm:not-sr-only">
           {open ? 'Close' : assistantIdentity.label}
         </span>
       </button>

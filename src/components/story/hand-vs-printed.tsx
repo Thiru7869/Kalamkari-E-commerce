@@ -30,7 +30,7 @@ export function HandVsPrinted({
 }) {
   return (
     <section
-      className={cn('border-y border-border bg-cotton-100 py-14 md:py-20 dark:bg-card', className)}
+      className={cn('border-y border-border bg-cotton-100 section-y dark:bg-card', className)}
       aria-labelledby="hand-vs-printed-heading"
     >
       <div className="container">

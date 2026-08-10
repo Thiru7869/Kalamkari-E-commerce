@@ -17,7 +17,7 @@ export default async function WishlistPage() {
 
   if (!session?.user?.id) {
     return (
-      <div className="container py-20 md:py-28">
+      <div className="container section-y-lg">
         <div className="mx-auto max-w-md text-center">
           <Heart className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
           <h1 className="mt-5 text-display-md">Sign in to see your wishlist</h1>
@@ -44,7 +44,7 @@ export default async function WishlistPage() {
 
   if (products.length === 0) {
     return (
-      <div className="container py-20 md:py-28">
+      <div className="container section-y-lg">
         <div className="mx-auto max-w-md text-center">
           <Heart className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
           <h1 className="mt-5 text-display-md">Nothing saved yet</h1>
@@ -67,7 +67,7 @@ export default async function WishlistPage() {
   }
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container section-y-sm">
       <h1 className="text-display-lg">Your wishlist</h1>
       <p className="mt-2 text-muted-foreground">
         {products.length} saved

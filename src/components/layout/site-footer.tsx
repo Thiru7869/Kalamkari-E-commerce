@@ -9,7 +9,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-24 border-t border-border bg-kasim-900 text-cotton-200">
-      <div className="container py-14 md:py-16">
+      <div className="container section-y">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)]">
           <div className="max-w-sm">
             <p className="font-display text-2xl leading-tight text-cotton-50">{site.name}</p>

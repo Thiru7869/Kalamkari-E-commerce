@@ -47,7 +47,7 @@ export function TrustStrip({ className }: { className?: string }) {
   return (
     <section
       aria-label="What you are buying"
-      className={cn('border-y border-border bg-cotton-100 py-10 md:py-12 dark:bg-card', className)}
+      className={cn('border-y border-border bg-cotton-100 section-y-sm dark:bg-card', className)}
     >
       <div className="container">
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">

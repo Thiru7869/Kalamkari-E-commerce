@@ -21,7 +21,7 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="container py-24 md:py-32">
+    <div className="container section-y-lg">
       <div className="mx-auto max-w-lg text-center">
         <h1 className="text-display-md">Something went wrong at our end</h1>
         <p className="mt-4 leading-relaxed text-muted-foreground">

@@ -61,7 +61,7 @@ export default function CommissionPage() {
         </div>
       </section>
 
-      <section className="py-14 md:py-20">
+      <section className="section-y">
         <div className="container">
           <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-20">
             <div>
@@ -125,7 +125,7 @@ export default function CommissionPage() {
       {/* ------------------------------------------------------------------ */}
       {/* What actually happens after you send                                */}
       {/* ------------------------------------------------------------------ */}
-      <section className="border-y border-border bg-cotton-100 py-14 md:py-20 dark:bg-card">
+      <section className="border-y border-border bg-cotton-100 section-y dark:bg-card">
         <div className="container">
           <RevealOnScroll>
             <p className="eyebrow">After you send it</p>
@@ -162,7 +162,7 @@ export default function CommissionPage() {
       {/* ------------------------------------------------------------------ */}
       {/* The narrative traditions                                            */}
       {/* ------------------------------------------------------------------ */}
-      <section className="py-14 md:py-20">
+      <section className="section-y">
         <div className="container">
           <RevealOnScroll>
             <NarrativeNote />

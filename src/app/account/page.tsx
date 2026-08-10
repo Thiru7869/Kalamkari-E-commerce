@@ -43,7 +43,7 @@ export default async function AccountPage() {
   ]);
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container section-y-sm">
       <div className="flex flex-wrap items-start justify-between gap-6">
         <div>
           <h1 className="text-display-lg">

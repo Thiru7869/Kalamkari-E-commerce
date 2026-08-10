@@ -110,7 +110,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
         </div>
       </header>
 
-      <div className="container py-10 md:py-14">
+      <div className="container section-y-sm">
         {items.length > 0 ? (
           <>
             <ProductGrid products={items} wishlistIds={wishlistIds} />

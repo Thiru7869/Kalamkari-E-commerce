@@ -58,7 +58,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </div>
 
-      <div className="container py-8 md:py-10">{children}</div>
+      <div className="container section-y-sm">{children}</div>
     </div>
   );
 }

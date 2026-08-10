@@ -4,7 +4,7 @@ import { shopCategories } from '@/content/site';
 
 export default function NotFound() {
   return (
-    <div className="container py-24 md:py-32">
+    <div className="container section-y-lg">
       <div className="mx-auto max-w-lg text-center">
         <p className="font-display text-5xl text-primary/40">404</p>
         <h1 className="mt-5 text-display-md">This page is not here</h1>

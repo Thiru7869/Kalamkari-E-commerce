@@ -113,8 +113,8 @@ export default function OurStoryPage() {
           key={chapter.id}
           className={
             i % 2 === 1
-              ? 'border-y border-border bg-cotton-100 py-14 md:py-20 dark:bg-card'
-              : 'py-14 md:py-20'
+              ? 'border-y border-border bg-cotton-100 section-y dark:bg-card'
+              : 'section-y'
           }
         >
           <div className="container">
@@ -140,7 +140,7 @@ export default function OurStoryPage() {
       ))}
 
       {/* The family. */}
-      <section className="py-14 md:py-20">
+      <section className="section-y">
         <div className="container">
           <RevealOnScroll className="max-w-2xl">
             <p className="eyebrow">Five people</p>
@@ -233,7 +233,7 @@ export default function OurStoryPage() {
       {/* Recognition. */}
       <AwardsWall />
 
-      <section className="border-t border-border bg-cotton-100 py-16 md:py-20 dark:bg-card">
+      <section className="border-t border-border bg-cotton-100 section-y dark:bg-card">
         <div className="container">
           <RevealOnScroll className="mx-auto max-w-2xl text-center">
             <h2 className="text-display-md">See the work itself</h2>

@@ -18,7 +18,7 @@ export default async function CartPage() {
 
   if (cart.lines.length === 0) {
     return (
-      <div className="container py-20 md:py-28">
+      <div className="container section-y-lg">
         <div className="mx-auto max-w-md text-center">
           <ShoppingBag className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
           <h1 className="mt-5 text-display-md">Your bag is empty</h1>
@@ -45,7 +45,7 @@ export default async function CartPage() {
   const soldOutLines = cart.lines.filter((l) => l.stock < 1);
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container section-y-sm">
       <h1 className="text-display-lg">Your bag</h1>
       <p className="mt-2 text-muted-foreground">
         {cart.itemCount} {cart.itemCount === 1 ? 'piece' : 'pieces'}

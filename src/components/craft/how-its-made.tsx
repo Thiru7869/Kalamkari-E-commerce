@@ -86,7 +86,7 @@ export function HowItsMade() {
 
   return (
     <section
-      className="relative overflow-hidden border-y border-border bg-cotton-100 py-14 md:py-24 dark:bg-card"
+      className="relative overflow-hidden border-y border-border bg-cotton-100 section-y dark:bg-card"
       aria-labelledby="how-its-made-heading"
     >
       <div className="container">
