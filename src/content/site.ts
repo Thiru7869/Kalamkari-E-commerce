@@ -46,8 +46,14 @@ export const site = {
    * there is always at least one way through to the family.
    */
   contact: {
-    /** Published store email, e.g. 'hello@example.com'. */
-    email: '',
+    /**
+     * Published store email.
+     *
+     * Supplied by the store on 2026-08-10 and corroborated by the SMTP account
+     * the site already authenticates with, so this is the address the family
+     * actually reads rather than one built from the domain.
+     */
+    email: 'vijayalakshmifinekalamkariarts@gmail.com',
     /** Telephone, in the form it should be displayed, e.g. '+91 98765 43210'. */
     phone: '',
     /** Digits only, country code first — used to build the wa.me deep link. */

@@ -179,6 +179,17 @@ export default function ContactPage() {
               addressCountry: 'IN',
             },
             hasMap: site.location.mapsUrl,
+            /*
+              Contact channels, spread in only when published.
+
+              These read through the same guards as the visible page rather
+              than `site.contact` directly, so the two can never disagree — an
+              unpublished channel is absent from the markup and absent from the
+              structured data, instead of being hidden on the page while a
+              crawler is still told an empty string.
+            */
+            ...(email ? { email } : {}),
+            ...(phone ? { telephone: phone } : {}),
           }),
         }}
       />
