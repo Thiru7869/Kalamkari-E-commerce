@@ -1,19 +1,34 @@
 // Sri Vijaya Lakshmi Fine Kalamkari Arts — data model
 //
-// Defaults to SQLite so the project runs immediately after clone. To move to
-// PostgreSQL, change `provider` to "postgresql" and point DATABASE_URL at your
-// instance — no other change is required, because this schema deliberately
-// avoids provider-specific features (no native enums, no arrays, no JSON
-// columns). Lists are stored as newline-delimited text and read through the
-// helpers in src/lib/serialize.ts.
+// PostgreSQL. Not a preference: the site is deployed to serverless functions,
+// whose filesystem is read-only and thrown away between invocations, so a
+// SQLite file has nowhere to live. Running on SQLite in production is what put
+// the error boundary on every page of the first deployment — the build wrote
+// `prisma/dev.db` into the build container, and nothing that served a request
+// afterwards could see it.
+//
+// The move cost exactly what this schema was written to make it cost: the two
+// lines below, and `mode: 'insensitive'` on the `contains` clauses in
+// buildWhere (src/lib/queries.ts) — SQLite is case-insensitive for ASCII by
+// default and rejects the option, Postgres is not and needs it. Nothing else
+// changed, because the schema deliberately avoids provider-specific features
+// (no native enums, no arrays, no JSON columns). Lists are stored as
+// newline-delimited text and read through the helpers in src/lib/serialize.ts.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+
+  // Migrations must not run through a transaction pooler — it cannot hold the
+  // advisory lock Prisma takes for the duration, and `migrate deploy` either
+  // hangs or reports a lock it never acquired. `url` is the pooled endpoint the
+  // app queries through; `directUrl` is the unpooled one, used by the migration
+  // engine only. On Neon they differ by the `-pooler` in the host.
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // ---------------------------------------------------------------------------

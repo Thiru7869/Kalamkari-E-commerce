@@ -140,22 +140,73 @@ export function HeroScene({ className }: { className?: string }) {
       frame = requestAnimationFrame(paint);
     };
 
-    frame = requestAnimationFrame(paint);
-    return () => cancelAnimationFrame(frame);
+    /*
+      The loop runs only while the hero is actually on screen.
+
+      It used to start on mount and never stop, so reading the rest of a very
+      long home page — or leaving the tab open on it — kept a rAF callback
+      firing every frame for the lifetime of the page, to move a gradient
+      nobody could see. That is the kind of thing that shows up as battery
+      drain on a phone rather than as a bug on a desktop.
+
+      An IntersectionObserver rather than a scroll handler: the browser already
+      knows the answer and can give it to us without running anything per
+      frame.
+    */
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !frame) {
+          frame = requestAnimationFrame(paint);
+        } else if (!entry.isIntersecting && frame) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+        }
+      },
+      { threshold: 0 },
+    );
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [scroll, reducedMotion]);
 
   return (
     <div ref={containerRef} className={className} aria-hidden="true">
-      {ready && enabled ? (
-        <HeroCanvas
-          scroll={scroll}
-          lowPower={lowPower}
-          reducedMotion={reducedMotion}
-          dpr={dpr}
-        />
-      ) : (
-        <ClothGradient />
-      )}
+      {/*
+        The gradient is always painted, and the canvas layers over it.
+
+        It used to be an either/or, and the "or" was decided by a WebGL *probe*
+        — a throwaway context created and immediately released by
+        useSceneCapability. That probe answers "could this device do WebGL",
+        which is not the same question as "did this Canvas start". The real
+        context can still fail afterwards: a driver blocklist, one context too
+        many on the page, a lost context on a phone that backgrounded the tab.
+        When it did, `enabled` was still true, so the fallback was not rendered
+        and the hero was left as bare page colour under a scrim built to sit on
+        mid-dark cloth — which took the heading down to about 2.4:1.
+
+        Painting both costs one CSS gradient and removes the whole failure
+        class: whatever happens to WebGL, the hero has its cloth behind the
+        text, and the canvas is a pure enhancement on top of it.
+      */}
+      <div className="relative h-full w-full">
+        <div className="absolute inset-0">
+          <ClothGradient />
+        </div>
+
+        {ready && enabled && (
+          <div className="absolute inset-0">
+            <HeroCanvas
+              scroll={scroll}
+              lowPower={lowPower}
+              reducedMotion={reducedMotion}
+              dpr={dpr}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

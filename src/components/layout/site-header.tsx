@@ -41,14 +41,20 @@ export async function SiteHeader() {
           rotates rather than scrolls under reduced motion, and closes. */}
       <AnnouncementBar />
 
-      <div className="container flex h-16 items-center gap-3 md:h-20">
-        <div className="flex items-center gap-1 md:hidden">
+      <div className="container flex h-16 items-center gap-2 md:h-20 md:gap-3">
+        <div className="flex shrink-0 items-center gap-1 md:hidden">
           <MobileMenu isSignedIn={Boolean(session?.user)} />
         </div>
 
+        {/*
+          `min-w-0`, not `shrink-0`. A flex item defaults to `min-width:auto`,
+          which refuses to shrink below its content — so the wordmark used to
+          hold its full 256px on a 320px screen and push the cart button off
+          the edge rather than give up a pixel.
+        */}
         <Link
           href="/"
-          className="flex shrink-0 items-center rounded-sm focus-visible:ring-2 focus-visible:ring-ring md:mr-2"
+          className="flex min-w-0 items-center rounded-sm focus-visible:ring-2 focus-visible:ring-ring md:mr-2"
           aria-label={`${site.name}, home`}
         >
           <Wordmark />
@@ -56,10 +62,17 @@ export async function SiteHeader() {
 
         <DesktopNav items={mainNav} />
 
-        <div className="ml-auto flex items-center gap-0.5">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5">
           {/* Explore sits immediately before search, as the map before the
-              index — one opens everything, the other finds one thing. */}
-          <ExploreMenu />
+              index — one opens everything, the other finds one thing.
+
+              Below `sm` it is icon-only and its whole contents are already in
+              the menu drawer beside it, so it is the one header control that
+              can go to buy the wordmark the width it needs. The tour skips
+              steps whose target is absent, so it drops out cleanly too. */}
+          <div className="hidden sm:block">
+            <ExploreMenu />
+          </div>
 
           {/*
             Both of these open the panel over the current page rather than

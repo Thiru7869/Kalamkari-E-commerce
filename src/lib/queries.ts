@@ -91,17 +91,31 @@ function buildWhere(filters: ShopFilters): Prisma.ProductWhereInput {
   if (filters.q) {
     const q = filters.q.trim();
     if (q) {
-      // SQLite's LIKE is case-insensitive for ASCII by default, so `mode` is
-      // omitted here — adding it would break the SQLite provider. On Postgres,
-      // add `mode: 'insensitive'` to each clause.
+      /*
+        Postgres' LIKE is case-sensitive, so every clause states `insensitive`
+        explicitly.
+
+        This is not cosmetic. Without it a visitor searching "ramayana" or
+        "TUSSAR" gets nothing back while the same search in the old SQLite
+        build worked, because SQLite's LIKE is case-insensitive for ASCII by
+        default and was quietly carrying this. It is also the one thing on the
+        Postgres move that no build step can catch: the query is valid, it
+        returns zero rows, and the page renders a perfectly good "nothing
+        found".
+
+        If the provider is ever set back to "sqlite", `mode` has to come out
+        again — SQLite rejects the option outright.
+      */
+      const insensitive = 'insensitive' as const;
+
       where.OR = [
-        { name: { contains: q } },
-        { summary: { contains: q } },
-        { description: { contains: q } },
-        { artisan: { contains: q } },
-        { category: { name: { contains: q } } },
-        { fabric: { name: { contains: q } } },
-        { motifs: { some: { motif: { name: { contains: q } } } } },
+        { name: { contains: q, mode: insensitive } },
+        { summary: { contains: q, mode: insensitive } },
+        { description: { contains: q, mode: insensitive } },
+        { artisan: { contains: q, mode: insensitive } },
+        { category: { name: { contains: q, mode: insensitive } } },
+        { fabric: { name: { contains: q, mode: insensitive } } },
+        { motifs: { some: { motif: { name: { contains: q, mode: insensitive } } } } },
       ];
     }
   }

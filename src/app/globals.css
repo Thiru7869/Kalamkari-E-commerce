@@ -120,11 +120,28 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    /* Prevent horizontal scroll from any oversized 3D canvas or wide table. */
-    overflow-x: hidden;
     text-rendering: optimizeLegibility;
     font-synthesis-weight: none;
   }
+
+  /*
+    There is deliberately no `overflow-x: hidden` here.
+
+    There was, and it was hiding a real bug rather than preventing one: the
+    header wordmark held a fixed 256px on a 320px screen and pushed the search
+    and cart buttons 103px past the right edge of every page on the site. The
+    rule meant nobody could scroll to see it, so it read as a cramped header
+    instead of a broken one.
+
+    It also has a cost of its own — `overflow` on the body makes it a scroll
+    container, which breaks `position: sticky` on its descendants and quietly
+    changes what `scrollIntoView` does. Sections that genuinely need to clip a
+    bleeding decoration (the hero's 3D canvas, the type banners) carry
+    `overflow-hidden` themselves, where the intent is local and visible.
+
+    If horizontal scroll ever comes back, it is a layout bug. Find it with:
+      document.documentElement.scrollWidth - document.documentElement.clientWidth
+  */
 
   /* Cormorant's regular is a *book* weight — correct for running text, too
      light for a heading standing alone on a cream ground. 500 is the weight at

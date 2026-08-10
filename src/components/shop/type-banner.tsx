@@ -131,7 +131,13 @@ export function TypeBanner({
                   // A slow drift, so a still photograph on a five-second hold
                   // does not read as a broken image.
                   active && !reduced && 'motion-safe:scale-105',
-                  'transition-transform duration-[6000ms] ease-out',
+                  // Spelled as the CSS property rather than the `duration-*`
+                  // shorthand with an arbitrary value: that form matches both
+                  // transition-duration and animation-duration, so Tailwind
+                  // cannot tell which was meant and warns on every build.
+                  // (Do not write the shorthand in a comment either — the
+                  // content scanner reads comments and warns about those too.)
+                  'transition-transform ease-out [transition-duration:6000ms]',
                 )}
               />
 

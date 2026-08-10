@@ -151,16 +151,32 @@ somebody writes to it and believes they have reached the store.
 
 ## The database
 
+**PostgreSQL, everywhere, including local development.** Not a preference: the
+deploy target is serverless, where the filesystem is read-only and discarded
+between invocations, so a SQLite file has nowhere to live. Running SQLite in
+production is what put the error boundary on every page of the first
+deployment.
+
 - The schema avoids provider-specific features on purpose: no native enums, no
   arrays, no JSON columns. Lists are newline-delimited text read through
-  `src/lib/serialize.ts`. This is what makes the SQLite → PostgreSQL move a
-  configuration change.
+  `src/lib/serialize.ts`. That is what kept the SQLite → PostgreSQL move down
+  to the provider line, a regenerated migration and one query option.
 - Schema changes go through **migrations** (`npm run db:migrate`), not
   `db push`. `db:push` remains for quick local spikes only.
-- Moving to Postgres additionally needs `mode: 'insensitive'` added to the
-  `contains` clauses in `buildWhere` (`src/lib/queries.ts`) — SQLite is
-  case-insensitive for ASCII by default and rejects the option; Postgres is not
-  and needs it.
+- `buildWhere` (`src/lib/queries.ts`) states `mode: 'insensitive'` on every
+  `contains` clause. Do not remove it: Postgres' `LIKE` is case-sensitive, and
+  without it a search for "ramayana" returns nothing while rendering a
+  perfectly good "nothing found". No build step can catch that — the query is
+  valid, it just has no rows. This is the reason development runs on Postgres
+  too.
+- **Two URLs.** `DATABASE_URL` is the *pooled* endpoint and carries every
+  query; `DIRECT_DATABASE_URL` is *unpooled* and is used by `prisma migrate`
+  alone, because migrations hold an advisory lock that a transaction pooler
+  cannot. Mixing them up fails in opposite directions: connection exhaustion
+  one way, a hanging migration the other.
+- Prisma CLI configuration lives in `prisma.config.ts`, not the `prisma` key in
+  `package.json`. That file has to load `.env` itself — the CLI stops doing it
+  the moment a config file exists.
 
 ## Per-request caching
 
@@ -169,6 +185,42 @@ Anything read more than once in a single render is wrapped in `React.cache`:
 `getCategoryBySlug`, `getCategories`, `getBlogPost`, `getReviewEligibility`.
 Prisma calls are not deduplicated the way `fetch` is. `generateMetadata` and the
 page body both run, so an uncached query on a product page costs two.
+
+## Layout
+
+**There is no `overflow-x: hidden` on `body`, and none should be added.**
+
+There was one, and it was hiding a bug rather than preventing one. The header
+wordmark's second line — "Fine Kalamkari Arts · Srikalahasti", 9px but tracked
+to 0.2em — is **222px wide**, which fixed the wordmark block at 256px. On a
+`shrink-0` flex item that meant the search and cart buttons sat 103px past the
+right edge of every page on the site, at every width below about 500px. The
+rule meant nobody could scroll to see it, so it read as a cramped header rather
+than a broken one.
+
+The rule also costs something: `overflow` on the body makes it a scroll
+container, which breaks `position: sticky` on its descendants and changes what
+`scrollIntoView` does.
+
+So horizontal scroll is treated as a bug with a location. To find it:
+
+```js
+document.documentElement.scrollWidth - document.documentElement.clientWidth
+```
+
+Two shapes account for most of it, and both were live here:
+
+- **`min-width: auto`.** A flex item will not shrink below its content unless
+  told to. `min-w-0` on the item, not `shrink-0` — `shrink-0` is what caused
+  this.
+- **Intrinsic widths that ignore `min-w-0`.** An `<input>` carries a default
+  `size="20"` — about 223px — and that width still counts toward the *flex
+  container's* min-content even when the input itself is `min-w-0 flex-1`. The
+  newsletter row sized the whole footer column this way. `size={1}` removes the
+  floor; `flex-1` still grows it.
+
+Sections that genuinely need to clip a bleeding decoration carry
+`overflow-hidden` themselves, where the intent is local and visible.
 
 ## Accessibility
 

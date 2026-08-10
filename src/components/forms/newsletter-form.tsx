@@ -41,6 +41,16 @@ export function NewsletterForm() {
           required
           autoComplete="email"
           placeholder="you@example.com"
+          /*
+            An <input> defaults to `size="20"`, which is an *intrinsic* width of
+            roughly 223px here. `min-w-0 flex-1` lets it shrink once the row is
+            being laid out, but it does not remove that 223px from the row's
+            min-content — so this row reported a 309px minimum, which sized the
+            whole footer column and pushed the footer 32px past the right edge
+            of a 320px screen. `size={1}` drops the intrinsic floor; `flex-1`
+            still grows it to fill whatever is actually available.
+          */
+          size={1}
           aria-describedby={state.status !== 'idle' ? 'newsletter-status' : undefined}
           aria-invalid={state.status === 'error'}
           className="h-11 min-w-0 flex-1 rounded-sm border border-cotton-200/25 bg-transparent px-3 text-base text-cotton-50 placeholder:text-cotton-200/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cotton-200 focus-visible:ring-offset-2 focus-visible:ring-offset-kasim-900"

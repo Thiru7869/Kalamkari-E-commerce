@@ -8,17 +8,18 @@ Next.js 15 (App Router) · TypeScript · Tailwind · Prisma · Auth.js · React 
 
 ## Quick start
 
+This project needs a PostgreSQL database — see [The database](#the-database)
+for why, and for a one-line Docker container if you do not have one.
+
 ```bash
-npm install --legacy-peer-deps
-cp .env.example .env          # then set AUTH_SECRET (see below)
+npm install
+cp .env.example .env          # set DATABASE_URL, DIRECT_DATABASE_URL, AUTH_SECRET
 npm run setup                 # prisma generate + migrate deploy + seed
 node scripts/generate-placeholders.mjs
 npm run dev
 ```
 
 Open <http://localhost:3000>.
-
-`--legacy-peer-deps` is needed because several three.js ecosystem packages have not yet widened their React 19 peer ranges. The code itself is React 19 compatible.
 
 Generate an auth secret with `npx auth secret`, or:
 
@@ -304,27 +305,93 @@ Registered in production only; in development any existing worker is actively un
 
 ---
 
-## Moving to PostgreSQL
+## The database
 
-The schema avoids provider-specific features on purpose (no native enums, no arrays, no JSON columns — lists are newline-delimited text read through `src/lib/serialize.ts`). To switch:
+**PostgreSQL, in development as well as production.** This is not a preference.
+The site is deployed to serverless functions, whose filesystem is read-only and
+thrown away between invocations, so a SQLite file has nowhere to live — the
+first deployment ran on SQLite and served the error boundary on every page,
+because the build wrote `prisma/dev.db` into the build container and nothing
+that answered a request afterwards could see it.
 
-1. `provider = "postgresql"` in `prisma/schema.prisma`.
-2. Point `DATABASE_URL` at your instance.
-3. Delete `prisma/migrations/` and regenerate it against the new provider —
-   the existing migration is SQLite DDL and will not replay on Postgres:
-   `npx prisma migrate dev --name initial_schema`, then `npm run db:seed`.
-4. In `src/lib/queries.ts`, add `mode: 'insensitive'` to the `contains` clauses in `buildWhere` — SQLite is case-insensitive for ASCII by default and rejects the option, Postgres is not and needs it.
+Developing on the same engine you deploy on also stops a specific class of bug
+reaching production: SQLite's `LIKE` is case-insensitive for ASCII and
+Postgres' is not, so a search filter that works locally can return zero rows
+live. That is why `buildWhere` in `src/lib/queries.ts` states
+`mode: 'insensitive'` explicitly.
+
+Two connection strings, and they are not interchangeable:
+
+| Variable | Endpoint | Used by |
+| --- | --- | --- |
+| `DATABASE_URL` | **pooled** | every query the app makes |
+| `DIRECT_DATABASE_URL` | **unpooled** | `prisma migrate` only |
+
+Each serverless invocation is its own process holding its own connection, so an
+unpooled `DATABASE_URL` exhausts the connection limit under real traffic.
+Migrations take an advisory lock for their duration and a transaction pooler
+cannot hold one, so they need the direct endpoint. On Neon the two differ by
+`-pooler` in the hostname; on a plain Postgres with no pooler, set both the
+same.
+
+For a local database without depending on the network:
+
+```bash
+docker run -d --name svl-pg \
+  -e POSTGRES_USER=svl -e POSTGRES_PASSWORD=devpass -e POSTGRES_DB=kalamkari \
+  -p 5432:5432 postgres:16-alpine
+```
 
 ---
 
-## Deploying
+## Deploying to Vercel
 
-Works on Vercel, or any Node host, with no configuration beyond environment variables.
+Vercel detects Next.js and needs no `vercel.json`. Everything below is done
+once.
 
-Set in production: `DATABASE_URL`, `AUTH_SECRET`, `NEXTAUTH_URL`, `NEXT_PUBLIC_SITE_URL`, and — if used — `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`, the `EMAIL_SERVER_*` block plus `STORE_NOTIFICATION_EMAIL`, and the Razorpay keys plus `RAZORPAY_WEBHOOK_SECRET`.
+**1. Create the database.** Neon's free tier is enough
+([neon.tech](https://neon.tech), or add it from Vercel → Storage). Copy both
+connection strings — the pooled one (host contains `-pooler`) and the direct
+one.
 
-`npm run build` applies pending migrations before building, so a deploy needs no
-separate migration step.
+**2. Set the environment variables** in Vercel → Settings → Environment
+Variables, for Production *and* Preview:
+
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | the **pooled** Neon string |
+| `DIRECT_DATABASE_URL` | the **direct** Neon string |
+| `AUTH_SECRET` | `npx auth secret`, or `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | `https://yourdomain` |
+| `NEXT_PUBLIC_SITE_URL` | `https://yourdomain` |
+
+Optional, and each degrades cleanly when absent:
+`AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`, the `EMAIL_SERVER_*` block plus
+`STORE_NOTIFICATION_EMAIL`, `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET`/
+`NEXT_PUBLIC_RAZORPAY_KEY_ID` plus `RAZORPAY_WEBHOOK_SECRET`, and
+`ANTHROPIC_API_KEY`.
+
+`NEXT_PUBLIC_SITE_URL` is worth setting even though the build no longer breaks
+without it: `absoluteUrl()` falls back to Vercel's own injected domain, which
+is right for a preview but wrong for a custom domain, and it is the value
+behind every canonical tag, Open Graph image and `sitemap.xml` entry.
+
+**3. Seed the catalogue, once.** The build applies migrations but deliberately
+does not seed — a build that re-seeds is a build that can overwrite live data.
+Against the **direct** URL, from your machine:
+
+```bash
+DATABASE_URL="<direct-url>" DIRECT_DATABASE_URL="<direct-url>" npm run db:seed
+```
+
+**4. Deploy.** Push to `master`.
+
+`npm run build` runs `prisma generate && prisma migrate deploy && next build`,
+so migrations are applied on every deploy and there is no separate step. Node
+is pinned to `>=20` via `engines`.
+
+Point the Razorpay webhook at `https://yourdomain/api/razorpay/webhook`,
+subscribed to `payment.captured`, `order.paid` and `payment.failed`.
 
 Point the Razorpay webhook at `https://yourdomain/api/razorpay/webhook`,
 subscribed to `payment.captured`, `order.paid` and `payment.failed`.
@@ -337,7 +404,13 @@ header in `next.config.mjs`.
 
 Google OAuth redirect URI: `https://yourdomain/api/auth/callback/google`.
 
-Admin routes are gated in `src/app/admin/layout.tsx` — a server layout, not middleware, because middleware runs on the edge where Prisma cannot read a user's role.
+Admin routes are gated by `requireAdmin()` as the first statement of **every
+admin page**, not only in `src/app/admin/layout.tsx` — a server layout rather
+than middleware, because middleware runs on the edge where Prisma cannot read a
+user's role. The layout guard alone is not enough: Next renders a layout and
+its page concurrently, so a `redirect()` in the layout bounces the browser
+*after* the page has already run its queries and serialised the results into
+the same response. See "Two traps this codebase already fell into" below.
 
 ---
 

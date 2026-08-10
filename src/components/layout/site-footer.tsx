@@ -49,9 +49,18 @@ export function SiteFooter() {
                 <ul className="mt-4 flex flex-col gap-0.5">
                   {group.links.map((link) => (
                     <li key={link.href}>
+                      {/*
+                        `flex`, not `inline-flex`. An inline-flex box sizes to
+                        max-content, so "Shipping & Returns" held its full
+                        151px inside a 118px column on a 320px phone and hung
+                        off the side of the page. As a block-level flex item it
+                        takes the column's width and the label wraps — and the
+                        whole row becomes the touch target, which is the better
+                        answer on a phone anyway.
+                      */}
                       <Link
                         href={link.href}
-                        className="-mx-1 inline-flex min-h-[2.25rem] items-center rounded-sm px-1 text-sm text-cotton-200/85 transition-colors hover:text-cotton-50"
+                        className="-mx-1 flex min-h-[2.25rem] items-center rounded-sm px-1 text-sm text-cotton-200/85 transition-colors hover:text-cotton-50"
                       >
                         {link.label}
                       </Link>

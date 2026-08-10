@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # The default branch here is `master`. This said `main`, so no push to this
+    # repository has ever triggered CI — every green tick came from a pull
+    # request, and direct pushes to the deployed branch went unverified.
+    branches: [master]
   pull_request:
   workflow_dispatch:
 
@@ -17,13 +20,35 @@ jobs:
     name: typecheck · lint · test · build · smoke
     runs-on: ubuntu-latest
 
+    # CI runs the same engine production runs. It used to run SQLite against a
+    # throwaway file, which is how a search filter that returns nothing on
+    # Postgres passed CI: the query is valid on both, and only one of them is
+    # case-insensitive by default.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: svl
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: kalamkari
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U svl -d kalamkari"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
     env:
-      # A throwaway SQLite file and a throwaway secret. Nothing here is a real
-      # credential and nothing here reaches a real service: with no SMTP host
-      # and no payment keys set, the mail layer prints to the console and the
-      # online payment option is simply not offered. That is exactly the
+      # Throwaway credentials against a throwaway container. Nothing here is a
+      # real credential and nothing here reaches a real service: with no SMTP
+      # host and no payment keys set, the mail layer prints to the console and
+      # the online payment option is simply not offered. That is exactly the
       # degraded configuration worth testing.
-      DATABASE_URL: file:./ci.db
+      #
+      # No pooler in front of this one, so both URLs are the same host.
+      DATABASE_URL: postgresql://svl:ci-only-password@localhost:5432/kalamkari?schema=public
+      DIRECT_DATABASE_URL: postgresql://svl:ci-only-password@localhost:5432/kalamkari?schema=public
       AUTH_SECRET: ci-only-not-a-real-secret-value-000000000000
       NEXTAUTH_URL: http://localhost:3000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -36,10 +61,15 @@ jobs:
           node-version: 22
           cache: npm
 
-      # --legacy-peer-deps: several three.js ecosystem packages have not yet
-      # widened their React 19 peer ranges. The code itself is React 19 ready.
+      # Plain `npm ci`, deliberately. This carried `--legacy-peer-deps` and a
+      # comment blaming the three.js packages' React 19 peer ranges — which
+      # they had since widened. The conflict that actually remained was
+      # nodemailer: next-auth's beta wants ^7 || ^8 and this project pinned ^6.
+      # Upgrading nodemailer fixed the tree properly, and the flag went with
+      # it — which matters because Vercel installs without it, so CI was
+      # testing a resolution the deployment would never use.
       - name: Install
-        run: npm ci --legacy-peer-deps
+        run: npm ci
 
       - name: Prepare database
         run: |

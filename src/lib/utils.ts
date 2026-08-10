@@ -52,9 +52,39 @@ export function generateOrderNumber() {
   return `SVL-${ref}`;
 }
 
+/**
+ * The site's public origin, for canonicals, OG images, the sitemap and robots.
+ *
+ * The order matters, and the last two entries are the point of it.
+ *
+ * This used to be `NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'`, which is
+ * correct right up until somebody deploys without setting the variable — and
+ * then every canonical tag, every Open Graph image and every URL in
+ * sitemap.xml confidently points at localhost. Nothing fails, nothing is
+ * logged, and the damage is done in a search index rather than in a build log.
+ *
+ * Vercel injects its own domains at build time, so the deployment can name
+ * itself when nobody has named it: the project's stable production domain
+ * first, then the per-deployment URL (which is what a preview build gets).
+ * An explicit NEXT_PUBLIC_SITE_URL still wins, and is what a custom domain
+ * should always set.
+ */
+function siteOrigin() {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL;
+  if (explicit) return explicit;
+
+  // Vercel supplies these without a scheme.
+  const production = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL;
+  if (production) return `https://${production}`;
+
+  const deployment = process.env.NEXT_PUBLIC_VERCEL_URL;
+  if (deployment) return `https://${deployment}`;
+
+  return 'http://localhost:3000';
+}
+
 export function absoluteUrl(path = '') {
-  const base =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+  const base = siteOrigin().replace(/\/$/, '');
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
