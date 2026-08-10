@@ -50,5 +50,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# neon cli — records which org the last `neon` command ran against. Local
+# state, not project configuration: it is whoever is signed in on this machine.
+.neon
+
 # Layout-audit screenshots (scripts/shots.mjs). Generated, never reviewed.
 .shots/
