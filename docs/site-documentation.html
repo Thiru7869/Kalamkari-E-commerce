@@ -135,7 +135,7 @@ voice and content model are unchanged throughout.</p>
 <table>
   <tr><th style="width:34%">Objective</th><th style="width:12%">Status</th><th>Outcome</th></tr>
   <tr><td>Fix mobile horizontal overflow</td><td><span class="tag">Done</span></td>
-      <td>3 root causes fixed at source. 60/60 route×width combinations clean on the production build. No <code>overflow-x: hidden</code> added.</td></tr>
+      <td>4 root causes fixed at source, one of them reported from production after the first push (§3.4). 60/60 route×width combinations clean, plus all three first-visit stages. No <code>overflow-x: hidden</code> added.</td></tr>
   <tr><td>Fix oversized components</td><td><span class="tag">Done</span></td>
       <td>Type scale and vertical rhythm rebuilt as fluid ramps; buttons and launcher trimmed. Home page 390px: 11,063px → 10,651px despite <em>adding</em> a video panel.</td></tr>
   <tr><td>Production-only scaling</td><td><span class="tag">Done</span></td>
@@ -210,7 +210,50 @@ input on the site is immune. It remains overridable.</p>
   invisible one. Every fix above addresses the cause.</p>
 </div>
 
-<h3>3.4 — The regression harness</h3>
+<h3>3.4 — The quick tour ran off the screen <span class="tag open">Found on production</span></h3>
+
+<p>Reported from the deployed site after the first push, and a different failure again from the three above:
+the quick-tour card started at the horizontal centre of the phone and ran off the right edge, clipping every
+line of its own copy.</p>
+
+<p>The card centred itself with <code>left-1/2 -translate-x-1/2</code> while also carrying
+<code>animate-rise-in</code>, whose keyframes end on <code>transform: translateY(0)</code>. <strong><code>transform</code> is a
+single property, not a list of independent ones</strong> — the animation's final value <em>replaces</em> the
+centring translate rather than composing with it, and <code>animation-fill-mode: forwards</code> makes the
+replacement permanent. Measured on the original code:</p>
+
+<table>
+  <tr><th>Quick-tour card at 390px</th><th>Before</th><th>After</th></tr>
+  <tr><td>Left edge</td><td class="num">195px — exactly 50% of 390</td><td class="num">16px</td></tr>
+  <tr><td>Right edge</td><td class="num">553px</td><td class="num">374px</td></tr>
+  <tr><td>Overhang past viewport</td><td class="num">+163px</td><td class="num">−16px (clear)</td></tr>
+  <tr><td>Computed transform</td><td class="mono">matrix(1, 0, 0, 1, 0, 0)</td><td class="mono">matrix(1, 0, 0, 1, 0, 0)</td></tr>
+  <tr><td><code>documentElement</code> overflow</td><td class="num">0px</td><td class="num">0px</td></tr>
+</table>
+
+<p>The identity matrix in the "before" column is the whole story: the <code>−50%</code> had been erased outright.
+Desktop was never affected, because from <code>md</code> the card anchors to <code>right</code> and never uses the
+translate.</p>
+
+<p><strong>Fix:</strong> the card is now centred by auto margins — <code>inset-x-0</code> + <code>mx-auto</code> + a width,
+which centres an out-of-flow box by spec (CSS 2.1 §10.3.7 splits the leftover space equally between two auto
+margins). Positioning no longer depends on <code>transform</code>, so the animation is free to own it. Verified
+symmetric at 320, 390, 430 and 1280px.</p>
+
+<div class="callout warn">
+  <p><strong>Two blind spots in the original audit let this reach production, and both are now closed.</strong></p>
+  <p><em>One:</em> a <code>position: fixed</code> element cannot widen the scroll area, so
+  <code>documentElement.scrollWidth</code> read a perfectly clean 0px while the card hung 163px off the edge. The
+  audit only looked for offending elements <em>if</em> the document already overflowed, which made it
+  structurally incapable of seeing this. It now scans for edge-crossing elements unconditionally, and reports
+  each one's <code>position</code>.</p>
+  <p><em>Two:</em> the audit dismissed the preloader, welcome overlay and quick tour via <code>sessionStorage</code>
+  so it could measure the pages behind them — which meant it suppressed the one component that was broken.
+  <code>--intro=preloader|welcome|tour</code> now marks the earlier stages as seen so the named one renders and is
+  measured. All three stages pass at 320/375/390/430px.</p>
+</div>
+
+<h3>3.5 — The regression harness</h3>
 
 <p><code>scripts/audit-layout.mjs</code> (<code>npm run audit:layout</code>) drives headless Chromium over ten routes at
 320 / 375 / 390 / 430px and reports <em>both</em> failure modes: documents that scroll sideways, and elements that
@@ -647,7 +690,8 @@ Nodemailer · Vitest · Zod.</p>
 <h4>New scripts</h4>
 <table>
   <tr><th>Command</th><th>Purpose</th></tr>
-  <tr><td><code>npm run audit:layout</code></td><td>Overflow and clipped-text audit across routes × phone widths. Exits non-zero; suitable as a CI gate.</td></tr>
+  <tr><td><code>npm run audit:layout</code></td><td>Three-way audit across routes × phone widths — documents that scroll sideways, elements clipping their own text, and visible elements hanging past the edge. <code>--intro=preloader|welcome|tour</code> measures the first-visit overlays. Exits non-zero; suitable as a CI gate.</td></tr>
+  <tr><td><code>node scripts/probe-tour.mjs [w]</code></td><td>Reports the quick-tour card's box, overhang and computed transform. Written to pin §3.4.</td></tr>
   <tr><td><code>npm run shots</code></td><td>Full-page or above-fold screenshots at a chosen width.</td></tr>
   <tr><td><code>node scripts/probe-sizes.mjs [w] [route]</code></td><td>Computed font sizes, padding and box metrics for a route.</td></tr>
   <tr><td><code>node scripts/probe-hero.mjs [w] [route] [sel]</code></td><td>Walks a subtree reporting each element's min-content — the tool that located the 456px tick row.</td></tr>
@@ -723,6 +767,15 @@ Nodemailer · Vitest · Zod.</p>
       ground because that is how Kalamkari green is actually made.</li>
   <li><strong>No <code>overflow-x: hidden</code>.</strong> See §3.</li>
 </ul>
+
+<h3>A note on the fourth overflow bug</h3>
+<p>§3.4 was found on the deployed site and not by the audit written to prevent exactly that class of fault.
+Both reasons it was missed were properties of the harness rather than bad luck — it could not see fixed-position
+overflow at all, and it deliberately suppressed the component that was broken. Both are fixed, and both are now
+recorded in <code>CLAUDE.md</code> alongside the CSS rule underneath them: an element positioned by
+<code>transform</code> cannot also be animated by <code>transform</code>. The general lesson is that a layout harness
+needs to be checked against a known failure before it is trusted; this one now is, since reverting the fix makes
+it report the bug.</p>
 
 <footer class="note">
   Sri Vijaya Lakshmi Fine Kalamkari Arts — front-end remediation documentation.

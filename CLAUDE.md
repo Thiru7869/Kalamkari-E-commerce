@@ -237,11 +237,44 @@ So there are two failures to look for, not one, and
 npm run audit:layout          # dev server or `npm start` must be running
 ```
 
-checks both across every important route at 320/375/390/430px: documents that
-scroll sideways, and elements that clip their own text. It excludes `sr-only`
-(a 1×1 box hiding a sentence is the point) and anything with
-`text-overflow: ellipsis` (clipping *with* a mark is a decision; clipping
-silently is the bug). It exits non-zero, so it can gate a build.
+checks every important route at 320/375/390/430px for **three** failures:
+documents that scroll sideways, elements that clip their own text, and visible
+elements hanging past the viewport edge. It excludes `sr-only` (a 1×1 box
+hiding a sentence is the point) and anything with `text-overflow: ellipsis`
+(clipping *with* a mark is a decision; clipping silently is the bug). It exits
+non-zero, so it can gate a build.
+
+**`position: fixed` overflow does not move `scrollWidth`.** A fixed box cannot
+widen the scroll area — it simply sits off-screen, unreadable, with no
+scrollbar to reveal it. The quick-tour card hung 163px off the right edge of a
+390px phone while `documentElement.scrollWidth - clientWidth` read a clean 0.
+So the audit scans for edge-crossing elements *unconditionally*, not only when
+the document already overflows.
+
+**Anything that can cover the viewport must be measured on the viewport.** The
+audit dismisses the preloader, welcome overlay and quick tour by default,
+because otherwise they are the only thing it measures. That default is also how
+the tour bug shipped: the audit suppressed the one component that was broken.
+`--intro=preloader|welcome|tour` marks the earlier stages as seen so the named
+one renders and can be measured. Run it after touching any of them.
+
+## Transform is one property, not several
+
+**An element positioned by `transform` may not also be animated by
+`transform`.**
+
+The quick-tour card centred itself with `left-1/2 -translate-x-1/2` and also
+carried `animate-rise-in`, whose keyframes end on `transform: translateY(0)`.
+That is not composited with the centring translate — it *replaces* it, and
+`animation-fill-mode: forwards` makes the replacement stick. The card settled
+at exactly `left: 50%` and ran off the right edge of every phone, with every
+line of its own copy clipped. Desktop never showed it, because from `md` the
+card is anchored to `right` and never used the translate.
+
+Centre out-of-flow boxes with `inset-x-0` + `mx-auto` + a width instead
+(CSS 2.1 §10.3.7 splits the leftover space between two auto margins). That
+leaves `transform` free for the animation to own. The same trap applies to
+`-translate-y-1/2` on vertically centred absolute elements.
 
 ## `cn()` and the custom font sizes
 

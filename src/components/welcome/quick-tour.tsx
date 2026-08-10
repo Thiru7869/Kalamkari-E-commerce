@@ -100,11 +100,31 @@ export function QuickTour({ onClose }: { onClose: () => void }) {
       aria-label="Quick tour"
       // Not modal: the page behind stays usable, which is the whole point.
       aria-modal="false"
+      /*
+        Centred by auto margins, never by a transform.
+
+        This card previously centred itself with `left-1/2 -translate-x-1/2`
+        while also carrying `animate-rise-in` — and `rise-in` animates
+        `transform`, ending on `translateY(0)`. `transform` is one property, not
+        a list of independent ones, so the animation's final value *replaced*
+        the centring translate rather than adding to it. With
+        `animation-fill-mode: forwards` that final value sticks, so the card
+        settled at exactly `left: 50%` with nothing pulling it back: on a phone
+        it began at the middle of the screen and ran off the right edge, with
+        every line of its own copy clipped. Desktop was unaffected, because
+        from `md` the card is anchored to `right` and never used the translate.
+
+        The lesson generalises: an element positioned by `transform` cannot
+        also be animated by `transform`. Here the positioning gives way, since
+        `inset-x-0` + `mx-auto` + a width centres an out-of-flow box by spec
+        (CSS 2.1 §10.3.7 splits the leftover space equally between two auto
+        margins) and leaves `transform` free for the animation to own.
+      */
       className={cn(
         'fixed z-[60] w-[calc(100%-2rem)] max-w-sm outline-none',
         // Above the phone tab bar; bottom-right on a desktop.
-        'bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2',
-        'md:bottom-6 md:left-auto md:right-6 md:translate-x-0',
+        'inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] mx-auto',
+        'md:inset-x-auto md:bottom-6 md:right-6 md:mx-0',
         'motion-safe:animate-rise-in',
       )}
     >

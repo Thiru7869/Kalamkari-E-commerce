@@ -68,6 +68,15 @@ export function AnnouncementBar() {
       // instead would either shift the whole page down 36px on every first
       // load, or flash the bar at everyone who has already closed it.
       data-announce-bar
+      /*
+        This box clips content far wider than itself on purpose — that is what
+        a marquee is, and the duplicate track below doubles it again. The
+        layout audit hunts for exactly that shape, because a section quietly
+        hiding its own text is the bug that put a clipped hero into
+        production. This marks the one place where the shape is the design, so
+        the audit can tell the two apart. See `npm run audit:layout`.
+      */
+      data-clips-intentionally
       className="relative flex h-9 items-center overflow-hidden border-b border-border/60 bg-kasim-900 text-cotton-200"
     >
       {reduced ? (
