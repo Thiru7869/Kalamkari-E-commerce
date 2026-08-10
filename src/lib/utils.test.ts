@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  cn,
   formatPrice,
   slugify,
   generateOrderNumber,
@@ -7,6 +8,42 @@ import {
   truncate,
   absoluteUrl,
 } from '@/lib/utils';
+
+describe('cn', () => {
+  /*
+    tailwind-merge decides conflicts by class *group*, and `text-*` covers two
+    of them — font size and text colour. It separates them using a list of
+    known size keys, which is the stock Tailwind scale and does not contain
+    this project's. Without the extension in utils.ts, `text-display-xl` is
+    filed as a colour, collides with the real colour beside it, and is dropped.
+
+    That is not a hypothetical: the home page's `<h1>` and the "two crafts"
+    `<h2>` both rendered at the inherited 16px, smaller than the body copy
+    underneath them, because their size class was being merged away.
+  */
+  const sizes = [
+    'text-display-xl',
+    'text-display-lg',
+    'text-display-md',
+    'text-display-sm',
+    'text-body-lg',
+    'text-body-base',
+    'text-eyebrow',
+  ];
+
+  it.each(sizes)('keeps %s when a text colour is merged alongside it', (size) => {
+    expect(cn(size, 'text-cotton-50')).toBe(`${size} text-cotton-50`);
+  });
+
+  it('still collapses two font sizes down to the last one', () => {
+    expect(cn('text-display-sm', 'text-display-xl')).toBe('text-display-xl');
+    expect(cn('text-display-xl', 'text-sm')).toBe('text-sm');
+  });
+
+  it('still collapses two text colours down to the last one', () => {
+    expect(cn('text-cotton-50', 'text-primary')).toBe('text-primary');
+  });
+});
 
 describe('formatPrice', () => {
   it('renders paise as whole rupees by default', () => {

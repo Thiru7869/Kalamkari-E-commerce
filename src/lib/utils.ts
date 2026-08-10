@@ -1,5 +1,46 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+/**
+ * The custom font sizes from tailwind.config, declared to tailwind-merge.
+ *
+ * This is not tidiness. tailwind-merge resolves conflicts by deciding which
+ * *group* a class belongs to, and `text-*` is two groups wearing one prefix:
+ * `font-size` and `text-color`. It tells them apart from a list of known size
+ * keys, and that list is the stock Tailwind scale — it has never heard of
+ * `display-xl`. So `text-display-xl` was being filed as a colour, found to
+ * conflict with the colour beside it, and dropped.
+ *
+ * Silently, and only through `cn()`. A plain `className="text-display-xl
+ * text-cotton-50"` string is untouched and renders correctly, which is why
+ * this survived: it only appears when a component merges a caller's classes,
+ * and then the heading simply inherits 16px from the body. The site's largest
+ * headline rendering smaller than the paragraph under it is what it looks
+ * like from the outside.
+ *
+ * Every custom key in `theme.extend.fontSize` has to be listed here. If you
+ * add one there, add it here, or it will disappear the first time it meets a
+ * text colour inside `cn()`.
+ */
+const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      'font-size': [
+        {
+          text: [
+            'display-xl',
+            'display-lg',
+            'display-md',
+            'display-sm',
+            'body-lg',
+            'body-base',
+            'eyebrow',
+          ],
+        },
+      ],
+    },
+  },
+});
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
