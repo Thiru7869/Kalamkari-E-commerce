@@ -92,11 +92,18 @@ export function WelcomeFilm({ poster, label }: { poster: string; label: string }
     <figure
       className={cn(
         'group relative isolate overflow-hidden bg-cotton-300 dark:bg-kasim-800',
-        // A cinematic band on a phone, where the film sits above the greeting
-        // and every pixel of height it takes is a pixel the welcome loses;
-        // portrait from `sm`, where it is a column beside the words and a
-        // letterbox would leave a stripe floating in white space.
-        'aspect-[21/9] w-full sm:aspect-[4/5]',
+        /*
+          One ratio, every width.
+
+          This was `aspect-[21/9]` below `sm` and `4/5` above it, from when the
+          film sat full-width above the greeting on a phone. The source is a
+          720x1280 portrait clip, and cropping that to 21:9 keeps roughly a
+          sixth of the frame. 4/5 is a mild, deliberate crop of a 9:16 source —
+          it trims the top and bottom of the frame rather than everything
+          except a band through the middle — and it is now the same shape on
+          a phone as on a desktop, which is what the layout asks for.
+        */
+        'aspect-[4/5] w-full',
         'shadow-[0_18px_44px_-28px_rgb(0_0_0/0.55)]',
       )}
       // A temple niche: semicircular head, straight shoulders. The radius is
@@ -112,7 +119,10 @@ export function WelcomeFilm({ poster, label }: { poster: string; label: string }
         src={poster}
         alt={label}
         fill
-        sizes="(min-width: 1024px) 15rem, (min-width: 640px) 13rem, 92vw"
+        // Tracks the column caps in welcome-note.tsx. A stale `sizes` here does
+        // not break the layout, it just makes the browser fetch a candidate
+        // several times wider than the box it will be painted into.
+        sizes="(min-width: 1024px) 7.5rem, (min-width: 640px) 6.5rem, 92vw"
         priority
         className="object-cover"
       />
@@ -173,9 +183,21 @@ export function WelcomeFilm({ poster, label }: { poster: string; label: string }
         </button>
       )}
 
-      <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 p-2.5">
-        <span className="font-inscription text-[0.5625rem] uppercase tracking-[0.18em] text-myrobalan-200">
-          The front room, today
+      {/*
+        The plate, and the widths it can honestly be set at.
+
+        "The front room" is two words at 0.18em tracking and needs roughly 90px.
+        The frame is 80px on a phone, 104px from `sm` and 120px from `lg`. So
+        below `sm` there is no caption at all — three tracked words stacked over
+        an 80px drawing is not a plate, it is a stain — and the full line only
+        appears at `lg` where it fits on one line. The alt text on the poster
+        already names what is in the frame, so nothing is lost when this is
+        absent.
+      */}
+      <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 hidden p-2 sm:block sm:p-2.5">
+        <span className="font-inscription text-[0.5625rem] uppercase leading-none tracking-[0.14em] text-myrobalan-200 lg:tracking-[0.18em]">
+          <span className="lg:hidden">The front room</span>
+          <span className="hidden lg:inline">The front room, today</span>
         </span>
       </figcaption>
     </figure>

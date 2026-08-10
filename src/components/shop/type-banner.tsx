@@ -119,27 +119,44 @@ export function TypeBanner({
               aria-hidden={!active}
               inert={!active ? true : undefined}
             >
-              <Image
-                src={slide.src}
-                alt={slide.alt}
-                fill
-                // The first slide is above the fold on every one of these pages.
-                priority={i === 0}
-                sizes="(min-width: 1280px) 1200px, 100vw"
-                className={cn(
-                  'object-cover',
-                  // A slow drift, so a still photograph on a five-second hold
-                  // does not read as a broken image.
-                  active && !reduced && 'motion-safe:scale-105',
-                  // Spelled as the CSS property rather than the `duration-*`
-                  // shorthand with an arbitrary value: that form matches both
-                  // transition-duration and animation-duration, so Tailwind
-                  // cannot tell which was meant and warns on every build.
-                  // (Do not write the shorthand in a comment either — the
-                  // content scanner reads comments and warns about those too.)
-                  'transition-transform ease-out [transition-duration:6000ms]',
-                )}
-              />
+              {/*
+                The drift is clipped here, in a box with no words in it.
+
+                `scale-105` deliberately pushes the photograph ~8px past each
+                edge, and the rounded frame further out has always absorbed it.
+                That frame also contains the caption, so from the outside it
+                looked exactly like a box quietly hiding its own text — which is
+                the one shape `npm run audit:layout` exists to catch, and it
+                duly failed every type page at 390px and 430px.
+
+                Clipping the image against its own wrapper keeps the effect
+                identical and makes the outer frame honest: it no longer
+                overflows at all, so if a caption ever does get cut, the audit
+                will say so instead of being told to ignore this box.
+              */}
+              <div className="absolute inset-0 overflow-hidden">
+                <Image
+                  src={slide.src}
+                  alt={slide.alt}
+                  fill
+                  // The first slide is above the fold on every one of these pages.
+                  priority={i === 0}
+                  sizes="(min-width: 1280px) 1200px, 100vw"
+                  className={cn(
+                    'object-cover',
+                    // A slow drift, so a still photograph on a five-second hold
+                    // does not read as a broken image.
+                    active && !reduced && 'motion-safe:scale-105',
+                    // Spelled as the CSS property rather than the `duration-*`
+                    // shorthand with an arbitrary value: that form matches both
+                    // transition-duration and animation-duration, so Tailwind
+                    // cannot tell which was meant and warns on every build.
+                    // (Do not write the shorthand in a comment either — the
+                    // content scanner reads comments and warns about those too.)
+                    'transition-transform ease-out [transition-duration:6000ms]',
+                  )}
+                />
+              </div>
 
               {/* The caption sits on a scrim rather than on the photograph, so
                   it is legible over a dark pallu and a pale cotton alike. */}

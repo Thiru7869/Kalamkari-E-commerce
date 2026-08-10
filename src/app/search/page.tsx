@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Search as SearchIcon } from 'lucide-react';
+import { resolveSearchDestination } from '@/lib/search-routing';
+
 import { ProductGrid } from '@/components/shop/product-card';
 import { SearchForm } from '@/components/shop/search-form';
 import { getProducts } from '@/lib/queries';
@@ -30,6 +33,24 @@ const SUGGESTIONS = [
 export default async function SearchPage({ searchParams }: { searchParams: Search }) {
   const { q } = await searchParams;
   const query = q?.trim() ?? '';
+
+  /*
+    A query that names a section is a navigation, not a search.
+
+    `src/middleware.ts` catches these before rendering begins and answers with a
+    real 307, which is what visitors actually get. This is the backstop for the
+    paths middleware does not see — most importantly a client-side soft
+    navigation from the search overlay, which never touches the edge.
+
+    It has to be a backstop rather than the only check. Calling `redirect()`
+    here, once the root layout has begun streaming, cannot change a status code
+    that is already on the wire: Next falls back to emitting
+    `<meta http-equiv="refresh" content="1;url=…">`, so the visitor watches an
+    empty shell for a full second before moving. Correct, but not acceptable as
+    the common path.
+  */
+  const destination = resolveSearchDestination(query);
+  if (destination) redirect(destination);
 
   // Did the visitor ask for one of the four narrative traditions by name? If
   // so, whatever the grid returns, the honest answer is that these are drawn

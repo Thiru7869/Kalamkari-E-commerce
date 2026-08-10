@@ -76,6 +76,23 @@ export function ClothSubnav({
 
       <nav
         aria-label="Varieties of cloth"
+        /*
+          The rail's overflow stops here.
+
+          The `<ul>` below is `overflow-x: auto` and does scroll internally, but
+          that alone did not stop its 1478px of chips being counted into the
+          document's scroll area: every type page scrolled ~990px sideways at
+          every phone width, with the rest of the page — including the fixed tab
+          bar — dragged along with it. Measured, not guessed: hiding a single
+          chip moved `documentElement.scrollWidth`.
+
+          `clip` rather than `hidden` on purpose. `hidden` would make this bar a
+          scroll container, and this bar is `position: sticky`; `clip` cuts the
+          overflow without creating one, so the sticky behaviour, the rail's own
+          scrolling and `scrollIntoView` all keep working. Vertical is left
+          visible so the focus ring on a chip is never sliced.
+        */
+        style={{ overflowX: 'clip', overflowY: 'visible' }}
         className={cn(
           'sticky top-[4rem] z-30 border-y border-border bg-background/95 backdrop-blur-md md:top-[5rem]',
           'transition-shadow duration-300',

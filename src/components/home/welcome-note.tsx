@@ -37,10 +37,29 @@ export function WelcomeNote() {
         This band is a doorway above the hero, not a section of its own, so its
         height must not track the viewport — given a `1fr` column the film grew
         to 260px on a laptop and the greeting beside it became its caption,
-        which inverts what the block is for. 10rem and 11.5rem keep the film
-        the size of a photograph on a table.
+        which inverts what the block is for.
+
+        Halved again from 10/11.5rem. Even capped, the band was taking ~250px
+        off the top of the landing page before the hero began — a doorway wider
+        than the room. At 6.5/7.5rem the film is still legibly a moving hand on
+        cloth, and the whole band now costs about 130px.
       */}
-      <div className="container grid gap-4 py-5 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] sm:items-center sm:gap-6 sm:py-6 lg:grid-cols-[minmax(0,11.5rem)_minmax(0,1fr)] lg:gap-8">
+      {/*
+        Two columns at every width, including the narrowest phone.
+
+        It used to stack below `sm`: the film went full-width as a 21:9 band
+        above the words. The film is a 720x1280 portrait clip, so a 21:9 crop of
+        it showed about a sixth of the frame — a horizontal strip across the
+        middle of a vertical composition, which is the one shape guaranteed to
+        lose whatever the camera was actually pointed at. It also made the band
+        two blocks tall on the smallest screens, which is where its height
+        mattered most.
+
+        Side by side at 5rem, the phone now gets the same arrangement as the
+        desktop at a smaller size, and the film keeps a portrait crop that
+        matches the source.
+      */}
+      <div className="container grid grid-cols-[minmax(0,5rem)_minmax(0,1fr)] items-center gap-4 py-4 sm:grid-cols-[minmax(0,6.5rem)_minmax(0,1fr)] sm:gap-5 lg:grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] lg:gap-6">
         {/* ---- The film ------------------------------------------------- */}
         {/*
           The arch is the shape of a temple niche, which is where this craft's
@@ -48,7 +67,7 @@ export function WelcomeNote() {
           is the one piece of framing on the page that says what the work is
           about before a word is read.
         */}
-        <div className="relative mx-auto w-full max-w-[22rem] sm:mx-0 sm:max-w-none">
+        <div className="relative w-full">
           <WelcomeFilm
             poster={master.image}
             label={`${master.name}, painting in the front room in ${site.location.town}`}
@@ -72,14 +91,24 @@ export function WelcomeNote() {
             <span className="hidden sm:inline"> · The front room</span> · Open most days
           </p>
 
-          <p className="mt-2 font-display text-[1.0625rem] italic leading-snug md:text-xl">
-            Come in — the cloth on the roof is still wet.
+          {/*
+            Not the same sentence as the overlay.
+
+            This read "Come in — the cloth on the roof is still wet", directly
+            underneath a first-visit modal whose headline is "The cloth on our
+            roof is still wet." The visitor was welcomed twice, in the same
+            words, within one screen. The overlay keeps that line, because it is
+            the better one and it is shown once; this band is the permanent
+            version and now says the thing the overlay does not — that the door
+            is a real door and can be walked through.
+          */}
+          <p className="mt-1.5 font-display text-[1.0625rem] italic leading-snug md:text-lg">
+            The store is a working house, and you are welcome in it.
           </p>
 
-          <p className="mt-2 max-w-2xl text-[0.8125rem] leading-relaxed text-muted-foreground md:text-sm">
-            Somebody is always painting here. If you have travelled far you will be given
-            tea before you are shown anything, and nothing you are shown was made by a
-            machine.
+          <p className="mt-1.5 max-w-2xl text-[0.8125rem] leading-relaxed text-muted-foreground">
+            Somebody is painting here most days. If you have travelled far you will be
+            given tea before you are shown anything.
           </p>
 
           {/*

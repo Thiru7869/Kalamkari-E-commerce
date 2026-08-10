@@ -122,8 +122,9 @@ uses for magic links.
   pages, and the commission-first note on the narrative motifs.
 - `commission.ts` — the guided questions, the attachment limits, the timeline.
 - `welcome.ts` — the doorway and the six tour stops.
-- `assistant.ts` — Chitra's knowledge base, which also backs the offline
-  answer engine.
+- `assistant.ts` — Lakshmi's knowledge base, which also backs the offline
+  answer engine. The assistant's name, launcher label and role all come from
+  `assistantIdentity` in that file; nothing hardcodes them.
 
 ### The editorial rule
 

@@ -81,7 +81,6 @@ const bannerSlides = [
 /** The three ways into the catalogue, shown under the eight stages. */
 const collectionCards = [
   {
-    label: 'Featured',
     title: 'Featured Sarees',
     blurb:
       'What the family would put in your hands first this week — chosen for the drawing, not the margin.',
@@ -89,7 +88,6 @@ const collectionCards = [
     image: '/images/products/hero-sarees.jpg',
   },
   {
-    label: 'Premium',
     title: 'Premium',
     blurb:
       'Signed and exhibition-grade work. Narrative pallus, dense jaal, the hardest drawing this workshop does.',
@@ -97,7 +95,6 @@ const collectionCards = [
     image: '/images/products/hero-paintings.jpg',
   },
   {
-    label: 'Custom',
     title: 'Custom Items',
     blurb:
       'Tell us the subject, the cloth and the occasion. Nothing here is printed, so nothing has to be chosen from a catalogue.',
@@ -205,8 +202,22 @@ export default async function HomePage() {
               </Entrance>
             </div>
 
+            {/*
+              Capped, not fluid.
+
+              At `lg:max-w-none` this filled its 0.85fr column, which on a wide
+              laptop is ~480px — and at `aspect-[5/5.6]` that is a 540px-tall
+              photograph before its caption and rail. Together with the headline
+              beside it the hero ran past 900px, so the paragraph carrying the
+              actual claim of the site sat below the fold on the most common
+              laptop screen there is. A hero the reader has to scroll to finish
+              reading is a slide, not a hero.
+            */}
             <Entrance step={4}>
-              <HeroBanner className="mx-auto w-full max-w-sm lg:max-w-none" slides={bannerSlides} />
+              <HeroBanner
+                className="mx-auto w-full max-w-[19rem] sm:max-w-sm lg:max-w-[24rem] xl:max-w-[26rem]"
+                slides={bannerSlides}
+              />
             </Entrance>
           </div>
         </div>
@@ -239,46 +250,83 @@ export default async function HomePage() {
           </RevealOnScroll>
 
           {/*
-            The collage. Two columns at every width, three from `lg`, with the
-            two narrative-led categories taking the wide cells — so the same
-            wide/narrow/narrow rhythm survives on a phone. Letting this fall to
-            a single column would turn a composition into a list, which is
-            precisely the thing worth keeping.
+            The collage. Two columns at every width, three from `lg`. Letting
+            this fall to a single column would turn a composition into a list,
+            which is precisely the thing worth keeping.
+
+            Only the first cell is wide, and that is a fix rather than a taste.
+            Spanning both `i === 0` and `i === 3` laid five categories out as
+            2+1 / 2+1 / 1 — six cells across the first two rows, leaving the
+            fifth category alone on a third row beside two empty ones. On the
+            three-column grid that hole is a third of the section's width and
+            reads as a card that failed to load. Spanning only the first fills
+            exactly two rows, 2+1 then 1+1+1, and still opens the collage with a
+            wide plate, which is what the span was for. On the two-column phone
+            grid the same rule gives a full-width opener and two clean pairs.
           */}
           <ul className="mt-7 grid grid-cols-2 gap-2.5 md:mt-9 md:gap-4 lg:grid-cols-3">
             {categories.map((category, i) => (
               <li
                 key={category.id}
-                className={i === 0 || i === 3 ? 'col-span-2' : ''}
+                className={i === 0 ? 'col-span-2' : ''}
               >
                 <RevealOnScroll delay={i * 0.05}>
                   <Link
                     href={`/shop/${category.slug}`}
-                    className="group relative flex h-full min-h-[8.5rem] flex-col justify-end overflow-hidden rounded-sm bg-kasim-800 p-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-[12rem] sm:p-5 md:min-h-[13.5rem] md:p-6"
+                    className="group relative flex h-full min-h-[8.5rem] flex-col justify-end overflow-hidden rounded-sm bg-kasim-800 p-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-[11rem] sm:p-5 md:min-h-[12.5rem] md:p-6"
                   >
                     <Image
                       src={category.heroImage}
                       alt=""
                       fill
                       sizes="(min-width: 1024px) 40vw, 50vw"
-                      className="object-cover opacity-70 transition-transform duration-700 ease-out motion-safe:group-hover:scale-105"
+                      className="object-cover opacity-70 transition-transform duration-[900ms] ease-out motion-safe:group-hover:scale-[1.06]"
                     />
+
+                    {/* Two scrims, not one. The vertical gradient holds the
+                        type; the flat kasim veil lifts on hover, so the whole
+                        photograph warms slightly as the cursor arrives rather
+                        than only moving. */}
                     <div
-                      className="absolute inset-0 bg-gradient-to-t from-kasim-950/85 via-kasim-950/30 to-transparent"
+                      className="absolute inset-0 bg-gradient-to-t from-kasim-950/88 via-kasim-950/35 to-kasim-950/5"
                       aria-hidden="true"
                     />
+                    <div
+                      className="absolute inset-0 bg-kasim-950/20 transition-opacity duration-700 group-hover:opacity-0"
+                      aria-hidden="true"
+                    />
+
+                    {/* The hairline frame used on the narrative panels and the
+                        welcome portrait. It is the site's one piece of shared
+                        framing language, and it is what makes these read as
+                        mounted plates rather than as tiles. */}
+                    <span
+                      className="pointer-events-none absolute inset-2 border border-cotton-100/15 transition-colors duration-500 group-hover:border-cotton-100/30"
+                      aria-hidden="true"
+                    />
+
                     <div className="relative">
-                      <h3 className="font-display text-base leading-tight text-cotton-50 sm:text-xl md:text-2xl">
+                      {/* Telugu on its own line rather than trailing the
+                          English at a third of its size. It is the name the
+                          cloth is actually asked for by in this town. */}
+                      {category.teluguName && (
+                        <span className="block font-telugu text-[0.6875rem] leading-none text-myrobalan-300/85 sm:text-xs md:text-sm">
+                          {category.teluguName}
+                        </span>
+                      )}
+                      <h3 className="mt-1 font-display text-base leading-tight text-cotton-50 sm:text-lg md:text-xl">
                         {category.name}
-                        {category.teluguName && (
-                          <span className="ml-2 font-telugu text-[0.6875rem] text-cotton-200/70 sm:text-sm md:text-base">
-                            {category.teluguName}
-                          </span>
-                        )}
                       </h3>
-                      <p className="mt-1 line-clamp-2 max-w-md text-[0.6875rem] leading-snug text-cotton-100/80 sm:mt-1.5 sm:text-xs md:text-sm">
+                      <p className="mt-1 line-clamp-2 max-w-md text-[0.6875rem] leading-snug text-cotton-100/75 sm:mt-1.5 sm:text-xs md:text-[0.8125rem]">
                         {category.tagline}
                       </p>
+
+                      {/* The affordance, drawn rather than stated. It costs no
+                          height at rest — the rule grows from nothing. */}
+                      <span
+                        className="mt-2 block h-px w-0 bg-myrobalan-300/70 transition-[width] duration-500 ease-out motion-safe:group-hover:w-10"
+                        aria-hidden="true"
+                      />
                     </div>
                   </Link>
                 </RevealOnScroll>
@@ -366,59 +414,16 @@ export default async function HomePage() {
       {/* What you are actually buying, and where each claim is set out. */}
       <TrustStrip />
 
-      {/* ------------------------------------------------------------------ */}
-      {/* The process, as an invitation                                       */}
-      {/* ------------------------------------------------------------------ */}
-      <section className="relative overflow-hidden bg-kasim-900 py-20 text-cotton-100 md:py-28">
-        <div className="container">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
-            <RevealOnScroll>
-              <p className="eyebrow text-cotton-200/60">The making</p>
-              <h2 className="mt-4 text-display-lg text-cotton-50">
-                Twenty-three steps, and the colour arrives at step sixteen.
-              </h2>
-              <p className="mt-6 text-body-lg text-cotton-100/80">
-                The strangest part of this craft is that the artist never touches a red
-                pigment. They paint with a clear solution of alum onto cream cloth, and
-                days later the whole thing goes into a boiling bath of madder root — where
-                the colour binds only where the alum went, and washes out everywhere else.
-              </p>
-              <p className="mt-4 leading-relaxed text-cotton-100/65">
-                We have built the full sequence as something you can move through, step by
-                step, and watch happen.
-              </p>
-              <Button asChild size="lg" variant="outline" className="mt-8 border-cotton-100/40 text-cotton-50 hover:bg-cotton-50/10">
-                <Link href="/process">
-                  Walk through all 23 steps
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={0.12}>
-              <ol className="grid gap-px overflow-hidden rounded-sm bg-cotton-100/10">
-                {[
-                  { n: '04', t: 'Myrobalan and buffalo milk', d: 'The tannin that will later turn iron black soaks into every fibre.' },
-                  { n: '10', t: 'Fermenting the iron liquor', d: 'Rusted iron and jaggery, sealed in an earthen pot for 21 days.' },
-                  { n: '13', t: 'Painting with alum', d: 'The reds are laid down as a clear liquid you cannot see.' },
-                  { n: '16', t: 'The madder bath', d: 'One boiling pot. Pink through maroon, decided days earlier by hand.' },
-                  { n: '22', t: 'Washing and sunning', d: 'Up to twenty cycles, most of them to remove colour, not add it.' },
-                ].map((step) => (
-                  <li key={step.n} className="flex gap-5 bg-kasim-900 px-1 py-4">
-                    <span className="tabular font-display text-2xl text-myrobalan-400/80">
-                      {step.n}
-                    </span>
-                    <span>
-                      <span className="block font-medium text-cotton-50">{step.t}</span>
-                      <span className="mt-0.5 block text-sm text-cotton-100/60">{step.d}</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </RevealOnScroll>
-          </div>
-        </div>
-      </section>
+      {/*
+        "The making" used to stand here: a second, darker restatement of the
+        same argument the eight-stage section above already makes, ending in a
+        second button to the same page. It was the largest piece of duplicated
+        content on the landing page. Its one genuinely surprising fact — that
+        the reds go down as a clear liquid — now sits under the eight stages,
+        beside the single permanent route through to /process, and the five
+        numbered steps it listed are the opening of that page rather than a
+        preview of it.
+      */}
 
       {/* ------------------------------------------------------------------ */}
       {/* The family                                                          */}

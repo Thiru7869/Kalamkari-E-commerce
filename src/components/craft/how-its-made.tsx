@@ -237,17 +237,37 @@ export function HowItsMade() {
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 <span className="sr-only">Next stage</span>
               </button>
-
-              {stage === STAGE_COUNT - 1 && (
-                <Button asChild size="sm" className="ml-1 animate-rise-in md:ml-2">
-                  <Link href="/process">
-                    All 23 steps
-                    <ArrowRight aria-hidden="true" />
-                  </Link>
-                </Button>
-              )}
             </div>
           </div>
+        </div>
+
+        {/*
+          The way through to the full sequence.
+
+          These eight stages are a summary of twenty-three, and the visitor who
+          has just watched the colour arrive is the one most likely to want the
+          rest. Previously that route appeared only once the rail reached stage
+          eight, which meant it was invisible to everyone who did not finish —
+          and the landing page carried a second, near-duplicate section further
+          down to compensate. One permanent, stated route replaces both.
+
+          The line on the left is the single most surprising fact in the whole
+          process, kept from that removed section: it is what makes the link
+          worth following rather than a label saying "learn more".
+        */}
+        <div className="mt-10 flex flex-col gap-5 border-t border-border pt-7 md:mt-14 md:flex-row md:items-center md:justify-between md:gap-10">
+          <p className="max-w-xl text-[0.9375rem] leading-relaxed text-muted-foreground">
+            The reds are never painted on as red. They go down as a clear solution of
+            alum, and the colour arrives days later in a boiling bath of madder root —
+            binding only where the alum went.
+          </p>
+
+          <Button asChild size="lg" className="shrink-0">
+            <Link href="/process">
+              See the making — all 23 steps
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

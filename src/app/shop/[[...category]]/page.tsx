@@ -18,6 +18,7 @@ import {
 } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { shopCategories } from '@/content/site';
+import { absoluteUrl } from '@/lib/utils';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 type Params = Promise<{ category?: string[] }>;
@@ -239,6 +240,42 @@ export default async function ShopPage({
           </div>
         </div>
       </div>
+
+      {/*
+        The grid, as structured data.
+
+        Product pages already describe themselves; the listing that leads to
+        them described nothing, so a crawler had to discover every piece by
+        following links and had no idea which page it came from or in what
+        order. An `ItemList` of the current page of results is what search
+        engines read to build a carousel of pieces under the store's result.
+
+        Only the visible page is listed, in the order shown, with positions
+        1-based from the offset — claiming all 43 pieces on a page that shows 12
+        would be a misrepresentation of the page, and the pagination links
+        already lead to the rest.
+      */}
+      {items.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'ItemList',
+              name: activeCollection
+                ? activeCollection.title
+                : (activeCategory?.name ?? 'The store'),
+              numberOfItems: items.length,
+              itemListElement: items.map((product, i) => ({
+                '@type': 'ListItem',
+                position: from + i,
+                url: absoluteUrl(`/product/${product.slug}`),
+                name: product.name,
+              })),
+            }),
+          }}
+        />
+      )}
     </>
   );
 }

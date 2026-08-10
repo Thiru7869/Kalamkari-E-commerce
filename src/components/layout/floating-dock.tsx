@@ -86,16 +86,50 @@ export function FloatingDock() {
         // Sits above the phone tab bar; clears the safe area on both axes.
         'pointer-events-none fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-4 z-40',
         'flex flex-col items-end gap-3 md:bottom-6 md:right-6',
-        'transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none',
-        retracted ? 'translate-y-[calc(100%+5rem)] opacity-0' : 'translate-y-0 opacity-100',
       )}
-      // Keyboard users must not be able to tab into a control that has slid
-      // off the screen.
-      inert={retracted ? true : undefined}
     >
+      {/*
+        Back-to-top does not retract.
+
+        It used to sit inside the sliding group with the other two, which meant
+        it was hidden by exactly the gesture that earns it: scrolling down. A
+        reader eleven screens into /process — the case the control exists for —
+        could only summon it by first scrolling up, which is the thing they
+        wanted the button to do. It appears after a viewport and a half of
+        travel and is 48px, so there is no cost to leaving it there.
+
+        It also carries no transform of its own, so nothing here becomes a
+        containing block for a `position: fixed` descendant.
+      */}
       <BackToTop />
-      {wantsWhatsApp && <WhatsAppFloat />}
-      {!assistantSuppressed && <StoreAssistant />}
+
+      {/*
+        These two do retract on a phone, and should.
+
+        Both are offers rather than navigation, and both are wide enough to
+        cover the page. The tab bar already owns the bottom of a phone screen
+        permanently; a reader moving down the page gets the column out of the
+        way, and it returns the moment they stop or scroll back.
+
+        The transform lives on this inner wrapper, not on the column above,
+        because the assistant's panel is `position: fixed` and a transformed
+        ancestor would become its containing block — which is precisely how the
+        chat sheet came to open 48px wide. The panel is portalled to <body> as
+        well, so this is belt and braces rather than the only guard.
+      */}
+      <div
+        className={cn(
+          'pointer-events-none flex flex-col items-end gap-3',
+          'transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none',
+          retracted ? 'translate-y-[calc(100%+5rem)] opacity-0' : 'translate-y-0 opacity-100',
+        )}
+        // Keyboard users must not be able to tab into a control that has slid
+        // off the screen.
+        inert={retracted ? true : undefined}
+      >
+        {wantsWhatsApp && <WhatsAppFloat />}
+        {!assistantSuppressed && <StoreAssistant />}
+      </div>
     </div>
   );
 }

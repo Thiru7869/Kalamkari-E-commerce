@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, absoluteUrl } from '@/lib/utils';
 
 export type Crumb = { label: string; href?: string };
 
@@ -26,8 +26,42 @@ export function Breadcrumbs({
 }) {
   if (trail.length === 0) return null;
 
+  /*
+    The same trail, again, for a search engine.
+
+    Google builds the breadcrumb line under a result from this rather than from
+    the visible markup, and without it a deep page — a product, a journal entry,
+    a cloth type — is listed under a bare domain with no indication of where it
+    sits. It is emitted from this component rather than from each page so the
+    two can never drift: the trail a reader sees and the trail a crawler is told
+    about are the same array.
+
+    Positions are 1-based and include Home, matching what is rendered. Only
+    entries with a real href get an `item`; the last crumb is the current page
+    and schema.org expects it to be nameless of a URL.
+  */
+  const itemListElement = [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') },
+    ...trail.map((crumb, i) => ({
+      '@type': 'ListItem',
+      position: i + 2,
+      name: crumb.label,
+      ...(crumb.href && i < trail.length - 1 ? { item: absoluteUrl(crumb.href) } : {}),
+    })),
+  ];
+
   return (
     <nav aria-label="Breadcrumb" className={cn('text-sm text-muted-foreground', className)}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement,
+          }),
+        }}
+      />
       <ol className="flex flex-wrap items-center gap-1.5">
         <li>
           <Link href="/" className="hover:text-foreground">

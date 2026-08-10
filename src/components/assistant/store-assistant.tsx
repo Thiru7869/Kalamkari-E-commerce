@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowUp, MessageCircle, Square, X } from 'lucide-react';
@@ -67,6 +68,15 @@ export function StoreAssistant() {
    * transcript cannot re-trigger an announcement.
    */
   const [announcement, setAnnouncement] = useState('');
+
+  /**
+   * `document.body` does not exist while the tree is being described on the
+   * server, and `createPortal` needs a real node. This component is already
+   * `ssr: false` at its import site, but that is the dock's decision to make
+   * and not something this file should depend on.
+   */
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const panelId = useId();
   const pathname = usePathname();
@@ -237,8 +247,26 @@ export function StoreAssistant() {
         </span>
       </button>
 
-      {/* Panel */}
-      {open && (
+      {/*
+        Panel
+
+        Portalled to <body>, and that is load-bearing rather than tidiness.
+
+        This component is rendered inside `FloatingDock`, whose column carries
+        `translate-y-0` so it can slide away on a phone. A transform on an
+        ancestor makes that ancestor the containing block for every
+        `position: fixed` descendant — so `inset-x-0 bottom-0` on the sheet
+        below resolved against a 48px-wide column pinned to the right margin,
+        not against the viewport. The chat panel opened 48px wide and 658px
+        tall: a vertical ribbon of clipped words, on the one control that is
+        supposed to answer questions. The `md:hidden` scrim was constrained the
+        same way and covered nothing.
+
+        Portalling also takes the panel out of the `inert` the dock sets on
+        itself while retracted, which would otherwise make an open panel
+        unfocusable the moment the reader scrolled down behind it.
+      */}
+      {open && mounted && createPortal(
         <>
           {/* Scrim, phones only — the sheet covers enough of the screen that the
               page behind it should stop competing for attention. */}
@@ -442,7 +470,8 @@ export function StoreAssistant() {
               </div>
             </form>
           </div>
-        </>
+        </>,
+        document.body,
       )}
     </>
   );

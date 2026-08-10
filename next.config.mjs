@@ -71,7 +71,20 @@ const nextConfig = {
               "frame-src https://api.razorpay.com https://checkout.razorpay.com",
               "worker-src 'self' blob:",
               "manifest-src 'self'",
-              'upgrade-insecure-requests',
+              /*
+                `upgrade-insecure-requests` is deliberately absent.
+
+                The spec says it is ignored when delivered in a report-only
+                policy, and Chrome says so out loud: every page load logged
+                "The Content Security Policy directive
+                'upgrade-insecure-requests' is ignored when delivered in a
+                report-only policy" to the console. A directive that does
+                nothing but print an error on every navigation is worse than
+                no directive, because it trains everyone to ignore the console.
+
+                Add it back in the same commit that promotes this header to an
+                enforcing `Content-Security-Policy`, where it starts working.
+              */
             ].join('; '),
           },
         ],

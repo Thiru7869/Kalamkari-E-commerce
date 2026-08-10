@@ -256,29 +256,41 @@ const config: Config = {
        * come down too — the desktop headline was also larger than the writing
        * underneath it deserved.
        *
-       *                 320px      390px     1024px     1440px    (was 390 / max)
-       *   display-xl     34px       37px       65px       84px     (48 / 96)
-       *   display-lg     28px       30px       48px       60px     (40 / 70)
-       *   display-md     24px       25px       35px       42px     (31 / 48)
-       *   display-sm     20px       21px       26px       30px     (24 / 33)
-       *   body-lg        16px       16px       17px       18px     (17 / 19)
+       * Re-struck a second time, downward. The ramps were the right shape but
+       * the desktop end of every one of them was set for a poster rather than
+       * for a page: `display-xl` reached 84px at 1440px, which put six words of
+       * the home page headline across four lines and pushed the paragraph that
+       * explains the claim below the fold on a 900px-tall laptop. The same
+       * two-point solve is used, with the ceilings brought down about 20% and
+       * the floors about 10% — proportional, so a phone gets the identical
+       * layout at a smaller size rather than a different one.
+       *
+       *                 320px      390px     1024px     1440px    (previous max)
+       *   display-xl     30px       32px       52px       66px     (84)
+       *   display-lg     26px       27px       40px       48px     (60)
+       *   display-md     22px       23px       29px       34px     (42)
+       *   display-sm     19px       19px       23px       25px     (30)
+       *   body-lg        16px       16px       17px       18px     (18, unchanged)
+       *
+       * `body-lg` is deliberately untouched. Reading size is set by what is
+       * comfortable to read, not by what is in proportion to the headings.
        */
       fontSize: {
         'display-xl': [
-          'clamp(2.125rem, 4.46vw + 1.23rem, 5.25rem)',
-          { lineHeight: '1.04', letterSpacing: '-0.012em' },
+          'clamp(1.875rem, 3.214vw + 1.232rem, 4.125rem)',
+          { lineHeight: '1.06', letterSpacing: '-0.012em' },
         ],
         'display-lg': [
-          'clamp(1.75rem, 2.86vw + 1.18rem, 3.75rem)',
-          { lineHeight: '1.08', letterSpacing: '-0.01em' },
+          'clamp(1.625rem, 1.964vw + 1.232rem, 3rem)',
+          { lineHeight: '1.1', letterSpacing: '-0.01em' },
         ],
         'display-md': [
-          'clamp(1.5rem, 1.61vw + 1.18rem, 2.625rem)',
-          { lineHeight: '1.16', letterSpacing: '-0.006em' },
+          'clamp(1.375rem, 1.071vw + 1.161rem, 2.125rem)',
+          { lineHeight: '1.18', letterSpacing: '-0.006em' },
         ],
         'display-sm': [
-          'clamp(1.25rem, 0.89vw + 1.07rem, 1.875rem)',
-          { lineHeight: '1.25', letterSpacing: '-0.002em' },
+          'clamp(1.1875rem, 0.536vw + 1.08rem, 1.5625rem)',
+          { lineHeight: '1.26', letterSpacing: '-0.002em' },
         ],
         'body-lg': ['clamp(1rem, 0.18vw + 0.96rem, 1.125rem)', { lineHeight: '1.65' }],
         'body-base': ['1rem', { lineHeight: '1.62' }],

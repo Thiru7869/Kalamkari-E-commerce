@@ -18,7 +18,6 @@ import { cn } from '@/lib/utils';
  */
 
 export type CollectionCard = {
-  label: string;
   title: string;
   blurb: string;
   href: string;
@@ -105,11 +104,20 @@ function TiltCard({ card, index }: { card: CollectionCard; index: number }) {
             aria-hidden="true"
           />
 
+          {/*
+            The numeral alone. This badge used to read "02 · PREMIUM" directly
+            above a heading that read "Premium" — the same word twice, once in
+            tracked capitals over the image and once as the card's actual
+            title. The numeral is the part that does work here: it marks these
+            as an ordered set of three ways in. The name belongs to the
+            heading, which is where a screen reader and a search engine both
+            look for it.
+          */}
           <span
             className="tabular absolute left-3 top-3 rounded-sm bg-kasim-950/55 px-2 py-1 font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-cotton-100 backdrop-blur-sm"
             aria-hidden="true"
           >
-            {String(index + 1).padStart(2, '0')} · {card.label}
+            {String(index + 1).padStart(2, '0')}
           </span>
         </div>
 

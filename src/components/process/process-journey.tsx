@@ -361,27 +361,60 @@ export function ProcessJourney({
       </div>
 
       {/*
-        Below `lg` the frame moves under the header as a slim strip rather than
-        a full panel. A 460×600 frame pinned on a phone would leave a column of
-        text the width of a receipt.
+        The cloth below `lg`.
+
+        This was a 44x56px thumbnail in a receipt-width strip, which is smaller
+        than the favicon and read as a loading placeholder rather than as the
+        subject of the page. On a phone it was also the only view of the cloth
+        there was — the panel above is `hidden` until `lg` — so the one thing
+        /process exists to show was, in practice, not shown to most of its
+        readers.
+
+        It is still pinned to the bottom rather than under the header: the
+        header is already sticky, and a second pinned band beneath it costs the
+        article two bites out of the top of a short viewport. The cloth is now
+        sized from the viewport, so it holds real presence on a tall phone and
+        still fits a landscape one, and the frame around it is the same
+        double-rule the desktop panel uses so the two read as one object at two
+        sizes rather than as two different components.
+
+        Decorative, and stated as such: every word in it is repeated in the
+        prose beside it, so a screen reader gains nothing from a second copy.
       */}
       <div
-        className="pointer-events-none sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-10 px-5 lg:hidden"
+        className="pointer-events-none sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-10 px-4 lg:hidden"
         aria-hidden="true"
       >
-        <div className="mx-auto flex max-w-md items-center gap-3 rounded-sm border border-border/70 bg-background/92 p-2.5 shadow-[0_14px_40px_-28px_rgb(0_0_0/0.7)] backdrop-blur-md">
-          <div className="relative h-14 w-11 shrink-0 overflow-hidden rounded-[2px] border border-border/60 bg-cotton-100 dark:bg-kasim-800">
-            <SareeCanvas stage={0} layers={current.layers} label="" />
+        <div className="mx-auto flex max-w-md items-stretch gap-3.5 rounded-sm border border-border/70 bg-background/95 p-2.5 shadow-[0_18px_50px_-30px_rgb(0_0_0/0.75)] backdrop-blur-md">
+          {/* The frame. Outer rule, hairline inner, exactly as on desktop. */}
+          <div className="shrink-0 rounded-[3px] bg-foreground/[0.04] p-[3px] ring-1 ring-border/70">
+            <div
+              className="relative aspect-[46/60] h-[clamp(6rem,17vh,9.5rem)] overflow-hidden rounded-[2px] border border-border/60 bg-cotton-100 dark:bg-kasim-800"
+            >
+              <SareeCanvas stage={0} layers={current.layers} label="" />
+            </div>
           </div>
-          <div className="min-w-0">
+
+          <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
             <p className="tabular font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-primary">
               {current.short} · {current.steps}
             </p>
-            <p className="truncate font-display text-sm leading-tight">{current.title}</p>
+            <p className="mt-1 font-display text-[0.9375rem] leading-tight">{current.title}</p>
+
+            {/* Where the cloth has got to, drawn rather than counted. The
+                numeral alone made the reader do the division. */}
+            <div className="mt-auto pt-3">
+              <div className="h-px w-full bg-foreground/15">
+                <div
+                  className="h-px bg-primary transition-[width] duration-500 ease-out"
+                  style={{ width: `${((stage + 1) / JOURNEY_COUNT) * 100}%` }}
+                />
+              </div>
+              <p className="tabular mt-1.5 font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-muted-foreground">
+                Stage {current.n} of {JOURNEY_COUNT}
+              </p>
+            </div>
           </div>
-          <span className="tabular ml-auto shrink-0 pr-1 font-display text-sm text-muted-foreground">
-            {current.n}/{JOURNEY_COUNT}
-          </span>
         </div>
       </div>
     </div>

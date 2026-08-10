@@ -45,20 +45,32 @@ if (INTRO !== 'skip' && !INTRO_STAGES.includes(INTRO)) {
 const SEEN_STAGES =
   INTRO === 'skip' ? INTRO_STAGES : INTRO_STAGES.slice(0, INTRO_STAGES.indexOf(INTRO));
 
-/** The widest span of layouts on the site, not every URL. */
+/**
+ * The widest span of layouts on the site, not every URL.
+ *
+ * `/types/sarees` and `/collections/premium` are here because they were not,
+ * and both carry a layout no other route does: the type pages a sticky cloth
+ * rail of chips, the collection pages a banner. The rail scrolled every type
+ * page ~990px sideways at every phone width and nothing caught it, because the
+ * only route in this list that reached one was `/search?q=saree` — and that
+ * only started redirecting here once search learned to route section names.
+ */
 const ROUTES = arg(
   'routes',
   [
     '/',
     '/shop',
     '/shop/sarees',
+    '/types/sarees',
+    '/types/dupattas',
+    '/collections/premium',
     '/process',
     '/our-story',
     '/journal',
     '/custom',
     '/contact',
     '/cart',
-    '/search?q=saree',
+    '/search?q=indigo',
   ].join(','),
 ).split(',');
 

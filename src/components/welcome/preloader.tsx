@@ -146,9 +146,29 @@ export function Preloader({ onDone }: { onDone: () => void }) {
       {/* ---- Act 1: the film ------------------------------------------- */}
       {showFilm && (
         <>
+          {/*
+            The film is 720x1280 — portrait, shot on a phone over a table.
+
+            `object-cover` across a full-screen box is right on a phone and
+            wrong on everything else. On a 1280x900 laptop, covering the
+            viewport with a 9:16 clip scales it to 1280 wide and therefore 2276
+            tall, and throws away sixty per cent of the frame — including, on
+            this footage, the hand and the pen, which are the entire reason
+            there is a film here at all.
+
+            So the fit follows the shape of the screen rather than being fixed:
+            cover while the viewport is itself portrait-ish, and contain once it
+            is wider than it is tall, where the clip becomes a centred column of
+            film on the same kasim ground the name arrives on afterwards. That
+            ground is the brand's own black, not a letterbox bar — the frame
+            reads as mounted rather than as a video that did not fit.
+          */}
           <video
             ref={videoRef}
-            className="absolute inset-0 h-full w-full object-cover"
+            className={cn(
+              'absolute inset-0 h-full w-full',
+              'object-cover [@media(min-aspect-ratio:1/1)]:object-contain',
+            )}
             // Muted is not a preference — it is the condition under which a
             // browser will autoplay at all.
             muted

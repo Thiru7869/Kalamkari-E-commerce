@@ -163,7 +163,19 @@ export function TwoCrafts() {
                 pot in the yard.
               </p>
 
-              <ul className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {/*
+                Three across, at every width.
+
+                `sm:grid-cols-4` broke eight swatches into two flush rows of
+                four, which reads as a colour picker — a grid of equal options
+                to pick from. These are not options; they are the eight pots
+                this workshop actually keeps, and three-up gives 3 · 3 · 2, so
+                the last row is short and the set reads as a counted list of
+                real things rather than as a complete palette. It also buys each
+                swatch half as much width again for its two lines of label,
+                which at four-up were breaking to three lines on a phone.
+              */}
+              <ul className="mt-6 grid grid-cols-3 gap-2.5">
                 {SWATCHES.map((swatch) => {
                   const on = active === swatch.id;
                   return (
