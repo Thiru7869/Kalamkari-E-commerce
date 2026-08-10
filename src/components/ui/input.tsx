@@ -1,10 +1,26 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
+/**
+ * `size={1}` is a layout fix, not a sizing choice, and it belongs here rather
+ * than at each call site.
+ *
+ * An `<input>` with no `size` attribute carries a default of 20 characters —
+ * about 223px of *intrinsic* width. That figure still counts toward the
+ * min-content of any flex or grid container the input sits in, even though
+ * `w-full` makes the input itself perfectly happy to be 40px wide. The
+ * container refuses to shrink below it, and the overflow surfaces somewhere
+ * else entirely, which is what made the newsletter row size the whole footer
+ * column. `size={1}` removes the floor; `w-full` still does the growing.
+ *
+ * Overridable, because a caller that genuinely wants character-sizing can pass
+ * its own — this only changes the default from "223px" to "nothing".
+ */
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
-  ({ className, type, ...props }, ref) => (
+  ({ className, type, size = 1, ...props }, ref) => (
     <input
       type={type}
+      size={size}
       ref={ref}
       className={cn(
         // 16px base size prevents iOS Safari from zooming the viewport on focus.

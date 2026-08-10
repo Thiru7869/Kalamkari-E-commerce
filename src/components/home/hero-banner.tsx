@@ -215,6 +215,22 @@ export function HeroBanner({
       </div>
 
       {/* ---- Ticks: position, and the way to move ---------------------- */}
+      {/*
+        `min-w-0` on the buttons is load-bearing.
+
+        `flex-1` is `flex: 1 1 0%`, which says nothing about how far an item may
+        shrink — `min-width` still defaults to `auto`, so a flex item will not
+        go below its own min-content. The label carries `truncate`, and
+        `truncate` includes `white-space: nowrap`, which makes its min-content
+        the *entire untruncated label*. Six of those came to 456px against a
+        350px column on a 390px phone, the row refused to shrink, and it took
+        the whole hero with it: the section's `overflow-hidden` then clipped 86px
+        of the headline and body copy, and the last two ticks were laid out
+        past the right edge where nobody could reach them.
+
+        With `min-w-0` the buttons shrink as intended and `truncate` finally
+        does the job it was added for.
+      */}
       <div className="mt-4 flex items-center gap-2">
         {slides.map((slide, i) => (
           <button
@@ -223,7 +239,7 @@ export function HeroBanner({
             onClick={() => setIndex(i)}
             aria-label={`Show ${slide.label}`}
             aria-current={i === index}
-            className="group relative h-6 flex-1"
+            className="group relative h-6 min-w-0 flex-1"
           >
             <span
               className={cn(
@@ -231,9 +247,16 @@ export function HeroBanner({
                 i === index ? 'bg-myrobalan-300' : 'bg-cotton-100/30 group-hover:bg-cotton-100/60',
               )}
             />
+            {/*
+              Hidden below `sm`. Six labels sharing 350px leaves ~50px each,
+              which truncates "Blouse pieces" to "Blo…" — a label that costs
+              vertical space and tells the reader nothing. The active slide's
+              name is already set over the panel above, and `aria-label` on the
+              button keeps the accessible name intact, so nothing is lost.
+            */}
             <span
               className={cn(
-                'mt-1.5 block truncate text-left text-[0.625rem] uppercase tracking-[0.12em] transition-colors',
+                'mt-1.5 hidden truncate text-left text-[0.625rem] uppercase tracking-[0.12em] transition-colors sm:block',
                 i === index ? 'text-cotton-100' : 'text-cotton-100/45',
               )}
             >

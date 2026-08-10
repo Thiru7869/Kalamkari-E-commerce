@@ -26,21 +26,31 @@ export function Pagination({ page, pageCount }: { page: number; pageCount: numbe
   }
 
   return (
+    /*
+      The word labels are hidden below `sm`.
+
+      "Previous" and "Next" are ~99px and ~74px of unbreakable text. Add the
+      numbered buttons at 44px each and the row's min-content passes the 280px
+      a 320px phone actually offers inside the container, so the row pushed the
+      document 12px wider than the viewport. The chevrons alone are unambiguous
+      in a pagination row, the 44px targets are untouched, and `sr-only` keeps
+      the accessible name for anybody not reading the glyph.
+    */
     <nav aria-label="Pagination" className="mt-12 flex items-center justify-center gap-1">
       {page > 1 ? (
         <Link
           href={hrefFor(page - 1)}
           rel="prev"
           scroll
-          className="inline-flex h-11 items-center gap-1 rounded-sm px-3 text-sm transition-colors hover:bg-foreground/5"
+          className="inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded-sm px-2 text-sm transition-colors hover:bg-foreground/5 sm:px-3"
         >
-          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-          Previous
+          <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="sr-only sm:not-sr-only">Previous</span>
         </Link>
       ) : (
-        <span className="inline-flex h-11 items-center gap-1 px-3 text-sm text-muted-foreground/50">
-          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-          Previous
+        <span className="inline-flex h-11 min-w-11 items-center justify-center gap-1 px-2 text-sm text-muted-foreground/50 sm:px-3">
+          <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="sr-only sm:not-sr-only">Previous</span>
         </span>
       )}
 
@@ -75,15 +85,15 @@ export function Pagination({ page, pageCount }: { page: number; pageCount: numbe
           href={hrefFor(page + 1)}
           rel="next"
           scroll
-          className="inline-flex h-11 items-center gap-1 rounded-sm px-3 text-sm transition-colors hover:bg-foreground/5"
+          className="inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded-sm px-2 text-sm transition-colors hover:bg-foreground/5 sm:px-3"
         >
-          Next
-          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only sm:not-sr-only">Next</span>
+          <ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
         </Link>
       ) : (
-        <span className="inline-flex h-11 items-center gap-1 px-3 text-sm text-muted-foreground/50">
-          Next
-          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+        <span className="inline-flex h-11 min-w-11 items-center justify-center gap-1 px-2 text-sm text-muted-foreground/50 sm:px-3">
+          <span className="sr-only sm:not-sr-only">Next</span>
+          <ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
         </span>
       )}
     </nav>

@@ -84,7 +84,7 @@ export function DesktopNav({ items }: { items: NavItem[] }) {
                   aria-haspopup="true"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                   className={cn(
-                    'flex h-11 items-center gap-1 rounded-sm px-3 text-sm font-medium transition-colors',
+                    'flex h-11 items-center gap-1 whitespace-nowrap rounded-sm px-3 text-sm font-medium transition-colors',
                     'hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     isActive ? 'text-primary' : 'text-foreground/80',
                   )}
@@ -108,7 +108,11 @@ export function DesktopNav({ items }: { items: NavItem[] }) {
                       : undefined
               }
                   className={cn(
-                    'flex h-11 items-center rounded-sm px-3 text-sm font-medium transition-colors',
+                    // Two-word labels ("The Process", "Our Story", "Visit Us")
+                    // wrap onto a second line as soon as the row is tight,
+                    // which makes a 44px nav item 60px tall and drags the
+                    // whole header with it. They are labels; they do not wrap.
+                    'flex h-11 items-center whitespace-nowrap rounded-sm px-3 text-sm font-medium transition-colors',
                     'hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     isActive ? 'text-primary' : 'text-foreground/80',
                   )}
