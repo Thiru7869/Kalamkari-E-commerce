@@ -58,16 +58,19 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Matches `engines.node` in package.json, which is the major Vercel
+          # deploys. CI ran 22 while the deployment ran 24 — testing a runtime
+          # nothing shipped on.
+          node-version: 24
           cache: npm
 
-      # Plain `npm ci`, deliberately. This carried `--legacy-peer-deps` and a
-      # comment blaming the three.js packages' React 19 peer ranges — which
-      # they had since widened. The conflict that actually remained was
-      # nodemailer: next-auth's beta wants ^7 || ^8 and this project pinned ^6.
-      # Upgrading nodemailer fixed the tree properly, and the flag went with
-      # it — which matters because Vercel installs without it, so CI was
-      # testing a resolution the deployment would never use.
+      # Plain `npm ci`, which reads `.npmrc`. The `legacy-peer-deps=true` in
+      # there is load-bearing rather than lazy: every nodemailer up to and
+      # including 9.0.0 carries high-severity advisories, and next-auth's beta
+      # declares an optional peer range of ^7 || ^8 that excludes the fixed
+      # line. See `.npmrc` for why that range is metadata rather than a real
+      # incompatibility. Vercel's install command passes the same flag, so CI
+      # and the deployment resolve one tree instead of two.
       - name: Install
         run: npm ci
 
