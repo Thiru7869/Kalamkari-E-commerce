@@ -56,3 +56,6 @@ yarn-error.log*
 
 # Layout-audit screenshots (scripts/shots.mjs). Generated, never reviewed.
 .shots/
+
+.vercel
+.env*

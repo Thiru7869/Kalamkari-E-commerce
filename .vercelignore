@@ -1,0 +1,22 @@
+# What the Vercel CLI must not upload.
+#
+# `vercel deploy` does NOT read .gitignore. Its own default ignore list covers
+# .git, node_modules, .next, .vercel and .env.local — but not `.env`, which
+# sits right next to them and holds the live database password, AUTH_SECRET,
+# the SMTP password and the API keys. A `vercel --prod` from a working
+# directory therefore ships the local .env into the build container and into
+# the deployment's source listing. Verified with `vercel deploy --dry`, which
+# prints exactly which files go up.
+#
+# Production values come from the project's environment variables, which Vercel
+# injects directly; nothing here is needed at build time. prisma.config.ts
+# already expects no .env on a host and says so.
+.env
+.env.*
+!.env.example
+
+# Records which Neon org the last `neon` command ran against. Local state.
+.neon
+
+# Layout-audit screenshots. Generated, never served.
+.shots
