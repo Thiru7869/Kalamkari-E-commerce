@@ -23,14 +23,43 @@ export function WorkshopVideo({
   src = null,
   poster,
   className,
+  tone = 'dark',
+  eyebrow = 'From the workshop',
+  caption,
+  aspect = 'tall',
 }: {
   /** Path to the film. Null until the store supplies one. */
   src?: string | null;
   poster: string;
   className?: string;
+  /**
+   * Which ground the frame is standing on.
+   *
+   * The frame was written for the kasim band on /our-story and hardcoded
+   * cotton-on-dark throughout, so dropping it onto the cream visit section
+   * produced pale text on a pale ground. Stated rather than sniffed: the
+   * caller knows what its own background is and the component cannot.
+   */
+  tone?: 'dark' | 'light';
+  eyebrow?: string;
+  /**
+   * What the film actually is, in the caller's words.
+   *
+   * A default that says "a morning in the front room" would be this component
+   * asserting the contents of whatever file it was handed. The caller has the
+   * file; the caller describes it.
+   */
+  caption?: string;
+  /**
+   * `tall` fills a narrow side column beside a heading. `wide` is for a video
+   * standing in a body column, where 4:3 would be a wall of player.
+   */
+  aspect?: 'tall' | 'wide';
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+
+  const light = tone === 'light';
 
   const toggle = () => {
     const el = videoRef.current;
@@ -47,7 +76,12 @@ export function WorkshopVideo({
   return (
     <figure
       className={cn(
-        'overflow-hidden rounded-sm border border-cotton-100/20 bg-kasim-950/40 shadow-[0_30px_70px_-45px_rgb(0_0_0/0.9)] backdrop-blur-sm',
+        'overflow-hidden rounded-sm border',
+        light
+          ? // Light ground: a real hairline and a soft lift rather than a
+            // translucent panel, which on cream reads as a smudge.
+            'border-border bg-background shadow-[0_24px_60px_-40px_rgb(60_40_30/0.45)]'
+          : 'border-cotton-100/20 bg-kasim-950/40 shadow-[0_30px_70px_-45px_rgb(0_0_0/0.9)] backdrop-blur-sm',
         className,
       )}
     >
@@ -58,7 +92,12 @@ export function WorkshopVideo({
         it was given; 16:10 on a phone, where it is full width and a taller
         crop would push the first chapter off the screen.
       */}
-      <div className="relative aspect-[16/10] w-full lg:aspect-[4/3]">
+      <div
+        className={cn(
+          'relative w-full',
+          aspect === 'tall' ? 'aspect-[16/10] lg:aspect-[4/3]' : 'aspect-[16/10]',
+        )}
+      >
         {src ? (
           <>
             <video
@@ -68,7 +107,22 @@ export function WorkshopVideo({
               playsInline
               controls={playing}
               preload="none"
-              className="h-full w-full object-cover"
+              /*
+                `absolute inset-0`, not `h-full w-full`.
+
+                A <video> carries the intrinsic width of its file — 1200px for
+                this one — and that width counts toward its *container's*
+                min-content even when the element itself is `w-full`. It is the
+                same trap as the `<input size="20">` that once sized the whole
+                footer column: `w-full` constrains the box that is drawn, not
+                the width the box demands during layout.
+
+                In flow it pushed the story fold 858px past the right edge of a
+                390px phone. Out of flow it contributes nothing to intrinsic
+                sizing, and the wrapper's aspect-ratio already reserves the
+                space, so nothing shifts.
+              */
+              className="absolute inset-0 h-full w-full object-cover"
               onEnded={() => setPlaying(false)}
             />
             {!playing && (
@@ -107,14 +161,27 @@ export function WorkshopVideo({
         )}
       </div>
 
-      <figcaption className="border-t border-cotton-100/15 px-3.5 py-2.5">
-        <p className="font-inscription text-[0.5625rem] uppercase tracking-[0.18em] text-cotton-200/60">
-          From the workshop
+      <figcaption
+        className={cn('border-t px-3.5 py-2.5', light ? 'border-border' : 'border-cotton-100/15')}
+      >
+        <p
+          className={cn(
+            'font-inscription text-[0.5625rem] uppercase tracking-[0.18em]',
+            light ? 'text-muted-foreground' : 'text-cotton-200/60',
+          )}
+        >
+          {eyebrow}
         </p>
-        <p className="mt-1 text-[0.8125rem] leading-snug text-cotton-100/85">
-          {src
-            ? 'A morning in the front room, at ordinary speed.'
-            : 'A film of a morning in the front room is being cut. It will appear here.'}
+        <p
+          className={cn(
+            'mt-1 text-[0.8125rem] leading-snug',
+            light ? 'text-muted-foreground' : 'text-cotton-100/85',
+          )}
+        >
+          {caption ??
+            (src
+              ? 'Filmed in the store.'
+              : 'A film of a morning in the front room is being cut. It will appear here.')}
         </p>
       </figcaption>
     </figure>

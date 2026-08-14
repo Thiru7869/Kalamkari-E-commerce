@@ -91,7 +91,7 @@ export function WelcomeFilm({ poster, label }: { poster: string; label: string }
   return (
     <figure
       className={cn(
-        'group relative isolate overflow-hidden bg-cotton-300 dark:bg-kasim-800',
+        'group relative isolate overflow-hidden bg-cotton-300 dark:bg-muted',
         /*
           One ratio, every width.
 
@@ -184,22 +184,19 @@ export function WelcomeFilm({ poster, label }: { poster: string; label: string }
       )}
 
       {/*
-        The plate, and the widths it can honestly be set at.
+        No caption.
 
-        "The front room" is two words at 0.18em tracking and needs roughly 90px.
-        The frame is 80px on a phone, 104px from `sm` and 120px from `lg`. So
-        below `sm` there is no caption at all — three tracked words stacked over
-        an 80px drawing is not a plate, it is a stain — and the full line only
-        appears at `lg` where it fits on one line. The alt text on the poster
-        already names what is in the frame, so nothing is lost when this is
-        absent.
+        There was one — "The front room, today", set in tracked capitals across
+        the foot of the frame. It has been taken out rather than reworded, and
+        the reason is what now surrounds this box: the film sits inside a drawn
+        Kalamkari border whose whole job is to be looked at, and a line of type
+        laid over the bottom edge of that border fights it and loses. Two
+        ornaments in one 120px box is one too many.
+
+        Nothing is lost by the removal. The poster's `alt` still names what is
+        in the frame for anyone who cannot see it, and the sentence beside the
+        film says the same thing in words a visitor will actually read.
       */}
-      <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 hidden p-2 sm:block sm:p-2.5">
-        <span className="font-inscription text-[0.5625rem] uppercase leading-none tracking-[0.14em] text-myrobalan-200 lg:tracking-[0.18em]">
-          <span className="lg:hidden">The front room</span>
-          <span className="hidden lg:inline">The front room, today</span>
-        </span>
-      </figcaption>
     </figure>
   );
 }

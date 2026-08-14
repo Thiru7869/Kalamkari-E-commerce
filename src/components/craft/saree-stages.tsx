@@ -1,5 +1,6 @@
 'use client';
 
+import { NO_LAYERS, type ClothLayers } from '@/content/process';
 import { cn } from '@/lib/utils';
 
 /**
@@ -16,253 +17,214 @@ import { cn } from '@/lib/utils';
  * including step five, which paints in a liquid you cannot see.
  */
 
+/**
+ * The cloth state, and the empty one.
+ *
+ * Both live in `src/content/process.ts` now — three different lists declare a
+ * cloth state and two of them are content files, so the type belongs with the
+ * content rather than beside the SVG that draws it.
+ *
+ * Both stage lists in this file state their layers rather than deriving them
+ * from an index. The journey always did, because several of its stages change
+ * only one thing. The eight-stage rail was switched to it when those stages
+ * were rewritten: index gating only worked while each stage happened to
+ * advance the cloth by exactly one layer, and public stage 5 covers the alum
+ * *and* the madder bath that follows it. Derived from its index, that stage
+ * showed a cloth still painted in an invisible mordant under a heading
+ * announcing the red had arrived.
+ */
+const NONE = NO_LAYERS;
+export type { ClothLayers };
+
+/* -------------------------------------------------------------------------- */
+/* The eight public stages, for the home page                                 */
+/* -------------------------------------------------------------------------- */
+
 export type SareeStage = {
   n: number;
   /** Short label for the numbered rail. */
   short: string;
   title: string;
+  /**
+   * What the operation is called in the workshop, in Telugu.
+   *
+   * These are working words rather than translations of the English titles —
+   * what somebody in the front room in Srikalahasti would actually say they
+   * were doing this morning. `roman` is not decoration either: this site's
+   * readers overwhelmingly cannot sound out the script, and an unglossed
+   * label is an ornament rather than a piece of information. With the
+   * transliteration beside it a reader can carry the word away and say it.
+   */
+  telugu: { script: string; roman: string };
+  /**
+   * The materials this stage handles, in the workshop's own words.
+   *
+   * `telugu` above names the *operation* — what somebody would say they were
+   * doing. These name the *things*, and they are a different kind of fact: a
+   * reader who learns that the black is `kasim` and the alum is `patika` can
+   * follow the rest of this site, because those are the words the product
+   * pages, the dye filter and the assistant already use.
+   *
+   * Two rules, both to keep this honest rather than decorative:
+   *
+   *   - Every term glosses something the English body of the same stage
+   *     already names. Nothing here introduces a material the page has not
+   *     mentioned, so each one can be checked against the paragraph beside it.
+   *   - The romanisations match the `localName` fields already used in
+   *     `src/content/process.ts` (karakkaya, kalam, kasim, patika, chay ver,
+   *     neeli). One spelling per material across the whole site.
+   */
+  terms: { script: string; roman: string; gloss: string }[];
   /** The real step numbers, of twenty-three, that this stage covers. */
   steps: string;
   body: string;
-};
-
-export const sareeStages: SareeStage[] = [
-  {
-    n: 1,
-    short: 'Cloth',
-    title: 'Loom-white cotton, and nothing else',
-    steps: 'Steps 1–3',
-    body: 'A length of handloom cotton arrives stiff with starch and mill dressing. It is beaten on stone at the river and washed until it holds water instead of repelling it. Until it will drink, no dye will stay.',
-  },
-  {
-    n: 2,
-    short: 'Myrobalan',
-    title: 'Myrobalan and buffalo milk',
-    steps: 'Steps 4–5',
-    body: 'The cloth is steeped in ground karakkaya — chebulic myrobalan — and buffalo milk. The tannin will later turn black wherever iron touches it; the milk fat stops the pen from bleeding. This is why the ground is cream, never white.',
-  },
-  {
-    n: 3,
-    short: 'The kalam',
-    title: 'Every line drawn freehand',
-    steps: 'Steps 6–9',
-    body: 'A sharpened bamboo stick wrapped in wool holds the liquor like a reservoir; squeezing the wool feeds the nib. The whole composition is drawn once, without tracing, without a block, and without a second chance.',
-  },
-  {
-    n: 4,
-    short: 'Kasim black',
-    title: 'Rusted iron, jaggery, twenty-one days',
-    steps: 'Steps 10–12',
-    body: 'Scrap iron and jaggery ferment in a sealed earthen pot for three weeks. Drawn onto myrobalan-treated cloth the liquor is pale brown — it turns black on the cloth, not in the pot. Not a true black: a warm blue-grey.',
-  },
-  {
-    n: 5,
-    short: 'Alum',
-    title: 'Painting in a colour you cannot see',
-    steps: 'Steps 13–15',
-    body: 'Every area that will become red is painted with a clear solution of alum, tinted faintly so the artist can track their own hand. Nothing looks like it has happened. Days of work go down invisibly.',
-  },
-  {
-    n: 6,
-    short: 'Madder',
-    title: 'The bath where the red arrives',
-    steps: 'Steps 16–18',
-    body: 'The whole cloth boils in madder root. Colour binds only where the alum went and washes out everywhere else. Pink through deep maroon was decided days earlier, by hand, in a liquid nobody could see.',
-  },
-  {
-    n: 7,
-    short: 'Indigo & gold',
-    title: 'The one colour that is dipped',
-    steps: 'Steps 19–21',
-    body: 'Indigo will not paint — it is a vat colour, and it strikes on contact with air. Areas that must stay pale are waxed, the cloth is dipped, and it comes out green before turning blue in front of you. Myrobalan over alum gives the yellows.',
-  },
-  {
-    n: 8,
-    short: 'Sun',
-    title: 'Twenty washings, and the river',
-    steps: 'Steps 22–23',
-    body: 'Up to twenty cycles of washing and drying in the sun — most of them to take colour away, not add it. What survives is what was bound. The cloth softens, the whites clear, and the piece is finished.',
-  },
-];
-
-export const STAGE_COUNT = sareeStages.length;
-
-/* -------------------------------------------------------------------------- */
-/* The long journey — twelve stages, for /process                             */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Which layers of the drawing are visible.
- *
- * The eight-stage rail on the home page derives these from its index. The
- * twelve-stage journey on /process sets them explicitly, because it moves
- * through the same cloth at finer resolution and several of its stages change
- * only one thing — the whole point of watching it slowly.
- */
-export type ClothLayers = {
-  /** Myrobalan and buffalo milk: the ground turns cream. */
-  prepared: boolean;
-  /** Charcoal composition is down. */
-  drawn: boolean;
-  /** Iron liquor has struck: the outline is black rather than pale. */
-  blackened: boolean;
-  /** Alum painted, before the bath — visible only as a damp shadow. */
-  alum: boolean;
-  /** The madder bath has been run. */
-  madder: boolean;
-  /** Indigo dipped and the yellows painted. */
-  indigo: boolean;
-  /** Twenty washings and the sun. */
-  finished: boolean;
-};
-
-export type JourneyStage = {
-  n: number;
-  short: string;
-  title: string;
-  /** The real step numbers, of twenty-three, that this stage covers. */
-  steps: string;
   /**
-   * The first of those steps, as a number.
+   * Which layers of the drawing are showing at this stage.
    *
-   * Held separately from `steps` rather than parsed back out of it. `steps` is
-   * display copy — it says "Step 1" or "Steps 9–11" with an en dash — and the
-   * process page uses this value to scroll the article to the matching
-   * paragraph when the reader steps the frame by hand. Deriving a scroll
-   * target by parsing prose works right up until somebody writes "Steps 9 and
-   * 11", at which point the page quietly jumps to the wrong chapter.
+   * Stated per stage rather than derived from the index. It used to be
+   * `stage >= 4` and so on inside `SareeCanvas`, which worked only for as long
+   * as the eight public stages happened to advance the cloth by exactly one
+   * layer each. They no longer do: the public step 5 covers the alum *and* the
+   * bath that follows it, so index-gating showed a cloth painted with an
+   * invisible mordant under a heading that says the red has arrived.
    */
-  startsAtStep: number;
-  /** One line, shown under the frame. Longer prose lives in the phase text. */
-  caption: string;
   layers: ClothLayers;
 };
 
-const NONE: ClothLayers = {
-  prepared: false,
-  drawn: false,
-  blackened: false,
-  alum: false,
-  madder: false,
-  indigo: false,
-  finished: false,
-};
-
 /**
- * Twelve states of one length of cotton.
+ * The eight-stage public summary of the twenty-three.
  *
- * Deliberately not evenly spaced across the twenty-three steps: the craft is
- * not evenly spaced either. Four of these stages happen before a pen is picked
- * up, and two of them — the alum and the bath — are the pair the whole page
- * exists to explain, so they get a stage each rather than sharing one.
+ * These are the store's own short version, and the wording is theirs. Each maps
+ * onto a real span of the full sequence in `src/content/process.ts` — the
+ * `steps` field is not decoration, it is where to go and check.
+ *
+ * Note that this is a *summary*, not a replacement. The site's central claim is
+ * twenty-three operations, stated in `site.craft.steps`, counted from
+ * `processPhases` by `totalSteps`, and quoted in the announcement bar, the
+ * heritage figures, the assistant's knowledge base and the HowTo structured
+ * data. Eight is how you tell somebody at a counter; twenty-three is what is
+ * actually done.
  */
-export const journeyStages: JourneyStage[] = [
+export const sareeStages: SareeStage[] = [
   {
     n: 1,
-    short: 'Loom',
-    title: 'Off the loom',
-    steps: 'Step 1',
-    startsAtStep: 1,
-    caption: 'Stiff with mill starch. It repels dye and drinks ink — nothing can be done to it yet.',
+    short: 'Fabric',
+    title: 'Fabric preparation',
+    telugu: { script: 'ఉతకడం', roman: 'utakadam' },
+    terms: [
+      { script: 'గడ', roman: 'gada', gloss: 'greige cotton, as it leaves the loom' },
+      { script: 'ఎండ', roman: 'enda', gloss: 'the sun the cloth is dried in' },
+    ],
+    steps: 'Steps 1–3',
+    body: 'Cotton arrives stiff with mill starch, sizing oils and whatever else the loom left in it, and in that state it repels dye and drinks ink in equal measure. It is beaten against stone in running water until the water runs clear, then dried on sand in full sun. Until the cloth will drink, nothing that follows will hold.',
     layers: { ...NONE },
   },
   {
     n: 2,
-    short: 'Washed',
-    title: 'Beaten at the river',
-    steps: 'Steps 2–3',
-    startsAtStep: 2,
-    caption: 'Washed against stone in the Swarnamukhi until the water runs clear, then dried on sand.',
-    layers: { ...NONE },
+    short: 'Myrobalan',
+    title: 'Myrobalan treatment',
+    telugu: { script: 'కరక్కాయ ముంచడం', roman: 'karakkaya munchadam' },
+    terms: [
+      { script: 'కరక్కాయ', roman: 'karakkaya', gloss: 'chebulic myrobalan nut' },
+      { script: 'గేదె పాలు', roman: 'gede paalu', gloss: 'buffalo milk' },
+    ],
+    steps: 'Steps 4–5',
+    body: 'The cloth is steeped in a milky bath of ground karakkaya — chebulic myrobalan — and buffalo milk. Two things are happening at once: the tannin soaks into every fibre and waits there for the iron it will later turn black against, and the fat in the milk coats the surface so the pen lays a line instead of a blur. The cream you see behind every painting is that nut. It was never bleached white.',
+    layers: { ...NONE, prepared: true },
   },
   {
     n: 3,
-    short: 'Myrobalan',
-    title: 'Myrobalan and buffalo milk',
-    steps: 'Steps 4–5',
-    startsAtStep: 4,
-    caption: 'The ground turns cream. That colour is the nut, not a dye — and the tannin now waiting in the fibre is what will later turn black.',
-    layers: { ...NONE, prepared: true },
-  },
-  {
-    n: 4,
-    short: 'Burnished',
-    title: 'Smoothed over stone',
-    steps: 'Step 6',
-    startsAtStep: 6,
-    caption: 'Raised fibres flattened. A pen dragged across an unsmoothed cloth catches and skips.',
-    layers: { ...NONE, prepared: true },
-  },
-  {
-    n: 5,
-    short: 'Charcoal',
-    title: 'The story set out in charcoal',
-    steps: 'Steps 7–8',
-    startsAtStep: 7,
-    caption: 'Burnt tamarind twigs. Several days of decisions on a nine-yard cloth, with nothing undoable.',
+    short: 'Drawing',
+    title: 'Hand drawing',
+    telugu: { script: 'బొమ్మ గీయడం', roman: 'bomma geeyadam' },
+    terms: [
+      { script: 'కలం', roman: 'kalam', gloss: 'the sharpened bamboo pen' },
+      { script: 'బొగ్గు', roman: 'boggu', gloss: 'tamarind-twig charcoal' },
+    ],
+    steps: 'Steps 6–8',
+    body: 'The whole composition goes down freehand in charcoal burnt from tamarind twigs — the border, the register lines, where Rama stands, which way the peacock turns. On a nine-yard saree that is several days of decisions with nothing undoable in any of them. There is no stencil, no transfer, no projection and no block at any point.',
     layers: { ...NONE, prepared: true, drawn: true },
   },
   {
-    n: 6,
-    short: 'Kasim',
-    title: 'The iron liquor strikes',
-    steps: 'Steps 9–11',
-    startsAtStep: 9,
-    caption: 'A pale brown liquid drawn with a bamboo kalam turns black in the cloth, not in the pot.',
+    n: 4,
+    short: 'Outline',
+    title: 'Black outlining',
+    telugu: { script: 'నలుపు గీత', roman: 'nalupu geeta' },
+    terms: [
+      { script: 'కసిం', roman: 'kasim', gloss: 'fermented iron liquor — the black' },
+      { script: 'బెల్లం', roman: 'bellam', gloss: 'jaggery, what the iron ferments in' },
+    ],
+    steps: 'Steps 9–12',
+    body: 'The kalam — bamboo, sharpened, with a ball of wool bound above the tip — is charged with kasim, a liquor of rusted iron and jaggery left to ferment about three weeks. It goes on pale brown and darkens in front of you, because the iron is meeting the tannin already sitting in the cloth. The colour forms in the fibre rather than on it, which is why the outline is still there after fifty years.',
     layers: { ...NONE, prepared: true, drawn: true, blackened: true },
+  },
+  {
+    n: 5,
+    short: 'Red',
+    title: 'Red dyeing',
+    telugu: { script: 'ఎరుపు రంగు', roman: 'erupu rangu' },
+    terms: [
+      { script: 'పటిక', roman: 'patika', gloss: 'alum — the invisible mordant' },
+      { script: 'చాయ వేరు', roman: 'chay ver', gloss: 'madder / chay root' },
+    ],
+    steps: 'Steps 13–17',
+    body: 'Every area that will end up red is first painted with a clear solution of alum, which reads as a faint damp shadow and nothing more — days of work laid down invisibly. The cloth is then rinsed and boiled in a pot of madder root, and the colour binds only where the alum went. Where the alum was thicker the red comes deeper, which is how one bath yields pink through maroon in a single pass.',
+    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true },
+  },
+  {
+    n: 6,
+    short: 'Colour',
+    title: 'Colouring and detailing',
+    telugu: { script: 'రంగు వేయడం', roman: 'rangu veyadam' },
+    terms: [
+      { script: 'నీలి', roman: 'neeli', gloss: 'indigo — dipped, never painted' },
+      { script: 'మైనం', roman: 'mainam', gloss: 'wax, to resist the vat' },
+      { script: 'దానిమ్మ తొక్క', roman: 'danimma tokka', gloss: 'pomegranate rind' },
+    ],
+    steps: 'Steps 18–21',
+    body: 'Yellow is drawn straight on with the pen from myrobalan flower and pomegranate rind. Indigo refuses to be painted at all: areas that must stay clear are waxed, the whole cloth is lowered into the vat, and it comes out yellow-green and turns blue as the air reaches it. Green is neither: it is always one colour arriving on top of another, and this workshop keeps four ways of reaching it — which is four greens, not one.',
+    layers: {
+      ...NONE,
+      prepared: true,
+      drawn: true,
+      blackened: true,
+      alum: true,
+      madder: true,
+      indigo: true,
+    },
   },
   {
     n: 7,
-    short: 'Washed',
-    title: 'The charcoal washed away',
-    steps: 'Step 12',
-    startsAtStep: 12,
-    caption: 'Everything that did not bind goes downstream. A finished black drawing on cream — and no other colour at all.',
-    layers: { ...NONE, prepared: true, drawn: true, blackened: true },
+    short: 'Washing',
+    title: 'Repeated washing and sun drying',
+    telugu: { script: 'ఎండబెట్టడం', roman: 'endabettadam' },
+    terms: [
+      { script: 'నీళ్ళు', roman: 'neellu', gloss: 'water — twenty washings of it' },
+      { script: 'ఎండ', roman: 'enda', gloss: 'the sun that lifts the ground' },
+    ],
+    steps: 'Step 22',
+    body: 'A finished piece may go through twenty full cycles of washing and drying in the sun, and most of them are there to take colour away rather than to add it. Each wash lifts a little more unbound dye and each spell on the ground bleaches the cream a shade cleaner while the bound colours stay exactly where they are. The contrast in a good piece is that difference, repeated twenty times.',
+    layers: {
+      ...NONE,
+      prepared: true,
+      drawn: true,
+      blackened: true,
+      alum: true,
+      madder: true,
+      indigo: true,
+    },
   },
   {
     n: 8,
-    short: 'Alum',
-    title: 'Painting in a colour you cannot see',
-    steps: 'Steps 13–15',
-    startsAtStep: 13,
-    caption: 'Every area that will be red is painted with clear alum. Days of work go down invisibly.',
-    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true },
-  },
-  {
-    n: 9,
-    short: 'Madder',
-    title: 'The bath where the red arrives',
-    steps: 'Steps 16–17',
-    startsAtStep: 16,
-    caption: 'Boiled in madder root. Colour binds only where the alum went, and washes out everywhere else.',
-    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true },
-  },
-  {
-    n: 10,
-    short: 'Yellow',
-    title: 'Myrobalan gold, painted on',
-    steps: 'Steps 18–19',
-    startsAtStep: 18,
-    caption: 'A soft mustard from flower and pomegranate rind, fixed by a day in the sun. Never a bright lemon.',
-    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true },
-  },
-  {
-    n: 11,
-    short: 'Indigo',
-    title: 'The one colour that is dipped',
-    steps: 'Steps 20–21',
-    startsAtStep: 20,
-    caption: 'Waxed, lowered into the vat, and blue as the air reaches it. Laid over the yellow it makes the green.',
-    layers: { ...NONE, prepared: true, drawn: true, blackened: true, alum: true, madder: true, indigo: true },
-  },
-  {
-    n: 12,
-    short: 'Sun',
-    title: 'Twenty washings, and the river',
-    steps: 'Steps 22–23',
-    startsAtStep: 22,
-    caption: 'Most of them to take colour away rather than add it. The ground clears, the cloth softens, the piece is done.',
+    short: 'Finishing',
+    title: 'Final finishing',
+    telugu: { script: 'చివరి మెరుగు', roman: 'chivari merugu' },
+    terms: [
+      { script: 'ఇస్త్రీ', roman: 'istri', gloss: 'the press' },
+      { script: 'మడత', roman: 'madata', gloss: 'the fold it leaves in' },
+    ],
+    steps: 'Step 23',
+    body: 'A last clean wash with nothing added, a final drying, then pressing, folding, and a piece-by-piece inspection before it is put out for sale. It leaves with no starch, no finish and no sizing — nothing has been added to the cloth since the buffalo milk at step four. Between fifteen and forty-five days have passed, and a wet week can stop any of it.',
     layers: {
       prepared: true,
       drawn: true,
@@ -275,7 +237,7 @@ export const journeyStages: JourneyStage[] = [
   },
 ];
 
-export const JOURNEY_COUNT = journeyStages.length;
+export const STAGE_COUNT = sareeStages.length;
 
 /* -------------------------------------------------------------------------- */
 /* Motifs                                                                     */

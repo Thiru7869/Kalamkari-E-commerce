@@ -44,7 +44,7 @@ export default function ContactPage() {
               <dl className="mt-8 flex flex-col gap-7">
                 <div className="flex gap-4">
                   <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                  <div>
+                  <div className="min-w-0">
                     <dt className="font-medium">Where</dt>
                     <dd className="mt-1.5 leading-relaxed text-muted-foreground">
                       {site.name}
@@ -67,7 +67,7 @@ export default function ContactPage() {
 
                 <div className="flex gap-4">
                   <Clock className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                  <div>
+                  <div className="min-w-0">
                     <dt className="font-medium">When</dt>
                     <dd className="mt-1.5 leading-relaxed text-muted-foreground">
                       {site.hours.note}
@@ -78,7 +78,7 @@ export default function ContactPage() {
                 {phone && (
                   <div className="flex gap-4">
                     <Phone className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                    <div>
+                    <div className="min-w-0">
                       <dt className="font-medium">Call</dt>
                       <dd className="mt-1.5 text-muted-foreground">
                         <a
@@ -98,7 +98,7 @@ export default function ContactPage() {
                       className="mt-0.5 h-5 w-5 shrink-0 text-primary"
                       aria-hidden="true"
                     />
-                    <div>
+                    <div className="min-w-0">
                       <dt className="font-medium">WhatsApp</dt>
                       <dd className="mt-1.5 text-muted-foreground">
                         <a
@@ -120,12 +120,31 @@ export default function ContactPage() {
                 {email && (
                   <div className="flex gap-4">
                     <Mail className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                    <div>
+                    <div className="min-w-0">
                       <dt className="font-medium">Email</dt>
                       <dd className="mt-1.5 text-muted-foreground">
+                        {/*
+                          `anywhere`, not `break-word`.
+
+                          The store's address is forty characters with no space
+                          in it, and nothing in an email address is a break
+                          opportunity to a browser — not the `@`, not the dots.
+                          At the body size that is a single 320px word, which on
+                          a 320px phone pushed this page 56px past its own right
+                          edge and took the tab bar and the WhatsApp button with
+                          it. `min-w-0` on the row above lets the column shrink;
+                          this is what lets the word inside it shrink too.
+
+                          The two differ in exactly the way that matters here:
+                          `overflow-wrap: break-word` breaks the line but does
+                          not reduce the element's *min-content* contribution,
+                          so the flex row would still have been sized by the
+                          unbroken address. `anywhere` reduces it, which is what
+                          actually removes the floor.
+                        */}
                         <a
                           href={`mailto:${email}`}
-                          className="underline underline-offset-4 hover:text-foreground"
+                          className="underline underline-offset-4 [overflow-wrap:anywhere] hover:text-foreground"
                         >
                           {email}
                         </a>

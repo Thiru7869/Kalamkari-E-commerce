@@ -4,46 +4,64 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { SareeCanvas, journeyStages, JOURNEY_COUNT } from '@/components/craft/saree-stages';
-import type { ProcessPhase, DyeTone } from '@/content/process';
+import { SareeCanvas } from '@/components/craft/saree-stages';
+import { stepsForStage, type MainStage } from '@/content/stages';
+import type { DyeTone } from '@/content/process';
 import { scrollTo } from '@/lib/smooth-scroll';
 import { cn } from '@/lib/utils';
 
 /**
- * The scroll-driven walk through the 23 steps.
+ * The scroll-driven walk through the fourteen main stages.
  *
- * Two things move together as the reader descends:
+ * ─── What changed, and what deliberately did not ──────────────────────────
  *
- *  1. **The wash behind the page** shifts through the seven pot colours in the
- *     order the craft reaches them. It is a real transition rather than a set
- *     of section backgrounds — the tone is interpolated continuously, so the
- *     black bleeds into the madder the way it would in water.
- *  2. **The cloth in the frame** advances through twelve states, from a length
- *     of loom cotton to a finished painted saree. It is the same drawing
- *     throughout, which is the whole claim: one cloth, twenty-three
- *     operations, not twelve different sarees photographed side by side.
+ * This used to render six phases and drive a separate twelve-state cloth. It
+ * now renders the fourteen stages in `src/content/stages.ts`, and the cloth is
+ * driven by the stage the reader is actually in rather than by a parallel list
+ * that had to be kept in step by hand. That removes the failure this component
+ * was one edit away from: two independent sequences over the same cloth, with
+ * nothing checking that stage nine of one lined up with stage nine of the
+ * other.
+ *
+ * The twenty-three operations have not gone anywhere. Each stage renders the
+ * ones it contains, resolved out of `process.ts` through `stepsForStage`, so
+ * the page still carries every step, with its materials, duration and note —
+ * and `stages.ts` fails at import if the fourteen ever stop accounting for all
+ * twenty-three exactly once.
+ *
+ * ─── What moves as you read ───────────────────────────────────────────────
+ *
+ *  1. **The wash behind the page** shifts through the pot colours in the order
+ *     the craft reaches them, interpolated continuously rather than switched
+ *     per section, so the black bleeds into the madder the way it would in
+ *     water. Written to a CSS variable, never to state: this fires on every
+ *     scroll tick and re-rendering fourteen chapters that often would be
+ *     indefensible.
+ *  2. **The cloth in the frame** advances through the fourteen states, from a
+ *     length of loom cotton to a finished painted saree. It is the same
+ *     drawing throughout, which is the whole claim: one cloth, twenty-three
+ *     operations, not fourteen different sarees photographed side by side.
  *
  * Readability is not left to chance. The dye tone is painted on a fixed layer
  * *behind* the text, and every block of prose sits on a solid card built from
- * the theme's own surface tokens — so the copy is exactly as legible over
- * kasim black as it is over myrobalan cream, in either theme. Only the phase
- * numerals and the frame furniture sit on the dye directly, and those switch
- * between a light and a dark ink chosen per tone.
+ * the theme's own surface tokens — so the copy is exactly as legible over kasim
+ * black as over myrobalan cream, in either theme.
  *
  * Everything is ordinary HTML in document order. Turn off JavaScript and you
- * get the full twenty-three steps as a readable article on a plain background;
- * the wash and the frame add atmosphere and carry no information of their own.
+ * get the full fourteen stages and all twenty-three steps as a readable article
+ * on a plain background; the wash and the frame add atmosphere and carry no
+ * information of their own.
  */
 export function ProcessJourney({
-  phases,
+  stages,
   tones,
 }: {
-  phases: ProcessPhase[];
+  stages: MainStage[];
   tones: DyeTone[];
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const washRef = useRef<HTMLDivElement>(null);
-  const [activePhase, setActivePhase] = useState(0);
+  /** Which of the fourteen the reader is in. Drives the frame and the rail. */
   const [stage, setStage] = useState(0);
   const [ink, setInk] = useState<'light' | 'dark'>('dark');
   /** True while the page is moving. Drives the frame's presence. */
@@ -59,10 +77,12 @@ export function ProcessJourney({
    * The current stage, readable from callbacks that must not re-subscribe.
    *
    * `stepTo` is handed to the frame and to the rail; if it closed over `stage`
-   * it would be a new function on every one of the twelve stage changes, and
+   * it would be a new function on every one of the fourteen stage changes, and
    * every consumer would re-render with it for no benefit.
    */
   const stageRef = useRef(0);
+
+  const total = stages.length;
 
   useEffect(() => {
     const root = rootRef.current;
@@ -75,19 +95,12 @@ export function ProcessJourney({
     const ctx = gsap.context(() => {
       /* ---- The dye wash -------------------------------------------------- */
 
-      // One trigger spanning the whole journey, scrubbed. The tone is written
-      // to a CSS variable rather than to state: this fires on every scroll
-      // tick, and re-rendering a page of twenty-three steps that often would
-      // be indefensible.
-      const swatch = { t: 0 };
-
       ScrollTrigger.create({
         trigger: root,
         start: 'top top',
         end: 'bottom bottom',
         scrub: reduced ? false : 0.6,
         onUpdate: (self) => {
-          swatch.t = self.progress;
           const scaled = self.progress * (tones.length - 1);
           const index = Math.min(tones.length - 2, Math.floor(scaled));
           const within = scaled - index;
@@ -107,32 +120,58 @@ export function ProcessJourney({
         },
       });
 
-      /* ---- The cloth in the frame ---------------------------------------- */
+      /* ---- Which stage the reader is in ---------------------------------- */
 
-      // Twelve stages spread across the same scroll distance. Quantised to an
-      // index so each state holds long enough to be read, rather than
-      // dissolving continuously into the next.
-      ScrollTrigger.create({
-        trigger: root,
-        start: 'top 80%',
-        end: 'bottom bottom',
-        scrub: false,
-        onUpdate: (self) => {
-          if (manualRef.current) return;
-          const next = Math.min(
-            JOURNEY_COUNT - 1,
-            Math.floor(self.progress * JOURNEY_COUNT),
-          );
-          stageRef.current = next;
-          setStage((prev) => (prev === next ? prev : next));
-        },
+      /*
+        One trigger per stage section, rather than one quantised trigger over
+        the whole run.
+
+        The old version divided total scroll progress by twelve, which assumes
+        every chapter is the same height. These fourteen are emphatically not:
+        stage 10 is four operations and three long paragraphs, stage 6 is one
+        operation and a short one. Dividing by count made the frame reach the
+        madder bath while the reader was still on the kalam, and then sit on
+        the last state for two full screens.
+
+        Anchored to the sections themselves, the cloth is always showing the
+        stage whose words are actually on the screen — which is the only thing
+        this component is for.
+      */
+      const sections = gsap.utils.toArray<HTMLElement>('[data-stage]');
+
+      sections.forEach((section, index) => {
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top 62%',
+          end: 'bottom 38%',
+          onEnter: () => {
+            if (manualRef.current) return;
+            stageRef.current = index;
+            setStage((prev) => (prev === index ? prev : index));
+          },
+          onEnterBack: () => {
+            if (manualRef.current) return;
+            stageRef.current = index;
+            setStage((prev) => (prev === index ? prev : index));
+          },
+        });
+
+        if (reduced) return;
+
+        // The steps inside a stage fade up as they arrive. Cheap, and it gives
+        // the reader a sense of moving through a sequence rather than a list.
+        gsap.from(section.querySelectorAll('[data-step]'), {
+          opacity: 0,
+          y: 16,
+          duration: 0.5,
+          stagger: 0.06,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: section, start: 'top 72%', once: true },
+        });
       });
 
       /* ---- Is the page moving? ------------------------------------------- */
 
-      // The frame is fully present while the reader is travelling and settles
-      // back to three-quarters when they stop, so it holds the page together
-      // during the journey and yields to the text once they are reading.
       let idle: number;
       ScrollTrigger.create({
         trigger: root,
@@ -144,62 +183,36 @@ export function ProcessJourney({
           idle = window.setTimeout(() => setScrolling(false), 260);
         },
       });
-
-      /* ---- Phase tracking, for the rail and the live region -------------- */
-
-      const sections = gsap.utils.toArray<HTMLElement>('[data-phase]');
-
-      sections.forEach((section, index) => {
-        ScrollTrigger.create({
-          trigger: section,
-          start: 'top 65%',
-          end: 'bottom 35%',
-          onEnter: () => setActivePhase(index),
-          onEnterBack: () => setActivePhase(index),
-        });
-
-        if (reduced) return;
-
-        // Individual steps fade up as they arrive. Cheap, and it gives the
-        // reader a sense of moving through a sequence rather than a list.
-        gsap.from(section.querySelectorAll('[data-step]'), {
-          opacity: 0,
-          y: 18,
-          duration: 0.55,
-          stagger: 0.07,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: section, start: 'top 72%', once: true },
-        });
-      });
     }, root);
 
     return () => ctx.revert();
-  }, [tones]);
+  }, [tones, total]);
 
   /**
    * Step the frame by hand, and bring the article with it.
    *
    * The frame and the prose are two views of one sequence, so moving one and
-   * leaving the other behind is a bug rather than a missing nicety: the reader
-   * clicks to stage nine, the caption says the madder bath, and the twelve
-   * paragraphs beside it are still describing charcoal.
+   * leaving the other behind is a bug rather than a missing nicety.
    *
    * Scroll is taken out of the loop first (`manualRef`) and only then is the
    * page moved. The order matters — the scroll this triggers would otherwise
    * be read as the reader travelling and would immediately overwrite the very
    * stage they just asked for.
    */
-  const stepTo = useCallback((next: number) => {
-    const clamped = Math.max(0, Math.min(JOURNEY_COUNT - 1, next));
-    if (clamped === stageRef.current) return;
+  const stepTo = useCallback(
+    (next: number) => {
+      const clamped = Math.max(0, Math.min(total - 1, next));
+      if (clamped === stageRef.current) return;
 
-    manualRef.current = true;
-    setManual(true);
-    setStage(clamped);
-    stageRef.current = clamped;
+      manualRef.current = true;
+      setManual(true);
+      setStage(clamped);
+      stageRef.current = clamped;
 
-    scrollTo(`#step-${journeyStages[clamped].startsAtStep}`);
-  }, []);
+      scrollTo(`#stage-${clamped + 1}`);
+    },
+    [total],
+  );
 
   /** Hand the frame back to the page, from wherever the reader now is. */
   const release = useCallback(() => {
@@ -210,7 +223,7 @@ export function ProcessJourney({
     ScrollTrigger.refresh();
   }, []);
 
-  const current = journeyStages[stage];
+  const current = stages[stage];
 
   return (
     <div ref={rootRef} className="relative">
@@ -238,100 +251,19 @@ export function ProcessJourney({
       </div>
 
       <div className="container">
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,35rem)] xl:gap-14">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] xl:gap-14">
           {/* ---------------------------------------------------------------- */}
           {/* Left: the reading                                                */}
           {/* ---------------------------------------------------------------- */}
           <div>
-            {/* Announces phase changes to screen-reader users, who get no
+            {/* Announces stage changes to screen-reader users, who get no
                 benefit from the wash or the frame. */}
             <p className="sr-only" aria-live="polite">
-              {`Phase ${activePhase + 1} of ${phases.length}: ${phases[activePhase]?.title}. Cloth stage ${stage + 1} of ${JOURNEY_COUNT}: ${current?.title}.`}
+              {`Stage ${stage + 1} of ${total}: ${current?.title}.`}
             </p>
 
-            {phases.map((phase) => (
-              <section
-                key={phase.id}
-                id={`phase-${phase.id}`}
-                data-phase={phase.id}
-                className="relative scroll-mt-24 section-y-lg"
-              >
-                <div className="rounded-sm border border-border/70 bg-background/95 p-6 shadow-[0_20px_60px_-40px_rgb(0_0_0/0.55)] backdrop-blur-md md:p-10">
-                  <div className="flex items-baseline gap-4">
-                    <span
-                      className="font-display text-4xl leading-none text-primary/70"
-                      aria-hidden="true"
-                    >
-                      {phase.numeral}
-                    </span>
-                    <div>
-                      <h2 className="text-display-md leading-tight">{phase.title}</h2>
-                      <p className="mt-1.5 text-sm text-muted-foreground">
-                        Steps {phase.steps[0].n}–{phase.steps[phase.steps.length - 1].n}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="mt-7 font-display text-xl italic leading-snug text-primary md:text-2xl">
-                    {phase.question}
-                  </p>
-                  <p className="mt-4 text-body-lg leading-relaxed text-muted-foreground">
-                    {phase.intro}
-                  </p>
-
-                  <ol className="mt-10 flex flex-col gap-9">
-                    {phase.steps.map((step) => (
-                      <li
-                        key={step.n}
-                        data-step
-                        id={`step-${step.n}`}
-                        className="scroll-mt-24 border-l-2 border-border pl-5 md:pl-7"
-                      >
-                        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                          <span className="tabular font-display text-sm font-semibold text-primary">
-                            {String(step.n).padStart(2, '0')}
-                          </span>
-                          <h3 className="font-display text-xl leading-snug">{step.title}</h3>
-                          {step.localName && (
-                            <span className="text-sm italic text-muted-foreground">
-                              {step.localName}
-                            </span>
-                          )}
-                        </div>
-
-                        <p className="mt-3 leading-relaxed text-muted-foreground">{step.body}</p>
-
-                        {(step.materials?.length || step.duration) && (
-                          <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-xs">
-                            {step.materials?.length ? (
-                              <div>
-                                <dt className="uppercase tracking-[0.12em] text-muted-foreground/70">
-                                  Materials
-                                </dt>
-                                <dd className="mt-1">{step.materials.join(' · ')}</dd>
-                              </div>
-                            ) : null}
-                            {step.duration && (
-                              <div>
-                                <dt className="uppercase tracking-[0.12em] text-muted-foreground/70">
-                                  Takes
-                                </dt>
-                                <dd className="mt-1">{step.duration}</dd>
-                              </div>
-                            )}
-                          </dl>
-                        )}
-
-                        {step.note && (
-                          <p className="mt-4 border-l-2 border-primary/50 bg-primary/[0.05] py-2.5 pl-4 pr-3 text-sm leading-relaxed">
-                            {step.note}
-                          </p>
-                        )}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              </section>
+            {stages.map((s, i) => (
+              <StageSection key={s.n} stage={s} index={i} total={total} />
             ))}
           </div>
 
@@ -339,18 +271,17 @@ export function ProcessJourney({
           {/* Right: the cloth, framed and sticky                              */}
           {/* ---------------------------------------------------------------- */}
           {/*
-            No longer `aria-hidden`. The frame's controls now move the article
-            itself, which makes them navigation rather than decoration — and a
-            control that relocates the reader must be reachable by keyboard and
+            Not `aria-hidden`. The frame's controls move the article itself,
+            which makes them navigation rather than decoration — and a control
+            that relocates the reader must be reachable by keyboard and
             announced. The canvas inside it stays hidden; the drawing carries
             no information the prose does not.
           */}
           <aside className="sticky top-20 hidden h-fit py-10 lg:block">
             <ClothFrame
+              stages={stages}
               stage={stage}
               ink={ink}
-              phases={phases}
-              activePhase={activePhase}
               scrolling={scrolling}
               manual={manual}
               onStep={stepTo}
@@ -363,20 +294,12 @@ export function ProcessJourney({
       {/*
         The cloth below `lg`.
 
-        This was a 44x56px thumbnail in a receipt-width strip, which is smaller
-        than the favicon and read as a loading placeholder rather than as the
-        subject of the page. On a phone it was also the only view of the cloth
-        there was — the panel above is `hidden` until `lg` — so the one thing
-        /process exists to show was, in practice, not shown to most of its
-        readers.
-
-        It is still pinned to the bottom rather than under the header: the
-        header is already sticky, and a second pinned band beneath it costs the
-        article two bites out of the top of a short viewport. The cloth is now
-        sized from the viewport, so it holds real presence on a tall phone and
-        still fits a landscape one, and the frame around it is the same
-        double-rule the desktop panel uses so the two read as one object at two
-        sizes rather than as two different components.
+        Pinned to the bottom rather than under the header: the header is
+        already sticky, and a second pinned band beneath it costs the article
+        two bites out of the top of a short viewport. The cloth is sized from
+        the viewport, so it holds real presence on a tall phone and still fits
+        a landscape one, and the frame around it is the same double-rule the
+        desktop panel uses so the two read as one object at two sizes.
 
         Decorative, and stated as such: every word in it is repeated in the
         prose beside it, so a screen reader gains nothing from a second copy.
@@ -388,16 +311,14 @@ export function ProcessJourney({
         <div className="mx-auto flex max-w-md items-stretch gap-3.5 rounded-sm border border-border/70 bg-background/95 p-2.5 shadow-[0_18px_50px_-30px_rgb(0_0_0/0.75)] backdrop-blur-md">
           {/* The frame. Outer rule, hairline inner, exactly as on desktop. */}
           <div className="shrink-0 rounded-[3px] bg-foreground/[0.04] p-[3px] ring-1 ring-border/70">
-            <div
-              className="relative aspect-[46/60] h-[clamp(6rem,17vh,9.5rem)] overflow-hidden rounded-[2px] border border-border/60 bg-cotton-100 dark:bg-kasim-800"
-            >
+            <div className="relative aspect-[46/60] h-[clamp(6rem,17vh,9.5rem)] overflow-hidden rounded-[2px] border border-border/60 bg-cotton-100 dark:bg-muted">
               <SareeCanvas stage={0} layers={current.layers} label="" />
             </div>
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
             <p className="tabular font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-primary">
-              {current.short} · {current.steps}
+              Stage {current.n} of {total}
             </p>
             <p className="mt-1 font-display text-[0.9375rem] leading-tight">{current.title}</p>
 
@@ -407,11 +328,13 @@ export function ProcessJourney({
               <div className="h-px w-full bg-foreground/15">
                 <div
                   className="h-px bg-primary transition-[width] duration-500 ease-out"
-                  style={{ width: `${((stage + 1) / JOURNEY_COUNT) * 100}%` }}
+                  style={{ width: `${((stage + 1) / total) * 100}%` }}
                 />
               </div>
               <p className="tabular mt-1.5 font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-muted-foreground">
-                Stage {current.n} of {JOURNEY_COUNT}
+                {current.coversSteps.length > 0
+                  ? `Steps ${current.coversSteps[0]}–${current.coversSteps[current.coversSteps.length - 1]} of 23`
+                  : 'Between the numbered steps'}
               </p>
             </div>
           </div>
@@ -422,50 +345,213 @@ export function ProcessJourney({
 }
 
 /* -------------------------------------------------------------------------- */
+/* One stage                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A stage, and the operations inside it.
+ *
+ * The prose is the stage; the numbered steps underneath are the twenty-three,
+ * resolved from `process.ts` rather than restated here. They sit inside the
+ * stage that contains them so the page reads as fourteen chapters with their
+ * working detail attached, instead of as two separate lists of the same craft
+ * that a reader has to reconcile.
+ *
+ * Stage 13 claims no numbered operations — final detailing is work the
+ * twenty-three do not enumerate — so the block is conditional rather than
+ * assumed. An empty `<ol>` with a heading over it is worse than none.
+ */
+function StageSection({
+  stage,
+  index,
+  total,
+}: {
+  stage: MainStage;
+  index: number;
+  total: number;
+}) {
+  const steps = stepsForStage(stage);
+
+  return (
+    <section
+      id={`stage-${stage.n}`}
+      data-stage={stage.n}
+      data-index={index}
+      className="relative scroll-mt-24 section-y-lg"
+      aria-labelledby={`stage-${stage.n}-heading`}
+    >
+      <div className="rounded-sm border border-border/70 bg-background/95 p-6 shadow-[0_20px_60px_-40px_rgb(0_0_0/0.55)] backdrop-blur-md md:p-10">
+        {/* ---- The stage head ------------------------------------------- */}
+        <div className="flex items-baseline gap-4">
+          <span
+            className="tabular font-display text-4xl leading-none text-primary/70"
+            aria-hidden="true"
+          >
+            {String(stage.n).padStart(2, '0')}
+          </span>
+          <div className="min-w-0">
+            <p className="font-inscription text-[0.625rem] uppercase tracking-[0.18em] text-muted-foreground">
+              Stage {stage.n} of {total}
+              {steps.length > 0 && (
+                <>
+                  {' · '}
+                  {steps.length === 1
+                    ? `Step ${steps[0].n}`
+                    : `Steps ${steps[0].n}–${steps[steps.length - 1].n}`}{' '}
+                  of 23
+                </>
+              )}
+            </p>
+            <h2
+              id={`stage-${stage.n}-heading`}
+              className="mt-2 text-display-md leading-tight"
+            >
+              {stage.title}
+            </h2>
+            {stage.localName && (
+              <p className="mt-1.5 font-display text-lg italic text-muted-foreground">
+                {stage.localName}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* ---- The question, and the answer ------------------------------ */}
+        <p className="mt-7 font-display text-xl italic leading-snug text-primary md:text-2xl">
+          {stage.question}
+        </p>
+
+        {stage.body.map((para, i) => (
+          <p
+            key={i}
+            className={cn(
+              'leading-relaxed text-muted-foreground',
+              i === 0 ? 'mt-4 text-body-lg' : 'mt-4',
+            )}
+          >
+            {para}
+          </p>
+        ))}
+
+        {(stage.materials?.length || stage.duration) && (
+          <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-3 border-t border-border pt-5 text-xs">
+            {stage.materials?.length ? (
+              <div className="min-w-0 max-w-full">
+                <dt className="uppercase tracking-[0.12em] text-muted-foreground/70">
+                  Materials
+                </dt>
+                <dd className="mt-1.5">{stage.materials.join(' · ')}</dd>
+              </div>
+            ) : null}
+            {stage.duration && (
+              <div>
+                <dt className="uppercase tracking-[0.12em] text-muted-foreground/70">Takes</dt>
+                <dd className="mt-1.5">{stage.duration}</dd>
+              </div>
+            )}
+          </dl>
+        )}
+
+        {stage.note && (
+          <p className="mt-5 border-l-2 border-primary/50 bg-primary/[0.05] py-3 pl-4 pr-3 text-sm leading-relaxed">
+            {stage.note}
+          </p>
+        )}
+
+        {/* ---- The numbered operations inside this stage ------------------ */}
+        {steps.length > 0 && (
+          <div className="mt-9 border-t border-border pt-7">
+            <h3 className="font-inscription text-[0.625rem] uppercase tracking-[0.18em] text-muted-foreground">
+              {steps.length === 1
+                ? 'The operation, as it is counted'
+                : `The ${steps.length} operations inside this stage`}
+            </h3>
+
+            <ol className="mt-5 flex flex-col gap-7">
+              {steps.map((step) => (
+                <li
+                  key={step.n}
+                  data-step
+                  id={`step-${step.n}`}
+                  className="scroll-mt-24 border-l-2 border-border pl-5 md:pl-7"
+                >
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="tabular font-display text-sm font-semibold text-primary">
+                      {String(step.n).padStart(2, '0')}
+                    </span>
+                    <h4 className="font-display text-lg leading-snug">{step.title}</h4>
+                    {step.localName && (
+                      <span className="text-sm italic text-muted-foreground">
+                        {step.localName}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted-foreground">
+                    {step.body}
+                  </p>
+
+                  {step.duration && (
+                    <p className="mt-2 text-xs uppercase tracking-[0.12em] text-muted-foreground/70">
+                      {step.duration}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* The frame                                                                  */
 /* -------------------------------------------------------------------------- */
 
 /**
  * The cloth, in a frame.
  *
- * Double-ruled rather than a single border - a hairline inside a heavier outer
- * line, the way a narrative panel is actually mounted in this workshop, and
- * the same rhythm as the temple borders in the drawing itself.
+ * Double-ruled rather than a single border — a hairline inside a heavier outer
+ * line, the way a narrative panel is actually mounted in this workshop, and the
+ * same rhythm as the temple borders in the drawing itself.
  *
- * Two behaviours worth naming:
+ * Three behaviours worth naming:
  *
  *  - **Presence follows travel.** While the page is moving the frame is fully
  *    opaque and the reader is watching the cloth change; when they stop it
- *    settles to three-quarters and yields to the paragraph they have stopped
- *    to read. It never disappears, because the whole point is that the cloth
- *    and the words are the same story.
- *  - **The controls sit on the image.** Low-contrast until hovered, so they
- *    are available without competing with the drawing. Stepping by hand takes
- *    scroll out of the loop until the reader hands it back, because otherwise
- *    the next scroll tick would immediately overwrite their choice.
+ *    settles to three-quarters and yields to the paragraph they have stopped to
+ *    read. It never disappears, because the whole point is that the cloth and
+ *    the words are the same story.
+ *  - **The controls sit on the image.** Low-contrast until hovered, so they are
+ *    available without competing with the drawing. Stepping by hand takes
+ *    scroll out of the loop until the reader hands it back.
+ *  - **The rail is the table of contents.** Fourteen marks, each one a jump. On
+ *    a page this long the reader needs to know both where they are and that
+ *    there is a way to the stage they came for.
  *
  * `ink` follows the ground so the caption stays legible as the tone shifts.
  */
 function ClothFrame({
+  stages,
   stage,
   ink,
-  phases,
-  activePhase,
   scrolling,
   manual,
   onStep,
   onRelease,
 }: {
+  stages: MainStage[];
   stage: number;
   ink: 'light' | 'dark';
-  phases: ProcessPhase[];
-  activePhase: number;
   scrolling: boolean;
   manual: boolean;
   onStep: (next: number) => void;
   onRelease: () => void;
 }) {
-  const current = journeyStages[stage];
+  const current = stages[stage];
+  const total = stages.length;
   const light = ink === 'light';
 
   const control = cn(
@@ -506,8 +592,8 @@ function ClothFrame({
               light ? 'border-cotton-100/25' : 'border-kasim-900/15',
             )}
             // The drawing itself carries nothing the prose does not. The panel
-            // around it is no longer hidden wholesale — the controls in it are
-            // real navigation now — so the canvas opts out on its own.
+            // around it is not hidden wholesale — the controls in it are real
+            // navigation — so the canvas opts out on its own.
             aria-hidden="true"
           >
             {/*
@@ -518,11 +604,14 @@ function ClothFrame({
               drawing makes it taller faster than it makes it bigger, and past
               a certain point the caption underneath is pushed below the fold
               at the very moment the frame pins. Deriving the width from a
-              capped height instead means the frame grows on a large screen
-              and is guaranteed to fit on a short one, with the aspect ratio
-              intact in both cases.
+              capped height instead means the frame grows on a large screen and
+              is guaranteed to fit on a short one, aspect ratio intact.
+
+              Down from 58vh to 52vh, because the rail underneath is new and
+              has to fit in the same sticky column without pushing the stage
+              title off a 900px laptop screen.
             */}
-            <div className="relative mx-auto aspect-[46/60] h-[min(58vh,32rem)] max-w-full bg-cotton-100 dark:bg-kasim-800 xl:h-[min(62vh,40rem)]">
+            <div className="relative mx-auto aspect-[46/60] h-[min(52vh,28rem)] max-w-full bg-cotton-100 dark:bg-muted xl:h-[min(56vh,34rem)]">
               <SareeCanvas
                 stage={0}
                 layers={current.layers}
@@ -543,21 +632,21 @@ function ClothFrame({
           <span className="sr-only">
             {stage === 0
               ? 'Previous stage of the cloth'
-              : `Go to stage ${journeyStages[stage - 1].n}, ${journeyStages[stage - 1].title}`}
+              : `Go to stage ${stages[stage - 1].n}, ${stages[stage - 1].title}`}
           </span>
         </button>
 
         <button
           type="button"
           onClick={() => onStep(stage + 1)}
-          disabled={stage === JOURNEY_COUNT - 1}
+          disabled={stage === total - 1}
           className={cn(control, 'right-5')}
         >
           <ChevronRight className="h-5 w-5" aria-hidden="true" />
           <span className="sr-only">
-            {stage === JOURNEY_COUNT - 1
+            {stage === total - 1
               ? 'Next stage of the cloth'
-              : `Go to stage ${journeyStages[stage + 1].n}, ${journeyStages[stage + 1].title}`}
+              : `Go to stage ${stages[stage + 1].n}, ${stages[stage + 1].title}`}
           </span>
         </button>
 
@@ -583,20 +672,30 @@ function ClothFrame({
       {/* The caption repeats, word for word, what the live region above the
           article already announces on every stage change. Exposing both would
           read the same sentence twice. */}
-      <div className="mt-4 px-1" aria-hidden="true">
+      <div className="mt-4 px-1">
         <p
           className={cn(
             'tabular font-inscription text-[0.6875rem] uppercase tracking-[0.18em] transition-colors duration-700',
             light ? 'text-cotton-100/80' : 'text-kasim-900/70',
           )}
+          aria-hidden="true"
         >
-          Stage {current.n} of {JOURNEY_COUNT} - {current.steps}
+          Stage {current.n} of {total}
+          {current.coversSteps.length > 0 && (
+            <>
+              {' · '}
+              {current.coversSteps.length === 1
+                ? `Step ${current.coversSteps[0]}`
+                : `Steps ${current.coversSteps[0]}–${current.coversSteps[current.coversSteps.length - 1]}`}
+            </>
+          )}
         </p>
         <p
           className={cn(
             'mt-1.5 font-display text-xl leading-snug transition-colors duration-700',
             light ? 'text-cotton-50' : 'text-kasim-950',
           )}
+          aria-hidden="true"
         >
           {current.title}
         </p>
@@ -605,36 +704,59 @@ function ClothFrame({
             'mt-2 text-[0.8125rem] leading-relaxed transition-colors duration-700',
             light ? 'text-cotton-100/75' : 'text-kasim-900/75',
           )}
+          aria-hidden="true"
         >
-          {current.caption}
+          {current.question}
         </p>
 
-        <ol className="mt-5 flex items-center gap-1" aria-hidden="true">
-          {journeyStages.map((s, i) => (
-            <li
-              key={s.n}
-              className={cn(
-                'h-0.5 flex-1 rounded-full transition-colors duration-500',
-                i <= stage
-                  ? light
-                    ? 'bg-cotton-100/85'
-                    : 'bg-kasim-900/70'
-                  : light
-                    ? 'bg-cotton-100/20'
-                    : 'bg-kasim-900/15',
-              )}
-            />
+        {/*
+          The rail: fourteen marks, and every one of them a jump.
+
+          It replaces a row of inert progress ticks. On a page this long the
+          reader arrives with a stage in mind as often as not — somebody who
+          came to read about the indigo vat should not have to scroll past the
+          myrobalan to find it — and the marks were already drawn. Making them
+          buttons costs nothing and turns the frame into the page's table of
+          contents.
+
+          Real buttons with real labels, so this is operable by keyboard and
+          announced. The bars themselves are `aria-hidden`; the accessible name
+          is the stage it goes to.
+        */}
+        <ol className="mt-6 flex items-end gap-1">
+          {stages.map((s, i) => (
+            <li key={s.n} className="flex-1">
+              <button
+                type="button"
+                onClick={() => onStep(i)}
+                aria-current={i === stage ? 'step' : undefined}
+                // 44px of vertical target over a 2px mark: the hit area is
+                // padding, not paint, so the rail stays a hairline and is
+                // still reachable with a thumb.
+                className="group/mark flex w-full items-end justify-center py-3 focus-visible:outline-none"
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'block w-full rounded-full transition-all duration-500',
+                    'group-hover/mark:h-1.5 group-focus-visible/mark:h-1.5',
+                    i === stage ? 'h-1.5' : 'h-0.5',
+                    i <= stage
+                      ? light
+                        ? 'bg-cotton-100/85'
+                        : 'bg-kasim-900/70'
+                      : light
+                        ? 'bg-cotton-100/20'
+                        : 'bg-kasim-900/15',
+                  )}
+                />
+                <span className="sr-only">
+                  Stage {s.n}: {s.title}
+                </span>
+              </button>
+            </li>
           ))}
         </ol>
-
-        <p
-          className={cn(
-            'mt-4 text-[0.6875rem] uppercase tracking-[0.14em] transition-colors duration-700',
-            light ? 'text-cotton-100/55' : 'text-kasim-900/55',
-          )}
-        >
-          {phases[activePhase]?.numeral} - {phases[activePhase]?.title}
-        </p>
       </div>
     </div>
   );

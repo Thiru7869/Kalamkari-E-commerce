@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import Link from 'next/link';
+import { RecentlyViewed } from '@/components/shop/recently-viewed';
 import { ProductGrid } from '@/components/shop/product-card';
 import { ShopFilters } from '@/components/shop/shop-filters';
 import { AppliedFilters } from '@/components/shop/applied-filters';
@@ -91,6 +93,7 @@ export default async function ShopPage({
     inStockOnly: sp.available === '1',
     fabrics: asArray(sp.fabric),
     motifs: asArray(sp.motif),
+    dyes: asArray(sp.dye),
     minPrice: asNumber(sp.min),
     maxPrice: asNumber(sp.max),
     sort: typeof sp.sort === 'string' ? sp.sort : undefined,
@@ -112,7 +115,10 @@ export default async function ShopPage({
 
   return (
     <>
-      <header className="border-b border-border bg-cotton-100 pb-10 pt-12 md:pb-14 md:pt-16 dark:bg-card">
+      {/* Tightened about a fifth. This block holds a breadcrumb, a heading and
+          two lines of prose, and at `pt-16 md:pb-14` it was reserving the air
+          of a section that carries an image. */}
+      <header className="border-b border-border bg-cotton-100 pb-8 pt-10 md:pb-11 md:pt-12 dark:bg-card">
         <div className="container">
           <Breadcrumbs
             trail={
@@ -165,7 +171,8 @@ export default async function ShopPage({
           <ShopFilters
             options={options}
             basePath={basePath}
-            selected={{ fabrics: filters.fabrics, motifs: filters.motifs }}
+            selected={{ fabrics: filters.fabrics, motifs: filters.motifs, dyes: filters.dyes }}
+            price={{ min: filters.minPrice, max: filters.maxPrice }}
           />
 
           <div>
@@ -177,7 +184,12 @@ export default async function ShopPage({
                   <ShopFilters
                     options={options}
                     basePath={basePath}
-                    selected={{ fabrics: filters.fabrics, motifs: filters.motifs }}
+                    selected={{
+                      fabrics: filters.fabrics,
+                      motifs: filters.motifs,
+                      dyes: filters.dyes,
+                    }}
+                    price={{ min: filters.minPrice, max: filters.maxPrice }}
                     triggerOnly
                   />
                 </div>
@@ -203,13 +215,21 @@ export default async function ShopPage({
               basePath={basePath}
               fabrics={options.fabrics}
               motifs={options.motifs}
+              dyes={options.dyes}
               className="mt-4"
             />
 
             {items.length > 0 ? (
               <>
-                <div className="pt-6">
-                  <ProductGrid products={items} wishlistIds={wishlistIds} />
+                {/*
+                  `id` and `scroll-mt`: this is the anchor the "choose by
+                  cloth" cards jump to, and the offset clears the sticky
+                  header. Without it a jump lands with the first row of cards
+                  hidden underneath the header, which reads as having scrolled
+                  to the wrong place.
+                */}
+                <div id="pieces" className="scroll-mt-28 pt-6 md:scroll-mt-32">
+                  <ProductGrid products={items} wishlistIds={wishlistIds} groupEvery={10} />
                 </div>
                 <Pagination page={page} pageCount={pageCount} />
               </>
@@ -240,6 +260,11 @@ export default async function ShopPage({
           </div>
         </div>
       </div>
+
+      {/* Below the grid and the pagination: this is a way back, not a way in. */}
+      <Suspense fallback={null}>
+        <RecentlyViewed />
+      </Suspense>
 
       {/*
         The grid, as structured data.

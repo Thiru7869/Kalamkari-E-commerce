@@ -40,6 +40,31 @@ export type TourStep = {
   id: string;
   /** Matches a `data-tour` attribute in the DOM. Missing targets are skipped. */
   target: string;
+  /**
+   * The page section this stop is *about*, matched against `data-tour-section`.
+   *
+   * `target` is the thing the ring is drawn on, and on a desktop three of the
+   * six targets are links in the header. A header link is `sticky`, so it is
+   * already on screen and there is nothing to scroll to — which made Next feel
+   * broken on a laptop while working correctly on a phone, where the same
+   * stops resolve to in-page controls.
+   *
+   * So the ring and the travel are separated: the ring stays on the control,
+   * and the page moves to the section that control leads to. Optional, because
+   * three stops (search, the assistant, the theme toggle) are chrome and have
+   * no section — for those the page correctly stays where it is.
+   */
+  section?: string;
+  /**
+   * Two or three words, for the row of section links in the tour card.
+   *
+   * Deliberately not the `title`. The titles are sentences — "Almost
+   * everything here is one of one" — which is right for the panel a reader is
+   * currently on and useless as a label in a row of six. These are the names
+   * of the stops, short enough that six of them wrap to two lines inside a
+   * 384px card.
+   */
+  label: string;
   title: string;
   /** One or two lines. What this is, in the visitor's terms. */
   summary: string;
@@ -62,6 +87,8 @@ export const tourSteps: TourStep[] = [
   {
     id: 'shop',
     target: 'shop',
+    label: 'One of one',
+    section: 'shop',
     title: 'Almost everything here is one of one',
     summary:
       'There is no device in this craft that would let a drawing be repeated. When a piece sells, it is gone.',
@@ -74,6 +101,8 @@ export const tourSteps: TourStep[] = [
   {
     id: 'process',
     target: 'process',
+    label: 'The 23 steps',
+    section: 'process',
     title: 'The twenty-three steps, in order',
     summary:
       'The whole sequence, with the cloth changing beside you as you read and the colour moving through the seven pots.',
@@ -86,6 +115,8 @@ export const tourSteps: TourStep[] = [
   {
     id: 'custom',
     target: 'custom',
+    label: 'Commissions',
+    section: 'custom',
     title: 'Anything can be painted for you',
     summary:
       'Because nothing is printed, nothing has to be chosen from a catalogue. Tell us the subject, the cloth and the occasion.',
@@ -98,6 +129,7 @@ export const tourSteps: TourStep[] = [
   {
     id: 'search',
     target: 'search',
+    label: 'Search',
     title: 'Search reads the story, not just the title',
     summary:
       'It looks inside the motif, the cloth and the description — so “indigo”, “tussar” or “Ramayana” finds more than a product name will.',
@@ -110,6 +142,7 @@ export const tourSteps: TourStep[] = [
   {
     id: 'assistant',
     target: 'assistant',
+    label: 'Ask Lakshmi',
     title: 'Someone to ask',
     summary:
       'An assistant that knows this workshop specifically — the dyes, the timings, and what is in the store right now.',
@@ -122,6 +155,7 @@ export const tourSteps: TourStep[] = [
   {
     id: 'theme',
     target: 'theme',
+    label: 'Light & dark',
     title: 'Light and dark, both sampled from the dyes',
     summary:
       'The dark theme is not an inverted copy — it is the store at night, with the madder lifted so it still reads.',

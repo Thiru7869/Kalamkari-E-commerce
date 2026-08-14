@@ -17,6 +17,8 @@
     "placeholders": "node scripts/generate-placeholders.mjs",
     "smoke": "node scripts/smoke-purchase.mjs",
     "audit:layout": "node scripts/audit-layout.mjs",
+    "audit:contrast": "node scripts/contrast.mjs",
+    "audit:ink": "node scripts/ink-check.mjs",
     "shots": "node scripts/shots.mjs",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",

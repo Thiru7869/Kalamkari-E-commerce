@@ -43,10 +43,20 @@ export function ShopSubnav({
 
   return (
     <div
+      /*
+        `data-subnav` carries the stickiness now — see `globals.css`.
+
+        The offset used to be hard-coded here as `top-[4rem] md:top-[5rem]`,
+        which is right only while the header is on screen. The header hides on
+        scroll-down, and a rail pinned 4rem below a header that is no longer
+        there leaves a band of moving page above it. The attribute opts this
+        element into `top: var(--subnav-top)`, which the header drives: it
+        becomes the top of the window going down, and steps back under the
+        header coming up.
+      */
+      data-subnav=""
       className={cn(
-        // Under the header: 2.25rem announcement + 4rem bar on a phone,
-        // 5rem on desktop. Matches the header's own sticky offset.
-        'sticky top-[4rem] z-30 -mx-5 border-b border-border bg-background/95 backdrop-blur-md md:top-[5rem] md:mx-0',
+        'z-30 -mx-5 border-b border-border bg-background/95 backdrop-blur-md md:mx-0',
       )}
     >
       {/* ---- Row one: what kind of thing --------------------------------- */}

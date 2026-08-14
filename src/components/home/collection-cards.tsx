@@ -80,7 +80,9 @@ function TiltCard({ card, index }: { card: CollectionCard; index: number }) {
           'motion-safe:group-hover:shadow-[0_30px_60px_-38px_rgb(0_0_0/0.6)]',
         )}
       >
-        <div className="relative aspect-[16/10] overflow-hidden bg-cotton-300">
+        {/* 16:9 rather than 16:10 — the same 10% off the plate as the product
+            cards, so the two grids shrink together rather than drifting apart. */}
+        <div className="relative aspect-[16/9] overflow-hidden bg-cotton-300">
           <Image
             src={card.image}
             alt=""

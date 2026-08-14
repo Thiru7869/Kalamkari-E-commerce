@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, ChevronDown, X } from 'lucide-react';
 import { tourSteps, type TourStep } from '@/content/welcome';
+import { scrollTo } from '@/lib/smooth-scroll';
 import { cn } from '@/lib/utils';
 
 /**
@@ -45,7 +46,43 @@ export function QuickTour({ onClose }: { onClose: () => void }) {
     onClose();
   }, [onClose]);
 
-  // Move the ring, and bring the target into view if it has scrolled away.
+  /*
+    Move the ring, then take the reader to what it is pointing at.
+
+    ---------------------------------------------------------------------------
+    Why this no longer uses `scrollIntoView`
+    ---------------------------------------------------------------------------
+
+    It used to, with `behavior: 'smooth'`, and on this site that silently did
+    not work. Lenis owns the page's scroll position whenever it is mounted, and
+    the stylesheet it ships with sets
+
+        .lenis.lenis-smooth { scroll-behavior: auto !important }
+
+    precisely so that native smooth scrolling cannot fight it. The consequence
+    is that every `scrollIntoView({ behavior: 'smooth' })` on this site is a
+    *jump*: the tour teleported the reader between steps and there was nothing
+    in the code to suggest it would. Going through `scrollTo` from
+    `src/lib/smooth-scroll.ts` routes the move through the one Lenis instance —
+    the same path the back-to-top button and the process rail already use — and
+    falls back to native smooth scrolling when Lenis is absent.
+
+    ---------------------------------------------------------------------------
+    Why it now scrolls every time, and the one case where it must not
+    ---------------------------------------------------------------------------
+
+    It used to move the page only when the target was already off-screen, which
+    made Next feel inert for the first two or three steps and then suddenly
+    lurch. Every step now travels, so the button does one predictable thing.
+
+    The exception is a `position: fixed` target. Three of the six stops are
+    fixed or sticky chrome — the assistant launcher, the phone tab bar, the
+    theme toggle in the header — and a fixed element's `getBoundingClientRect()`
+    is its position in the *viewport*, not in the document. Scrolling "to" it
+    computes a document offset from a number that has nothing to do with the
+    document, which sends the page somewhere arbitrary. Those targets are
+    already on screen by definition, so the correct move is not to move.
+  */
   useEffect(() => {
     if (!step) return;
 
@@ -58,14 +95,29 @@ export function QuickTour({ onClose }: { onClose: () => void }) {
 
     target.setAttribute('data-tour-active', '');
 
-    const rect = target.getBoundingClientRect();
-    const offScreen = rect.top < 72 || rect.bottom > window.innerHeight - 160;
-    if (offScreen) {
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      target.scrollIntoView({
-        behavior: reduced ? 'auto' : 'smooth',
-        block: 'center',
-      });
+    /*
+      Where to travel.
+
+      Prefer the step's own section — the part of the page this stop is about.
+      Fall back to the ringed control, but only when that control is actually
+      in the document flow: a `fixed` or `sticky` element's
+      `getBoundingClientRect()` is its position in the *viewport*, so deriving
+      a document offset from it sends the page somewhere meaningless. Those
+      controls are on screen by definition, so the correct move is not to move.
+    */
+    const section = step.section
+      ? document.querySelector<HTMLElement>(`[data-tour-section="${step.section}"]`)
+      : null;
+
+    const destination =
+      section ??
+      (['fixed', 'sticky'].includes(getComputedStyle(target).position) ? null : target);
+
+    if (destination) {
+      // Centre it rather than clearing the header: the ring is drawn *outside*
+      // the element, so a target parked directly under the header loses its
+      // top edge to it.
+      scrollTo(destination, { offset: -Math.round(window.innerHeight * 0.3) });
     }
 
     return () => target.removeAttribute('data-tour-active');
@@ -194,6 +246,46 @@ export function QuickTour({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
+        {/*
+          The stops, as links rather than as a progress bar.
+
+          What was here was six anonymous segments: they showed how far along
+          the reader was and offered nothing else. A tour is a table of
+          contents for a page somebody has just met, so the contents should be
+          readable and reachable — a reader who only wants the one about
+          commissions should not have to press Next three times to find out
+          which one that is.
+
+          Each carries `.link-underline`, whose whole design constraint is that
+          it cannot move anything: the rule is an absolutely-positioned
+          pseudo-element animating `scaleX`, so hovering one label does not
+          shift the five beside it by even a pixel. The current stop is marked
+          with `aria-current`, which both draws the rule permanently and is the
+          correct thing to announce.
+        */}
+        <nav
+          aria-label="Tour stops"
+          className="flex flex-wrap gap-x-3.5 gap-y-2 border-t border-border px-4 py-3"
+        >
+          {steps.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-current={i === index ? 'true' : undefined}
+              className={cn(
+                'link-underline rounded-sm text-[0.75rem] leading-none transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                i === index
+                  ? 'font-semibold text-primary'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {s.label}
+            </button>
+          ))}
+        </nav>
+
         {/* Foot */}
         <div className="flex items-center gap-2 border-t border-border px-3 py-2.5">
           <button
@@ -203,7 +295,7 @@ export function QuickTour({ onClose }: { onClose: () => void }) {
             className="flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors hover:border-primary/50 hover:text-primary disabled:pointer-events-none disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">Previous</span>
+            <span className="sr-only">Previous stop</span>
           </button>
 
           {/* Position, without a second set of numbers. */}
@@ -234,7 +326,7 @@ export function QuickTour({ onClose }: { onClose: () => void }) {
               className="flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              <span className="sr-only">Next</span>
+              <span className="sr-only">Next stop</span>
             </button>
           )}
         </div>

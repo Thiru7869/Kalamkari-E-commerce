@@ -35,7 +35,24 @@ export function HeaderShell({ children }: { children: React.ReactNode }) {
         // 6px deadzone absorbs trackpad jitter and iOS rubber-banding.
         if (Math.abs(delta) > 6) {
           const menuOpen = document.body.hasAttribute('data-menu-open');
-          setHidden(delta > 0 && y > 160 && !menuOpen);
+          const next = delta > 0 && y > 160 && !menuOpen;
+          setHidden(next);
+          /*
+            Publish the state to the document, for the sub-navbars.
+
+            The shop and cloth rails are `sticky` under this header and have to
+            know where its bottom edge currently is: pinned at a fixed `4rem`
+            they leave a band of scrolling page above them the moment the header
+            slides away, and the rail stops reading as attached to anything.
+
+            A data attribute rather than context or a store, because the
+            consumers are two leaf components several layers down in a different
+            part of the tree, they need this on *every* scroll frame, and none
+            of them should re-render for it. CSS reads it and moves them; React
+            never hears about it. `globals.css` owns the offset itself, as
+            `--subnav-top`.
+          */
+          document.documentElement.dataset.header = next ? 'hidden' : 'shown';
           lastY.current = y;
         }
       });

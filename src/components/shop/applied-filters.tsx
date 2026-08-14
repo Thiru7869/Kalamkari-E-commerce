@@ -5,7 +5,14 @@ import { useTransition } from 'react';
 import { X } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 
-type Chip = { key: string; label: string; param: string; value?: string };
+type Chip = {
+  key: string;
+  label: string;
+  param: string;
+  value?: string;
+  /** Drawn as a dot before the label, for the colour chips. */
+  swatch?: string;
+};
 
 /**
  * What is currently narrowing the list, shown above it.
@@ -24,11 +31,13 @@ export function AppliedFilters({
   basePath,
   fabrics,
   motifs,
+  dyes,
   className,
 }: {
   basePath: string;
   fabrics: { slug: string; name: string }[];
   motifs: { slug: string; name: string }[];
+  dyes: { slug: string; name: string; hex: string }[];
   className?: string;
 }) {
   const router = useRouter();
@@ -52,6 +61,17 @@ export function AppliedFilters({
       label: motifs.find((m) => m.slug === slug)?.name ?? slug,
       param: 'motif',
       value: slug,
+    });
+  }
+
+  for (const slug of searchParams.getAll('dye')) {
+    const dye = dyes.find((d) => d.slug === slug);
+    chips.push({
+      key: `dye-${slug}`,
+      label: dye?.name ?? slug,
+      param: 'dye',
+      value: slug,
+      swatch: dye?.hex,
     });
   }
 
@@ -102,7 +122,8 @@ export function AppliedFilters({
 
   const clearAll = () => {
     const params = new URLSearchParams(searchParams.toString());
-    for (const key of ['fabric', 'motif', 'min', 'max', 'available', 'q']) params.delete(key);
+    for (const key of ['fabric', 'motif', 'dye', 'min', 'max', 'available', 'q'])
+      params.delete(key);
     navigate(params);
   };
 
@@ -117,6 +138,17 @@ export function AppliedFilters({
               onClick={() => remove(chip)}
               className="inline-flex min-h-[2.25rem] items-center gap-1.5 rounded-sm border border-border bg-card px-3 text-sm transition-colors hover:border-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
+              {/* The dot carries no information the label does not — it is
+                  there so a row of chips reads as colours at a glance, and it
+                  keeps its own hairline so myrobalan cream is still a disc on
+                  a cream ground. */}
+              {chip.swatch && (
+                <span
+                  aria-hidden="true"
+                  className="h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-inset ring-foreground/25"
+                  style={{ backgroundColor: chip.swatch }}
+                />
+              )}
               {chip.label}
               <X className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
               <span className="sr-only">Remove this filter</span>

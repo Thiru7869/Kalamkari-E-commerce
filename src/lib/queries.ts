@@ -17,6 +17,15 @@ export const productCardSelect = {
   featured: true,
   masterpiece: true,
   craftDays: true,
+  /**
+   * Named on the card, not only on the product page.
+   *
+   * Populated on 15 of 43 pieces — attribution is stated where the store has
+   * confirmed it and left silent where it has not, which is the same rule
+   * `family.ts` follows. The card must therefore treat it as optional rather
+   * than printing "Painted by —" for the rest.
+   */
+  artisan: true,
   ratingSum: true,
   ratingCount: true,
   category: { select: { slug: true, name: true } },
@@ -58,6 +67,8 @@ export type ShopFilters = {
   collection?: CollectionKey;
   fabrics?: string[];
   motifs?: string[];
+  /** Dye slugs. A piece matches if it carries *any* of them — see buildWhere. */
+  dyes?: string[];
   minPrice?: number;
   maxPrice?: number;
   sort?: string;
@@ -67,7 +78,30 @@ export type ShopFilters = {
   inStockOnly?: boolean;
 };
 
-export const PAGE_SIZE = 12;
+/**
+ * How many pieces a listing page shows at once.
+ *
+ * **Ten**, paged, at three across.
+ *
+ * This was thirty in one continuous run, on the reasoning that a one-of-one
+ * catalogue is browsed rather than searched and a pager interrupts browsing.
+ * The store asked for ten with numbered pages instead, and the argument for
+ * thirty does not survive contact with the actual grid: thirty cards at three
+ * across is ten rows, which on a phone is roughly six screens of scrolling with
+ * no way to say "about two thirds down" to yourself and no way to get back to
+ * where you were after opening a piece. A numbered page is a place you can
+ * return to; a scroll position is not.
+ *
+ * Ten is three rows and a row of one. That orphan is the one real cost of the
+ * change and it is accepted rather than hidden — padding to twelve would be
+ * choosing a tidier grid over the number the store asked for.
+ *
+ * Note this makes `ProductGrid`'s `groupEvery={10}` a no-op on listing pages,
+ * since a page never now exceeds ten cards. The prop stays: it is what breaks
+ * the run on any surface that shows more, and removing it would have to be
+ * undone the first time a page size changes back.
+ */
+export const PAGE_SIZE = 10;
 
 function buildWhere(filters: ShopFilters): Prisma.ProductWhereInput {
   const where: Prisma.ProductWhereInput = { status: 'ACTIVE' };
@@ -79,6 +113,19 @@ function buildWhere(filters: ShopFilters): Prisma.ProductWhereInput {
   if (filters.fabrics?.length) where.fabric = { slug: { in: filters.fabrics } };
   if (filters.motifs?.length) {
     where.motifs = { some: { motif: { slug: { in: filters.motifs } } } };
+  }
+
+  /*
+    Any, not all — the same rule the motif filter follows.
+
+    Ticking madder and indigo asks for "pieces with madder or indigo in them",
+    which is what somebody choosing two swatches means. Requiring both would
+    be a different and much less useful question, and on a palette of eight
+    pots where kasim black is on 43 of 43 pieces it would mostly return the
+    intersection of two things nobody asked to intersect.
+  */
+  if (filters.dyes?.length) {
+    where.dyes = { some: { dye: { slug: { in: filters.dyes } } } };
   }
 
   if (filters.minPrice != null || filters.maxPrice != null) {
@@ -221,6 +268,167 @@ export async function getFeaturedProducts(take = 6) {
   });
 }
 
+/**
+ * The best of the work, for /our-story.
+ *
+ * Signed and exhibition-grade pieces, newest first, and *only* those — the
+ * store's own `masterpiece` flag decides, not a rating average and not a
+ * hand-written list of slugs in a content file. A "best works" section built
+ * from a list of slugs is a section that shows a sold piece for a year after it
+ * went, and one built from ratings is a section that shows nothing at all on a
+ * catalogue with no reviews in it.
+ *
+ * Sold pieces are deliberately *not* excluded. This section is the argument
+ * that the workshop can do this, not an offer to sell — a Ramayana pallu that
+ * went last spring is evidence in exactly the way a piece still in stock is,
+ * and the card marks it "Sold" on its own.
+ */
+export async function getBestWorks(take = 6) {
+  return prisma.product.findMany({
+    where: { status: 'ACTIVE', masterpiece: true },
+    select: productCardSelect,
+    orderBy: [{ craftDays: 'desc' }, { createdAt: 'desc' }],
+    take,
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* The quick store                                                            */
+/* -------------------------------------------------------------------------- */
+
+/** Card data plus the motif slugs, which the spread below selects on. */
+const quickStoreSelect = {
+  ...productCardSelect,
+  motifs: { select: { motif: { select: { slug: true, name: true } } } },
+} satisfies Prisma.ProductSelect;
+
+export type QuickStoreItem = Prisma.ProductGetPayload<{ select: typeof quickStoreSelect }>;
+
+/**
+ * Ten pieces for the landing page, chosen to be unlike each other.
+ *
+ * `getFeaturedProducts` answers "what has the store marked featured", which is
+ * the right question for a featured rail and the wrong one here. Featured
+ * follows what came off the line recently, and work comes off the line in runs
+ * — so the top ten by that ordering were four Tree of Life pieces on tussar
+ * within ₹4,000 of each other. A visitor scrolling that concludes the shop
+ * makes one thing.
+ *
+ * So the ordering picks the candidates and a spread pass picks the ten. The
+ * rule is one pass down the list taking anything whose motif *and* fabric *and*
+ * price band are all new, then a second pass relaxing to motif-or-fabric, then
+ * whatever is left in order. That is a greedy diversity selection rather than a
+ * clever one, and it is the right amount of clever: it is deterministic, it
+ * needs no extra query, and it degrades to plain ordering on a catalogue too
+ * small to spread — which is the state this store will be in for most of a
+ * quiet month, and a row of eight is not a bug.
+ *
+ * Scoped to a category by default, because the landing rail asks for sarees.
+ * Falls back to the whole catalogue when the category cannot fill the row: an
+ * eight-piece rail of real sarees beats ten with two empty cards, but a
+ * four-piece rail is a section that looks broken.
+ */
+export async function getQuickStore(take = 10, categorySlug = 'sarees') {
+  const scope = {
+    status: 'ACTIVE',
+    stock: { gt: 0 },
+  } satisfies Prisma.ProductWhereInput;
+
+  const order: Prisma.ProductOrderByWithRelationInput[] = [
+    { featured: 'desc' },
+    { masterpiece: 'desc' },
+    { createdAt: 'desc' },
+  ];
+
+  // Three times the row, so the spread below has something to choose between.
+  // Taking exactly `take` would make the diversity pass a no-op.
+  let candidates = await prisma.product.findMany({
+    where: { ...scope, category: { slug: categorySlug } },
+    select: quickStoreSelect,
+    orderBy: order,
+    take: take * 3,
+  });
+
+  if (candidates.length < take) {
+    const fill = await prisma.product.findMany({
+      where: { ...scope, id: { notIn: candidates.map((p) => p.id) } },
+      select: quickStoreSelect,
+      orderBy: order,
+      take: take * 3 - candidates.length,
+    });
+    candidates = [...candidates, ...fill];
+  }
+
+  return spreadForVariety(candidates, take);
+}
+
+/**
+ * Price bands, in paise.
+ *
+ * Deliberately coarse. The job is to stop ten pieces landing in one bracket,
+ * not to sort the catalogue — and a fine-grained band would put two pieces
+ * ₹500 apart in different buckets and call that variety.
+ */
+function priceBand(paise: number): number {
+  if (paise < 800000) return 0; // under ₹8,000
+  if (paise < 1800000) return 1; // ₹8,000 – ₹18,000
+  if (paise < 3500000) return 2; // ₹18,000 – ₹35,000
+  return 3; // above ₹35,000
+}
+
+/**
+ * Greedy spread: take the highest-ranked piece that repeats least.
+ *
+ * Three passes, each looser than the last, so the row fills even on a thin
+ * catalogue. Order within a pass is the incoming order, so the store's own
+ * featured and masterpiece flags still decide who goes first among equals.
+ */
+function spreadForVariety(candidates: QuickStoreItem[], take: number): QuickStoreItem[] {
+  const chosen: QuickStoreItem[] = [];
+  const usedMotifs = new Set<string>();
+  const usedFabrics = new Set<string>();
+  const usedBands = new Set<number>();
+  const taken = new Set<string>();
+
+  const motifsOf = (p: QuickStoreItem) => p.motifs.map((m) => m.motif.slug);
+
+  const accept = (p: QuickStoreItem) => {
+    chosen.push(p);
+    taken.add(p.id);
+    motifsOf(p).forEach((m) => usedMotifs.add(m));
+    if (p.fabric) usedFabrics.add(p.fabric.slug);
+    usedBands.add(priceBand(p.price));
+  };
+
+  // Pass 1 — everything about this piece is new.
+  for (const p of candidates) {
+    if (chosen.length >= take) break;
+    const motifNew = motifsOf(p).every((m) => !usedMotifs.has(m));
+    const fabricNew = !p.fabric || !usedFabrics.has(p.fabric.slug);
+    const bandNew = !usedBands.has(priceBand(p.price));
+    if (motifNew && fabricNew && bandNew) accept(p);
+  }
+
+  // Pass 2 — the motif or the cloth is new. Price is allowed to repeat, since
+  // by now every band worth having is usually already represented.
+  for (const p of candidates) {
+    if (chosen.length >= take) break;
+    if (taken.has(p.id)) continue;
+    const motifNew = motifsOf(p).every((m) => !usedMotifs.has(m));
+    const fabricNew = !p.fabric || !usedFabrics.has(p.fabric.slug);
+    if (motifNew || fabricNew) accept(p);
+  }
+
+  // Pass 3 — fill in the given order.
+  for (const p of candidates) {
+    if (chosen.length >= take) break;
+    if (taken.has(p.id)) continue;
+    accept(p);
+  }
+
+  return chosen;
+}
+
 export const getCategories = cache(async () => {
   return prisma.category.findMany({ orderBy: { position: 'asc' } });
 });
@@ -236,7 +444,7 @@ export async function getFilterOptions(categorySlug?: string) {
     ...(categorySlug ? { category: { slug: categorySlug } } : {}),
   };
 
-  const [fabrics, motifs, bounds] = await Promise.all([
+  const [fabrics, motifs, dyes, bounds] = await Promise.all([
     prisma.fabric.findMany({
       where: { products: { some: scope } },
       orderBy: { position: 'asc' },
@@ -256,6 +464,17 @@ export async function getFilterOptions(categorySlug?: string) {
         _count: { select: { products: { where: { product: scope } } } },
       },
     }),
+    prisma.dye.findMany({
+      where: { products: { some: { product: scope } } },
+      orderBy: { position: 'asc' },
+      select: {
+        slug: true,
+        name: true,
+        source: true,
+        hex: true,
+        _count: { select: { products: { where: { product: scope } } } },
+      },
+    }),
     prisma.product.aggregate({
       where: scope,
       _min: { price: true },
@@ -266,9 +485,41 @@ export async function getFilterOptions(categorySlug?: string) {
   return {
     fabrics,
     motifs,
+    dyes,
+    // Paise, like every other money value in this codebase. The filter UI
+    // rounds these to whole rupees for its own steps and converts back before
+    // it puts anything in the URL.
     minPrice: bounds._min.price ?? 0,
     maxPrice: bounds._max.price ?? 0,
   };
+}
+
+/**
+ * The pieces behind a visitor's history cookie, in the order they read them.
+ *
+ * Two things this has to do that a plain `findMany` does not.
+ *
+ * **Keep the order.** Postgres returns an `in` list in whatever order it
+ * likes, and the whole meaning of this rail is "most recent first". So the
+ * rows are re-sorted in memory against the id list rather than by any column.
+ *
+ * **Survive gone pieces.** A cookie can be thirty days old on a catalogue
+ * where almost everything is one of one. Anything sold, archived or deleted
+ * since simply does not come back from the query, and the rail is shorter —
+ * which is correct. Filtering to ACTIVE here rather than trusting the cookie
+ * is also what stops a stale id resurrecting a piece that was withdrawn.
+ */
+export async function getRecentlyViewed(ids: string[], excludeId?: string) {
+  const wanted = ids.filter((id) => id !== excludeId);
+  if (wanted.length === 0) return [];
+
+  const rows = await prisma.product.findMany({
+    where: { id: { in: wanted }, status: 'ACTIVE' },
+    select: productCardSelect,
+  });
+
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  return wanted.map((id) => byId.get(id)).filter((row): row is (typeof rows)[number] => !!row);
 }
 
 export async function getBlogPosts() {
@@ -322,6 +573,35 @@ export const getTypeVarieties = cache(async (categorySlug: string) => {
   }
 
   return byFamily;
+});
+
+/**
+ * The pots that appear on one category, with counts.
+ *
+ * The same shape as `getTypeVarieties` and for the same reason: the sarees
+ * page should say how many *sarees* carry indigo, not how many pieces in the
+ * store do. Pots with nothing in this category are dropped rather than shown
+ * at zero — the eight are a closed set, but not all eight reach every kind of
+ * cloth, and offering a colour the page cannot produce is the same mistake as
+ * offering a fabric the store cannot supply.
+ */
+export const getTypeDyes = cache(async (categorySlug: string) => {
+  const scope: Prisma.ProductWhereInput = {
+    status: 'ACTIVE',
+    category: { slug: categorySlug },
+  };
+
+  return prisma.dye.findMany({
+    where: { products: { some: { product: scope } } },
+    orderBy: { position: 'asc' },
+    select: {
+      slug: true,
+      name: true,
+      source: true,
+      hex: true,
+      _count: { select: { products: { where: { product: scope } } } },
+    },
+  });
 });
 
 /** Motifs present in one category, with counts. Drives the "drawn here" rail. */
@@ -389,8 +669,23 @@ export const getCollectionProducts = cache(
 );
 
 /** A few pieces of a given category, for the type page's lead grid. */
-export const getTypeProducts = cache(async (categorySlug: string, take = 8) => {
+/**
+ * The pieces shown on a type page.
+ *
+ * `fabric` is what makes "choose by cloth" work in place. The cloth cards used
+ * to link out to `/shop/<category>?fabric=<slug>`, which answered a question
+ * about cloth by navigating away from the page explaining cloth — the reader
+ * lost the varieties, the colours, the motifs and the craft notes to see six
+ * cards they could have been shown where they stood. Now the cards filter this
+ * grid and scroll to it, and the page keeps its argument.
+ *
+ * An unknown fabric slug returns nothing rather than everything. Silently
+ * ignoring the filter would show the full category under a heading saying it
+ * had been narrowed to organza.
+ */
+export const getTypeProducts = cache(async (categorySlug: string, take = 8, fabric?: string) => {
   const where: Prisma.ProductWhereInput = { status: 'ACTIVE', category: { slug: categorySlug } };
+  if (fabric) where.fabric = { slug: fabric };
   const [items, total] = await Promise.all([
     prisma.product.findMany({
       where,

@@ -72,6 +72,20 @@ Hence the split in `src/lib/cart.ts`:
 | `resolveCart()` | No | Anywhere, including render |
 | `resolveCartForWrite()` | Yes | Server actions only |
 | `mergeGuestCart()` | Yes | The Auth.js `signIn` event |
+| `readRecentlyViewed()` | No | Anywhere, including render |
+| `recordRecentlyViewed()` | Yes | Server actions only |
+
+`src/lib/recently-viewed.ts` follows the same split for the same reason. The
+rail is rendered during `/shop` and every product page, so the read path must
+never write; the write happens in `recordProductView` (`src/app/actions/`),
+called from an effect after paint.
+
+**"Recently viewed" is per-visitor and `viewCount` is not.** `viewCount` is one
+integer on the row counting how many times *anybody* opened a piece — it cannot
+express whose history it is, so a rail built on it would show every visitor the
+same six pieces under a heading that says otherwise. History lives in the
+`svl_seen` cookie. `viewCount` is incremented alongside it and is now a real
+popularity figure rather than a column nothing writes to.
 
 ## Stock and pricing
 
@@ -118,6 +132,23 @@ uses for magic links.
 - `process.ts` — the 23 steps in six phases, the dye index, the seven-tone wash
   behind /process, and the eight colour stories.
 - `family.ts` — the five family members and the three story chapters.
+
+  It used to carry `heritageNumbers` too, six counted figures rendered on the
+  home page by `heritage-numbers.tsx`. Both were deleted when *Best Works*
+  replaced that section: every figure they carried is still stated on the page
+  it linked to, so nothing was lost, and a content list with no consumer is a
+  thing that goes stale silently.
+
+  **The rule they existed under still applies to anything numeric here.** A
+  number looks like evidence whether or not it is one, so a figure may only be
+  printed if it is stated elsewhere on the site or derived from a list in
+  `src/content`, and it must carry the page where it is defended. No "since
+  1952", no units sold. Where a count exists in code — the step count is
+  `totalSteps` — import it rather than writing it down twice.
+- `best-works.ts` — the six grounds the Best Works rail is mounted on, each
+  sampled off a dye ramp and each stating its own `ink`. `npm run audit:ink`
+  checks them against the same contrast ladder as the flooded dye colours; a
+  ground that cannot carry text fails the check rather than shipping.
 - `catalogue.ts` — the editorial layer over the shop: the type and collection
   pages, and the commission-first note on the narrative motifs.
 - `commission.ts` — the guided questions, the attachment limits, the timeline.
@@ -125,6 +156,42 @@ uses for magic links.
 - `assistant.ts` — Lakshmi's knowledge base, which also backs the offline
   answer engine. The assistant's name, launcher label and role all come from
   `assistantIdentity` in that file; nothing hardcodes them.
+
+### The workshop outranks the literature
+
+`colourStories` in `process.ts` is **the family's own account**, and where a
+published description of Srikalahasti Kalamkari disagrees with it, this site
+follows the workshop. Two entries are deliberately not what a dye manual says:
+
+- **Pink** is prepared as its own colour from *seval podi* worked with roots
+  kept for it — not madder struck over a thinner alum layer.
+- **Brown** is processed down to crystals that keep and are brought back with
+  water — not catechu bark boiled on the day.
+- **Green** has *four* traditional routes (yellow with kasim, yellow under
+  blue, blue under yellow, hibiscus), not one. The order is the recipe, and the
+  routes give different shades.
+
+These were corrected by the store on 2026-08-12. `naturalDyes`, the `Dye` seed
+`source` strings and the eight-stage summary in `saree-stages.tsx` were all
+brought into line at the same time — if you change one, change all four, or the
+product page, the shop filter and the home page will describe the same pot
+differently.
+
+`openPalette` is deliberately **not** a member of `colourStories`. That array
+mirrors the closed `Dye` set the shop filters on; an open-ended ninth entry
+with no single hex would corrupt both.
+
+### Questions the family has not answered yet
+
+`src/content/faq.ts` holds every question, including four about the household's
+own motives and arrangements that nothing in this repository answers. They
+carry `draft: true`, have no `answer`, and **render nowhere** — `publishedFaqs`
+filters them out once so no surface has to remember to.
+
+A FAQ is the page where an invented answer is least likely to be noticed and
+most likely to be believed. To publish one, delete `draft: true` and write the
+answer; `resolveFaq` throws on an entry that is neither answered nor drafted,
+so a half-finished one cannot render blank.
 
 ### The editorial rule
 
@@ -164,6 +231,14 @@ deployment.
   to the provider line, a regenerated migration and one query option.
 - Schema changes go through **migrations** (`npm run db:migrate`), not
   `db push`. `db:push` remains for quick local spikes only.
+- **Colour is a relation, not a substring.** `Product.naturalDyes` is the
+  human sentence shown on the product page; `Dye` + `ProductDye` is the
+  filterable index over it. Both are written from the same array in
+  `prisma/seed.ts`, and an unrecognised dye phrase throws during the seed —
+  matching `contains` against the newline text instead works until the first
+  piece is described as "Madder red, thinned" and silently stops appearing
+  under its own colour. The eight pots are a closed set and match the swatches
+  in `two-crafts.tsx`.
 - `buildWhere` (`src/lib/queries.ts`) states `mode: 'insensitive'` on every
   `contains` clause. Do not remove it: Postgres' `LIKE` is case-sensitive, and
   without it a search for "ramayana" returns nothing while rendering a
@@ -238,9 +313,13 @@ So there are two failures to look for, not one, and
 npm run audit:layout          # dev server or `npm start` must be running
 ```
 
-checks every important route at 320/375/390/430px for **three** failures:
-documents that scroll sideways, elements that clip their own text, and visible
-elements hanging past the viewport edge. It excludes `sr-only` (a 1×1 box
+checks every important route at 320/375/390/430px for **four** failures:
+documents that scroll sideways, elements that clip their own text, visible
+elements hanging past the viewport edge, and pages that rendered no `<h1>` at
+all. The last one is not a layout rule — it is how the script knows a route
+still renders its page. An unknown product slug answers **200** and paints the
+error boundary, which measures perfectly clean; without the heading check a
+stale route in the list would report `ok` forever while covering nothing. It excludes `sr-only` (a 1×1 box
 hiding a sentence is the point) and anything with `text-overflow: ellipsis`
 (clipping *with* a mark is a decision; clipping silently is the bug). It exits
 non-zero, so it can gate a build.
@@ -353,6 +432,8 @@ of error, the first time a piece was named with a colon in it.
 npm run typecheck
 npm run lint
 npm test
+npm run audit:contrast   # theme tokens, both themes
+npm run audit:ink        # the flooded colours and the Best Works grounds
 npm run build
 npm start          # one terminal
 npm run smoke      # another
@@ -361,3 +442,19 @@ npm run audit:layout
 
 CI runs exactly this. The smoke test exists because two real bugs passed
 `tsc`, `eslint` and `next build`, and only appeared when the code ran.
+
+`audit:contrast` and `audit:ink` exist for the same reason one layer down: a
+palette written in HSL is read by humans, and moving a lightness by four points
+takes a heading under AA without anything failing. Both are pure functions over
+the content files, so they cost a second and need no server.
+
+They have each already caught a live defect. `audit:contrast` found the gold
+token at **3.32:1** on the cotton ground — under AA, on the one colour reserved
+for whatever is being pointed at. `audit:ink` found eight tone-on-ground pairs
+under AA in the flooded dye section, three of them on pink, where most of that
+colour's story was illegible.
+
+**Run `audit:layout` against `npm start`, not `next dev`.** Measured on a dev
+server it reports intermittent one-pixel overflows and missing `<h1>`s that do
+not reproduce on a build — the first paint is racing a compile. Two dev servers
+open at once makes it much worse, because they fight over `.next`.

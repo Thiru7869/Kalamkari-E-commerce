@@ -44,8 +44,14 @@ export default function ErrorBoundary({
         )}
 
         <p className="mt-6 text-sm text-muted-foreground">
+          {/* `overflow-wrap:anywhere` on the address: it is one
+              forty-character word with no break opportunity in it. See the
+              note on /contact. */}
           {email ? (
-            <a href={`mailto:${email}`} className="text-primary underline underline-offset-4">
+            <a
+              href={`mailto:${email}`}
+              className="text-primary underline underline-offset-4 [overflow-wrap:anywhere]"
+            >
               {email}
             </a>
           ) : (

@@ -6,7 +6,9 @@ import { ArrowRight, Check } from 'lucide-react';
 import { ProductGallery } from '@/components/shop/product-gallery';
 import { AddToCart } from '@/components/shop/add-to-cart';
 import { WishlistButton } from '@/components/shop/wishlist-button';
-import { ProductCard } from '@/components/shop/product-card';
+import { ProductCard, PRODUCT_GRID_GAP } from '@/components/shop/product-card';
+import { RecordView } from '@/components/shop/record-view';
+import { RecentlyViewed } from '@/components/shop/recently-viewed';
 import { ReviewSection } from '@/components/shop/review-section';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Badge, Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/primitives';
@@ -14,7 +16,7 @@ import { getProductBySlug, getRelatedProducts, getReviewEligibility } from '@/li
 import { getWishlistIds } from '@/lib/cart';
 import { prisma } from '@/lib/prisma';
 import { toList, primaryImage } from '@/lib/serialize';
-import { formatPrice, averageRating, absoluteUrl } from '@/lib/utils';
+import { formatPrice, averageRating, absoluteUrl, cn } from '@/lib/utils';
 import { site } from '@/content/site';
 
 type Params = Promise<{ slug: string }>;
@@ -322,7 +324,7 @@ export default async function ProductPage({ params }: { params: Params }) {
         <section className="border-t border-border section-y">
           <div className="container">
             <h2 className="text-display-sm">Painted in the same tradition</h2>
-            <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-4 md:gap-x-6">
+            <ul className={cn('mt-7 grid grid-cols-2 md:grid-cols-4', PRODUCT_GRID_GAP)}>
               {related.map((p) => (
                 <li key={p.id} className="flex">
                   <ProductCard product={p} wishlisted={wishlistIds.has(p.id)} className="w-full" />
@@ -332,6 +334,16 @@ export default async function ProductPage({ params }: { params: Params }) {
           </div>
         </section>
       )}
+
+      {/* Renders nothing. Records the view after paint, where a cookie may
+          legally be set. */}
+      <RecordView productId={product.id} />
+
+      {/* Suppressed on its own page: the current piece is excluded, and with
+          fewer than two others left the section does not render at all. */}
+      <Suspense fallback={null}>
+        <RecentlyViewed excludeId={product.id} />
+      </Suspense>
 
       <script
         type="application/ld+json"

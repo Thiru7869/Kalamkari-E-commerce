@@ -1,20 +1,25 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import { ArrowRight, MapPin } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { HeroScene } from '@/components/three/hero-scene';
 import { WelcomeNote } from '@/components/home/welcome-note';
 import { HeroBanner } from '@/components/home/hero-banner';
 import { CollectionCards } from '@/components/home/collection-cards';
+import { WhatIsKalamkari } from '@/components/home/what-is-kalamkari';
 import { HowItsMade } from '@/components/craft/how-its-made';
 import { TwoCrafts } from '@/components/home/two-crafts';
+import { QuickStore } from '@/components/home/quick-store';
+import { ArrivalQuestions } from '@/components/home/arrival-questions';
+import { WorkshopInvitation } from '@/components/home/workshop-invitation';
 import { TrustStrip } from '@/components/layout/trust-strip';
-import { ProductCard } from '@/components/shop/product-card';
+import { BestWorks } from '@/components/home/best-works';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/primitives';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
+import { Parallax } from '@/components/motion/parallax';
 import { Entrance } from '@/components/motion/entrance';
-import { getFeaturedProducts, getCategories } from '@/lib/queries';
+import { getQuickStore, getCategories, getBestWorks } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { site } from '@/content/site';
 import { family } from '@/content/family';
@@ -105,10 +110,11 @@ const collectionCards = [
 ];
 
 export default async function HomePage() {
-  const [featured, categories, wishlistIds] = await Promise.all([
-    getFeaturedProducts(6),
+  const [quickStore, categories, wishlistIds, bestWorksItems] = await Promise.all([
+    getQuickStore(10),
     getCategories(),
     getWishlistIds(),
+    getBestWorks(6),
   ]);
 
   const master = family.find((m) => m.id === 'viswanath-reddy')!;
@@ -127,15 +133,26 @@ export default async function HomePage() {
         <HeroScene className="absolute inset-0 -z-10 h-full w-full" />
 
         {/*
-          Scrim.
+          Scrim — three pots, and madder holds the middle.
 
-          The old one was a flat black wash at three opacities, which read as
-          grey over every dye behind it and flattened the whole hero. This is
-          built from the pots instead: indigo at the top where the cloth is
-          still pale, catechu through the middle, and a deep madder-into-kasim
-          at the foot. It still holds the text at AA over the full sweep — the
-          alpha is unchanged — but the hero now sits in a colour rather than
-          under a shadow.
+          The previous sweep ran indigo → catechu → deep madder → black. It was
+          honest and it was dull: catechu is a quiet bark brown, so the whole
+          centre of the hero — which is where the headline, the claim and both
+          buttons sit — was laid over the least saturated colour in the
+          workshop, and the banner beside it did all the talking.
+
+          This is the same idea with the dominant colour changed. Deep indigo
+          at the head, where the cloth in the scene is still pale and a cool
+          tone gives it depth; **chay-600 madder through the whole middle
+          third**, which is the store's primary and the colour the site is
+          actually about; a deeper chay under it; and kasim at the foot to sit
+          the buttons on.
+
+          The alpha at every stop is greater than or equal to the sweep it
+          replaces (0.62 / 0.48 / 0.55 / 0.82 against 0.62 / 0.42 / 0.46 /
+          0.80), so text contrast over the scene can only have improved. That
+          is the constraint this layer exists under: it is a legibility device
+          first and a colour second, and it is measured, not eyeballed.
         */}
         <div
           className="absolute inset-0 -z-10"
@@ -143,10 +160,34 @@ export default async function HomePage() {
           style={{
             backgroundImage:
               'linear-gradient(to bottom,' +
-              'rgb(27 41 66 / 0.62) 0%,' +
-              'rgb(70 48 34 / 0.42) 34%,' +
-              'rgb(69 24 19 / 0.46) 62%,' +
-              'rgb(20 19 18 / 0.80) 100%)',
+              'rgb(35 53 83 / 0.62) 0%,' + // indigo-700
+              'rgb(142 47 34 / 0.48) 36%,' + // chay-600 — the dominant band
+              'rgb(91 30 23 / 0.55) 66%,' + // chay-800
+              'rgb(20 19 18 / 0.82) 100%)', // kasim-950
+          }}
+        />
+
+        {/*
+          The third pot: myrobalan gold, as a bloom rather than a band.
+
+          Gold is this site's one *pointing* colour and is deliberately kept
+          out of the 60-30-10 body of the page, so it cannot be a stop in the
+          gradient above without becoming decoration. As a soft radial behind
+          the banner column it does the one thing the old hero was missing —
+          it puts a warm light source in the frame, so the madder reads as lit
+          cloth rather than as a flat wash.
+
+          Placed at 78% across, which is the banner's column on a wide screen
+          and empty ground on a narrow one. It never sits behind the headline,
+          so it cannot lift the ground under the text and cost contrast.
+        */}
+        <div
+          className="absolute inset-0 -z-10"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              'radial-gradient(58% 46% at 78% 16%, rgb(212 163 55 / 0.20) 0%, ' +
+              'rgb(212 163 55 / 0.07) 45%, transparent 72%)',
           }}
         />
 
@@ -220,18 +261,71 @@ export default async function HomePage() {
               />
             </Entrance>
           </div>
+
+          {/*
+            The scroll cue.
+
+            One line and one word, and it is doing a real job rather than
+            decorating the fold: this page now runs to eleven sections, and the
+            hero ends on a photograph that looks like a natural stopping place.
+            The rule below draws downward on a slow loop, which is the smallest
+            possible statement that there is more underneath.
+
+            Desktop only. On a phone the hero is already taller than the
+            viewport and the next section's heading is visible at the fold, so
+            a cue there would be pointing at something the reader can see.
+
+            `aria-hidden` — it is an instruction to a mouse, and a screen
+            reader user is already at the next heading.
+          */}
+          <div
+            className="pointer-events-none mt-14 hidden justify-center lg:flex"
+            aria-hidden="true"
+          >
+            <span className="flex flex-col items-center gap-2.5">
+              <span className="font-inscription text-[0.625rem] uppercase tracking-[0.22em] text-cotton-200/60">
+                Twenty-three steps below
+              </span>
+              <span className="relative block h-10 w-px overflow-hidden bg-cotton-100/15">
+                <span className="motion-safe:animate-scroll-hint absolute inset-x-0 top-0 block h-4 bg-myrobalan-300/85" />
+              </span>
+            </span>
+          </div>
         </div>
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* The distinction that matters most, stated immediately               */}
+      {/* What the word actually means — before anything is argued about it   */}
+      {/* ------------------------------------------------------------------ */}
+      {/*
+        Placed second, and it is the biggest structural change on this page.
+
+        Everything below — the pots, the eight stages, the price of a saree,
+        the whole "two crafts, one name" argument — assumes the reader already
+        knows that Kalamkari can mean two different things. Most arrive here
+        from a marketplace listing selling printed polyester under the word and
+        do not know that. The distinction used to be made first, by TwoCrafts,
+        which is a section that says "this is not the other one" to somebody
+        who has not yet been told there is another one.
+
+        So the definition comes first and the distinction second. TwoCrafts is
+        unchanged and still does the harder half of the job.
+      */}
+      <WhatIsKalamkari />
+
+      {/* ------------------------------------------------------------------ */}
+      {/* The distinction that matters most                                   */}
       {/* ------------------------------------------------------------------ */}
       <TwoCrafts />
 
       {/* ------------------------------------------------------------------ */}
       {/* Categories                                                          */}
       {/* ------------------------------------------------------------------ */}
-      <section className="section-y">
+      {/* `data-tour-section` — where the quick tour travels for its first stop.
+          The ring stays on the "Shop" link in the header; the page comes here,
+          which is what that link actually leads to. See the note on `section`
+          in src/content/welcome.ts. */}
+      <section className="section-y" data-tour-section="shop">
         <div className="container">
           <RevealOnScroll>
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -273,7 +367,11 @@ export default async function HomePage() {
                 <RevealOnScroll delay={i * 0.05}>
                   <Link
                     href={`/shop/${category.slug}`}
-                    className="group relative flex h-full min-h-[8.5rem] flex-col justify-end overflow-hidden rounded-sm bg-kasim-800 p-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-[11rem] sm:p-5 md:min-h-[12.5rem] md:p-6"
+                    // Plate heights down about 10%, in step with the product
+                    // cards: 8.5→7.75, 11→10, 12.5→11.25rem. The padding comes
+                    // with them at the top end so the type does not end up
+                    // sitting in proportionally more air than it did.
+                    className="group relative flex h-full min-h-[7.75rem] flex-col justify-end overflow-hidden rounded-sm bg-kasim-800 p-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-[10rem] sm:p-4 md:min-h-[11.25rem] md:p-5"
                   >
                     <Image
                       src={category.heroImage}
@@ -344,7 +442,7 @@ export default async function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* Three ways in: Featured, Premium, Custom                            */}
       {/* ------------------------------------------------------------------ */}
-      <section className="section-y">
+      <section className="section-y" data-tour-section="custom">
         <div className="container">
           <RevealOnScroll>
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -369,50 +467,66 @@ export default async function HomePage() {
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Featured pieces                                                     */}
+      {/* The quick store — ten pieces, chosen to be unlike each other        */}
       {/* ------------------------------------------------------------------ */}
-      {featured.length > 0 && (
-        <section className="border-y border-border bg-cotton-100 section-y-lg dark:bg-card">
-          <div className="container">
-            <RevealOnScroll>
-              <p className="eyebrow">In the store now</p>
-              <h2 className="mt-3 max-w-2xl text-display-md">
-                Finished pieces, ready to send
-              </h2>
-              <p className="mt-4 max-w-xl text-muted-foreground">
-                Each of these is the only one of itself. When it goes, it is gone — the
-                same drawing is never made twice.
-              </p>
-            </RevealOnScroll>
-
-            <ul className="mt-10 grid grid-cols-3 gap-x-2.5 gap-y-6 sm:gap-x-4 sm:gap-y-9 md:gap-x-6">
-              {featured.map((product) => (
-                <li key={product.id} className="flex">
-                  <ProductCard
-                    product={product}
-                    wishlisted={wishlistIds.has(product.id)}
-                    density="compact"
-                    className="w-full"
-                    sizes="(min-width: 768px) 30vw, 31vw"
-                  />
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-12 flex justify-center">
-              <Button asChild variant="outline" size="lg">
-                <Link href="/shop">
-                  See everything in the store
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      )}
+      {/*
+        This replaces a six-card "featured" grid, and the change is in the
+        selection rather than in the count. Featured ordering follows what came
+        off the line most recently, and work comes off the line in runs — so
+        the six were routinely four variations of one drawing on one cloth
+        within a few thousand rupees of each other, which is the opposite of
+        what a landing page needs to prove. `getQuickStore` spreads the ten
+        across motif, cloth and price band; the section states the resulting
+        range rather than asserting one.
+      */}
+      <QuickStore items={quickStore} wishlistIds={wishlistIds} />
 
       {/* What you are actually buying, and where each claim is set out. */}
       <TrustStrip />
+
+      {/* ------------------------------------------------------------------ */}
+      {/* The questions people actually arrive with                           */}
+      {/* ------------------------------------------------------------------ */}
+      {/*
+        Where a shop page usually puts testimonials. It is not one, and the
+        reasoning is at the top of `src/content/arrival.ts`: nobody has left a
+        review on this site yet, and inventing five would be the least honest
+        thing on a site whose whole argument is that its claims can be checked.
+
+        Six real questions, answered from the same notes that back the
+        assistant, does the same job by the better route — the doubt a
+        testimonial is trying to talk somebody out of is the doubt this
+        section simply answers.
+      */}
+      <ArrivalQuestions />
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Best works — and the turn from selling to introducing               */}
+      {/* ------------------------------------------------------------------ */}
+      {/*
+        This replaced `HeritageNumbers`, six counted figures on a dark ground.
+        That component and the `heritageNumbers` list behind it have been
+        deleted rather than left in the tree — every figure they carried is
+        still stated on the page each one linked to, which is where it was
+        defensible in the first place.
+
+        Two reasons, and the second is the real one. The rhythm reason: the
+        quick store and the trust strip above are both `bg-cotton-100`, so the
+        page ran cream into cream and read as one block — this section is the
+        paragraph break, and a rail whose ground changes colour with every
+        piece breaks it harder than a fixed dark band did.
+
+        The argument reason: "forty artisans in the cluster" is a fact about an
+        industry, and a visitor who has just read eight sections about how the
+        cloth is made is holding a simpler question — can these people actually
+        draw? Six figures cannot answer it. One large plate of the hardest work
+        the house does, with what it took beside it, answers it in a glance.
+
+        The numbers were not deleted, only moved off the front: every one of
+        them is still stated on the page it links to, which is where each was
+        defensible in the first place.
+      */}
+      <BestWorks works={bestWorksItems} />
 
       {/*
         "The making" used to stand here: a second, darker restatement of the
@@ -437,13 +551,32 @@ export default async function HomePage() {
                   thing on the page, and the biography beside it — which is
                   the point of the section — read as its caption. */}
               <div className="relative mx-auto aspect-[4/5] w-[62%] overflow-hidden rounded-sm bg-cotton-300 sm:w-[48%] lg:mx-0 lg:w-full lg:max-w-[21rem] xl:max-w-[24rem]">
-                <Image
-                  src={master.image}
-                  alt={`${master.name} at work in the store in ${site.location.town}`}
-                  fill
-                  sizes="(min-width: 1024px) 40vw, 100vw"
-                  className="object-cover"
-                />
+                {/*
+                  The portrait drifts inside its own frame as the section
+                  passes — the one piece of real depth on this page, and the
+                  right place for it, because a photograph moving against a
+                  fixed mount is what a mounted photograph does when you walk
+                  past it.
+
+                  `-inset-y-12` is the overscan the drift needs. At speed 0.045
+                  over a ~500px frame the layer travels about ±35px, so a layer
+                  the exact size of the frame would show the cotton ground at
+                  the top or bottom edge for most of the scroll. The extra 48px
+                  each way is clipped by the frame's `overflow-hidden` and is
+                  never seen.
+
+                  `Parallax` owns `transform` on this element, so nothing
+                  inside it may animate `transform` as well.
+                */}
+                <Parallax speed={0.045} className="absolute -inset-y-12 inset-x-0">
+                  <Image
+                    src={master.image}
+                    alt={`${master.name} at work in the store in ${site.location.town}`}
+                    fill
+                    sizes="(min-width: 1024px) 40vw, 100vw"
+                    className="object-cover"
+                  />
+                </Parallax>
               </div>
             </RevealOnScroll>
 
@@ -493,30 +626,17 @@ export default async function HomePage() {
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Visit                                                               */}
+      {/* Come and see it being made                                          */}
       {/* ------------------------------------------------------------------ */}
-      <section className="border-t border-border bg-cotton-100 section-y dark:bg-card">
-        <div className="container">
-          <RevealOnScroll className="mx-auto max-w-2xl text-center">
-            <MapPin className="mx-auto h-6 w-6 text-primary" aria-hidden="true" />
-            <h2 className="mt-4 text-display-md">Come and see it being made</h2>
-            <p className="mt-4 text-body-lg text-muted-foreground">
-              The store is a working home in {site.location.town}, a short walk from the
-              Swarnamukhi where the cloth is washed. {site.hours.note}
-            </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href="/contact">Plan a visit</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <a href={site.location.mapsUrl} target="_blank" rel="noopener noreferrer">
-                  Open in Google Maps
-                </a>
-              </Button>
-            </div>
-          </RevealOnScroll>
-        </div>
-      </section>
+      {/*
+        What stood here was a centred heading, one sentence and two buttons on
+        a cream band — about 260px of page doing the work of a link, in the
+        last position before the footer, carrying the one offer that most
+        separates this store from a marketplace listing. It now answers the
+        three questions somebody actually has before travelling: what will I
+        see, when is it open, and where exactly is it.
+      */}
+      <WorkshopInvitation />
 
       {/* Structured data: the store as a local business. */}
       <script

@@ -261,7 +261,7 @@ export function OrderDetail({ order }: { order: OrderView }) {
           {storeEmail ? (
             <a
               href={`mailto:${storeEmail}?subject=${encodeURIComponent(`Order ${order.number}`)}`}
-              className="mt-3 inline-block text-sm text-primary underline underline-offset-4"
+              className="mt-3 inline-block text-sm text-primary underline underline-offset-4 [overflow-wrap:anywhere]"
             >
               {storeEmail}
             </a>

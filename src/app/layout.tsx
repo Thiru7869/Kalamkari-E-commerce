@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Marcellus, Mulish, Noto_Sans_Telugu } from 'next/font/google';
+import { Fraunces, Plus_Jakarta_Sans, Noto_Sans_Telugu } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SmoothScrollProvider } from '@/components/providers/smooth-scroll-provider';
@@ -15,43 +15,59 @@ import { absoluteUrl } from '@/lib/utils';
 import './globals.css';
 
 /**
- * Display face: Cormorant Garamond. A Garamond revival — old-style, high
- * contrast, with the thin-to-thick modulation of a nib rather than a machine.
- * It is the closest typographic relative of a bamboo kalam on cloth, and it
- * carries long narrative headings (the ones this site is built out of) without
- * turning them into advertising.
+ * Two families, not three.
+ *
+ * The previous set — Cormorant Garamond, Marcellus and Mulish — was three
+ * faces doing the work of two, and the display face was the weak one: a
+ * Garamond revival is a *book* type, and its thin strokes get thinner as the
+ * size goes up, so the largest words on the site were also the palest. On a
+ * page whose whole argument is a bold factual claim, the claim was being set
+ * in a whisper.
+ *
+ * Display face: **Fraunces**. A variable old-style with a soft/wonk axis pair
+ * held at zero, so it keeps the nib modulation that belongs beside hand-drawn
+ * line work but reaches a genuine 700 without falling apart. It is the one
+ * face on the site allowed to be loud.
  */
-const cormorant = Cormorant_Garamond({
+const fraunces = Fraunces({
   subsets: ['latin'],
   display: 'swap',
-  weight: ['300', '400', '500', '600', '700'],
   style: ['normal', 'italic'],
   variable: '--font-display',
 });
 
 /**
- * Inscriptional face: Marcellus. Roman capitals, used only for eyebrows, the
- * wordmark and step numerals — the places that behave like an inscription on a
- * temple wall rather than a sentence. One weight, because carved letters have
- * one weight.
+ * Everything else: **Plus Jakarta Sans**. A geometric humanist with a tall
+ * x-height and open apertures — minimal, contemporary, and legible at 15px on
+ * a phone in daylight, which is where most of this site is read.
+ *
+ * It carries two roles. As `--font-body` it sets every paragraph. As
+ * `--font-inscription` it also sets the eyebrows, the wordmark's second line
+ * and the step numerals, where it runs at 600 in tracked capitals. Those
+ * places used to take Marcellus, a third family loaded for about forty short
+ * labels; tracked caps in a geometric sans say the same thing with one fewer
+ * font request and read as *official* rather than as archaeological.
  */
-const marcellus = Marcellus({
-  subsets: ['latin'],
-  display: 'swap',
-  weight: ['400'],
-  variable: '--font-inscription',
-});
-
-/**
- * Body face: Mulish. A humanist sans with rounded terminals and a tall
- * x-height — it stays warm beside the serif and stays legible at 15px on a
- * phone in daylight, which is where most of this site is read.
- */
-const mulish = Mulish({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-body',
 });
+
+/*
+  There were four faces here for a while. The fourth was **Kalam**, a
+  handwriting family used for the company name alone, chosen to match the hand
+  lettering on the store's visiting card and brochure.
+
+  It has been removed. A script face is the wrong tool for a wordmark that has
+  to be legible at 15px in a phone header, and the ornaments that came with it
+  — a drawn flourish and a leaf — made four competing marks inside one 200px
+  block. The name is now set in Fraunces, whose nib modulation says
+  "drawn by hand" in a way that survives being set small, and the mark beside
+  it is a single nib. See `src/components/layout/wordmark.tsx`.
+
+  Deleting it takes a whole font request off every page on the site.
+*/
 
 /** Telugu, for the local names of categories and materials. */
 const notoTelugu = Noto_Sans_Telugu({
@@ -137,7 +153,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en-IN"
-      className={`${cormorant.variable} ${marcellus.variable} ${mulish.variable} ${notoTelugu.variable}`}
+      className={`${fraunces.variable} ${jakarta.variable} ${notoTelugu.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-background">

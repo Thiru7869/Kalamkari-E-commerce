@@ -42,7 +42,10 @@ export async function SiteHeader() {
       <AnnouncementBar />
 
       <div className="container flex h-16 items-center gap-2 md:h-20 md:gap-3">
-        <div className="flex shrink-0 items-center gap-1 md:hidden">
+        {/* Follows `DesktopNav`, which now appears at `lg` rather than `md` —
+            see the note there. The drawer is the navigation for everything
+            below that, tablets included. */}
+        <div className="flex shrink-0 items-center gap-1 lg:hidden">
           <MobileMenu isSignedIn={Boolean(session?.user)} />
         </div>
 
@@ -54,7 +57,13 @@ export async function SiteHeader() {
         */}
         <Link
           href="/"
-          className="flex min-w-0 items-center rounded-sm focus-visible:ring-2 focus-visible:ring-ring md:mr-2"
+          // `lg:mr-5` buys the gutter the nav swallowed. With the nav arriving
+          // at `lg`, "Sri Vijaya Lakshmi" and "Shop" ended up eight pixels
+          // apart — the name read as the first item of the menu rather than as
+          // the shop it belongs to. The nav gives the space back through its
+          // own tightened padding at the same breakpoint, so the row is no
+          // wider than it was.
+          className="flex min-w-0 items-center rounded-sm focus-visible:ring-2 focus-visible:ring-ring md:mr-2 lg:mr-5"
           aria-label={`${site.name}, home`}
         >
           <Wordmark />
@@ -81,14 +90,24 @@ export async function SiteHeader() {
             long-form pages, it used to cost them two navigations to change
             their mind. /search is still there, and Enter still goes to it.
           */}
-          <div data-tour="search" className="hidden lg:block">
+          {/*
+            The inline search field costs about 200px and now waits for `xl`.
+
+            At `lg` the row is 960px of content against a 500px nav and a
+            420px control cluster — the field was the difference between the
+            wordmark having 204px and having 4px, and a search box is worth
+            less than the name of the shop. The icon below opens the identical
+            overlay, so nothing is lost between 1024px and 1279px except a
+            visible input.
+          */}
+          <div data-tour="search" className="hidden xl:block">
             <HeaderSearch className="mx-1" />
           </div>
 
           <SearchOverlay>
             <button
               type="button"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring xl:hidden"
             >
               <Search className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
               <span className="sr-only">Search</span>

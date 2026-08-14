@@ -48,6 +48,25 @@ function inline(escaped: string): string {
     .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
 }
 
+/**
+ * One line of inline Markdown, escaped and formatted — no block parsing.
+ *
+ * For copy that is already a single paragraph and only needs emphasis or a
+ * link: the heritage essay uses it so foreign words (*kalam*, *kari*) can be
+ * italicised in the content file rather than being broken into three spans in
+ * the component.
+ *
+ * It escapes first and formats second, exactly as `parseMarkdown` does, so the
+ * output is safe to pass to `dangerouslySetInnerHTML` even though every current
+ * caller is authoring the string in a checked-in file. That ordering is the
+ * whole safety property and is the reason this wraps `inline` rather than
+ * exporting it directly — `inline` expects *already-escaped* input, and an
+ * exported function with that precondition is a bug waiting to be filed.
+ */
+export function renderInlineMarkdown(source: string): string {
+  return inline(escapeHtml(source));
+}
+
 export function parseMarkdown(source: string): Block[] {
   const blocks: Block[] = [];
   const chunks = source.replace(/\r\n/g, '\n').split(/\n{2,}/);

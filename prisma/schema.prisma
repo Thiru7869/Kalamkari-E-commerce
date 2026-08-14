@@ -1,59 +1,31 @@
-// Sri Vijaya Lakshmi Fine Kalamkari Arts — data model
-//
-// PostgreSQL. Not a preference: the site is deployed to serverless functions,
-// whose filesystem is read-only and thrown away between invocations, so a
-// SQLite file has nowhere to live. Running on SQLite in production is what put
-// the error boundary on every page of the first deployment — the build wrote
-// `prisma/dev.db` into the build container, and nothing that served a request
-// afterwards could see it.
-//
-// The move cost exactly what this schema was written to make it cost: the two
-// lines below, and `mode: 'insensitive'` on the `contains` clauses in
-// buildWhere (src/lib/queries.ts) — SQLite is case-insensitive for ASCII by
-// default and rejects the option, Postgres is not and needs it. Nothing else
-// changed, because the schema deliberately avoids provider-specific features
-// (no native enums, no arrays, no JSON columns). Lists are stored as
-// newline-delimited text and read through the helpers in src/lib/serialize.ts.
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-
-  // Migrations must not run through a transaction pooler — it cannot hold the
-  // advisory lock Prisma takes for the duration, and `migrate deploy` either
-  // hangs or reports a lock it never acquired. `url` is the pooled endpoint the
-  // app queries through; `directUrl` is the unpooled one, used by the migration
-  // engine only. On Neon they differ by the `-pooler` in the host.
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_DATABASE_URL")
 }
 
-// ---------------------------------------------------------------------------
-// Auth (Auth.js / NextAuth v5 model contract)
-// ---------------------------------------------------------------------------
-
 model User {
-  id            String    @id @default(cuid())
+  id            String              @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?             @unique
   emailVerified DateTime?
   image         String?
   phone         String?
-  role          String    @default("CUSTOMER") // CUSTOMER | ADMIN
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts     Account[]
-  sessions     Session[]
-  addresses    Address[]
-  orders       Order[]
-  reviews      Review[]
-  wishlist     WishlistItem[]
-  cart         Cart?
-  commissions  CommissionRequest[]
+  role          String              @default("CUSTOMER")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  accounts      Account[]
+  addresses     Address[]
+  cart          Cart?
+  commissions   CommissionRequest[]
+  orders        Order[]
+  reviews       Review[]
+  sessions      Session[]
+  wishlist      WishlistItem[]
 
   @@index([role])
 }
@@ -71,8 +43,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -83,8 +54,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -97,24 +67,19 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ---------------------------------------------------------------------------
-// Catalogue
-// ---------------------------------------------------------------------------
-
 /// Top-level shop sections: sarees, dupattas, blouses, paintings, home-decor.
 model Category {
-  id          String  @id @default(cuid())
-  slug        String  @unique
+  id          String    @id @default(cuid())
+  slug        String    @unique
   name        String
   teluguName  String?
   tagline     String
   description String
   heroImage   String
   /// Ordering in navigation and on the shop index.
-  position    Int     @default(0)
-  featured    Boolean @default(false)
-
-  products Product[]
+  position    Int       @default(0)
+  featured    Boolean   @default(false)
+  products    Product[]
 
   @@index([position])
 }
@@ -124,8 +89,8 @@ model Category {
 /// dye behaves, how the piece drapes, and how it must be cared for. Customers
 /// genuinely shop by it.
 model Fabric {
-  id          String  @id @default(cuid())
-  slug        String  @unique
+  id          String    @id @default(cuid())
+  slug        String    @unique
   name        String
   /// Family used for grouping filters: cotton | silk | blended | sheer
   family      String
@@ -133,9 +98,8 @@ model Fabric {
   description String
   /// Care guidance specific to this cloth + natural dye combination.
   careNote    String
-  position    Int     @default(0)
-
-  products Product[]
+  position    Int       @default(0)
+  products    Product[]
 
   @@index([family])
   @@index([position])
@@ -145,77 +109,93 @@ model Fabric {
 /// borders...). Kalamkari is narrative art; motif is the most meaningful way
 /// to browse it, more so than colour or price.
 model Motif {
-  id          String  @id @default(cuid())
-  slug        String  @unique
-  name        String
+  id       String         @id @default(cuid())
+  slug     String         @unique
+  name     String
   /// The story or symbolism behind the motif. Shown on product pages.
-  story       String
-  position    Int     @default(0)
-
+  story    String
+  position Int            @default(0)
   products ProductMotif[]
 
   @@index([position])
 }
 
+/// A dye pot.
+///
+/// After the story in a piece, colour is what people actually browse by, and
+/// this workshop's palette is a *closed set of eight* rather than an open
+/// colour space — there are eight pots in the yard and nothing else goes on
+/// the cloth. That is what makes colour a facet here rather than a search
+/// term: the list cannot grow, so it can be a checklist.
+///
+/// The per-piece record stays `Product.naturalDyes`, which is the human
+/// sentence shown on the product page ("Alum-mordanted chay red"). This table
+/// is the *index over* it, not a second copy of it — both are written from the
+/// same array in `prisma/seed.ts`, so they cannot disagree. Filtering with
+/// `contains` on the newline text instead would work today and break the first
+/// time a piece is described as "Madder red, thinned" and stops matching
+/// "Madder red".
+model Dye {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  name     String
+  /// Where the colour comes from — shown under the swatch in the filter.
+  source   String
+  /// The swatch, sampled from the real dye. Matches the pots on the home page.
+  hex      String
+  position Int          @default(0)
+  products ProductDye[]
+
+  @@index([position])
+}
+
 model Product {
-  id          String @id @default(cuid())
-  slug        String @unique
-  name        String
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  name           String
   /// One-line hook used on cards and in search results.
-  summary     String
+  summary        String
   /// Long-form description: what is depicted, how it was made, who made it.
-  description String
-
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-
-  fabricId String?
-  fabric   Fabric? @relation(fields: [fabricId], references: [id])
-
+  description    String
+  categoryId     String
+  fabricId       String?
   /// Price in paise (integer money — never floats).
-  price         Int
+  price          Int
   /// Optional strike-through price, also in paise.
   compareAtPrice Int?
-
   /// Newline-delimited image paths. First entry is the primary image.
-  images String
-
+  images         String
   /// Newline-delimited dye names actually used on this piece
   /// (e.g. "Kasim black\nAlum-mordanted chay red").
-  naturalDyes String
-
+  naturalDyes    String
   /// Dimensions, free text, e.g. "6.3 m with blouse piece" or "24 x 36 in".
-  dimensions String?
+  dimensions     String?
   /// Newline-delimited care instructions.
-  careNotes  String?
-
+  careNotes      String?
   /// Days of hand-work that went into the piece. Used to justify price
   /// honestly rather than with invented scarcity.
-  craftDays Int?
-
+  craftDays      Int?
   /// Named artist within the family, if the piece is attributable.
-  artisan String?
-
+  artisan        String?
   /// Every piece is one of one unless stated otherwise — this is hand painting.
-  stock Int @default(1)
-
-  status   String  @default("ACTIVE") // ACTIVE | DRAFT | ARCHIVED
-  featured Boolean @default(false)
+  stock          Int            @default(1)
+  status         String         @default("ACTIVE")
+  featured       Boolean        @default(false)
   /// Marks pieces that are signed, award-lineage, or exhibition grade.
-  masterpiece Boolean @default(false)
-
-  ratingSum   Int @default(0)
-  ratingCount Int @default(0)
-  viewCount   Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  motifs       ProductMotif[]
-  reviews      Review[]
-  cartItems    CartItem[]
-  orderItems   OrderItem[]
-  wishlistedBy WishlistItem[]
+  masterpiece    Boolean        @default(false)
+  ratingSum      Int            @default(0)
+  ratingCount    Int            @default(0)
+  viewCount      Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  category       Category       @relation(fields: [categoryId], references: [id])
+  fabric         Fabric?        @relation(fields: [fabricId], references: [id])
+  dyes           ProductDye[]
+  motifs         ProductMotif[]
+  reviews        Review[]
+  wishlistedBy   WishlistItem[]
 
   @@index([categoryId, status])
   @@index([fabricId])
@@ -227,12 +207,21 @@ model Product {
 model ProductMotif {
   productId String
   motifId   String
-
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  motif   Motif   @relation(fields: [motifId], references: [id], onDelete: Cascade)
+  motif     Motif   @relation(fields: [motifId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@id([productId, motifId])
   @@index([motifId])
+}
+
+model ProductDye {
+  productId String
+  dyeId     String
+  dye       Dye     @relation(fields: [dyeId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([productId, dyeId])
+  @@index([dyeId])
 }
 
 model Review {
@@ -245,29 +234,23 @@ model Review {
   /// Only reviews attached to a delivered order are marked verified.
   verified  Boolean  @default(false)
   createdAt DateTime @default(now())
-
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([productId, userId])
   @@index([productId])
 }
 
-// ---------------------------------------------------------------------------
-// Cart & wishlist
-// ---------------------------------------------------------------------------
-
 model Cart {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   /// Set for signed-in carts.
-  userId    String?  @unique
+  userId    String?    @unique
   /// Set for guest carts, mirrored in an httpOnly cookie.
-  guestId   String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user  User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items CartItem[]
+  guestId   String?    @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
 }
 
 model CartItem {
@@ -276,9 +259,8 @@ model CartItem {
   productId String
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
-
-  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([cartId, productId])
   @@index([cartId])
@@ -289,90 +271,73 @@ model WishlistItem {
   userId    String
   productId String
   createdAt DateTime @default(now())
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
   @@index([userId])
 }
 
-// ---------------------------------------------------------------------------
-// Orders
-// ---------------------------------------------------------------------------
-
 model Address {
-  id        String  @id @default(cuid())
-  userId    String
-  fullName  String
-  phone     String
-  line1     String
-  line2     String?
-  city      String
-  state     String
+  id         String  @id @default(cuid())
+  userId     String
+  fullName   String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  state      String
   postalCode String
-  country   String  @default("India")
-  isDefault Boolean @default(false)
-
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orders Order[]
+  country    String  @default("India")
+  isDefault  Boolean @default(false)
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders     Order[]
 
   @@index([userId])
 }
 
 model Order {
-  id     String @id @default(cuid())
+  id                String       @id @default(cuid())
   /// Human-facing reference, e.g. SVL-2A7F4C.
-  number String @unique
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-
+  number            String       @unique
+  userId            String?
   /// Contact details are snapshotted so guest orders survive without a User.
-  email String
-  phone String?
-
-  addressId String?
-  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
-
+  email             String
+  phone             String?
+  addressId         String?
   /// Shipping address snapshot — an order must not change when the user later
   /// edits their address book.
-  shipName       String
-  shipLine1      String
-  shipLine2      String?
-  shipCity       String
-  shipState      String
-  shipPostalCode String
-  shipCountry    String  @default("India")
-
+  shipName          String
+  shipLine1         String
+  shipLine2         String?
+  shipCity          String
+  shipState         String
+  shipPostalCode    String
+  shipCountry       String       @default("India")
   /// All money in paise.
-  subtotal Int
-  shipping Int @default(0)
-  discount Int @default(0)
-  total    Int
-
-  status        String @default("PENDING")
-  // PENDING | CONFIRMED | IN_PRODUCTION | PACKED | SHIPPED | DELIVERED | CANCELLED
-  paymentMethod String @default("COD") // COD | RAZORPAY
-  paymentStatus String @default("PENDING") // PENDING | PAID | FAILED | REFUNDED
-
+  subtotal          Int
+  shipping          Int          @default(0)
+  discount          Int          @default(0)
+  total             Int
+  status            String       @default("PENDING")
+  paymentMethod     String       @default("COD")
+  paymentStatus     String       @default("PENDING")
   razorpayOrderId   String?
   razorpayPaymentId String?
-
-  courier        String?
-  trackingNumber String?
+  courier           String?
+  trackingNumber    String?
   /// Customer-facing note left at checkout (gifting, occasion, deadline).
-  customerNote   String?
-
-  placedAt    DateTime  @default(now())
-  confirmedAt DateTime?
-  shippedAt   DateTime?
-  deliveredAt DateTime?
-  cancelledAt DateTime?
-  updatedAt   DateTime  @updatedAt
-
-  items  OrderItem[]
-  events OrderEvent[]
+  customerNote      String?
+  placedAt          DateTime     @default(now())
+  confirmedAt       DateTime?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+  updatedAt         DateTime     @updatedAt
+  address           Address?     @relation(fields: [addressId], references: [id])
+  user              User?        @relation(fields: [userId], references: [id])
+  events            OrderEvent[]
+  items             OrderItem[]
 
   @@index([userId])
   @@index([status])
@@ -381,20 +346,18 @@ model Order {
 }
 
 model OrderItem {
-  id      String @id @default(cuid())
-  orderId String
+  id        String   @id @default(cuid())
+  orderId   String
   productId String?
-
   /// Snapshots — the catalogue may change or a one-of-one piece may be
   /// archived after sale, but the order must stay readable forever.
-  name     String
-  slug     String
-  image    String
-  price    Int
-  quantity Int
-
-  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name      String
+  slug      String
+  image     String
+  price     Int
+  quantity  Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product? @relation(fields: [productId], references: [id])
 
   @@index([orderId])
 }
@@ -407,43 +370,34 @@ model OrderEvent {
   status    String
   message   String
   createdAt DateTime @default(now())
-
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
 }
 
-// ---------------------------------------------------------------------------
-// Commissions, journal, enquiries
-// ---------------------------------------------------------------------------
-
 model CommissionRequest {
-  id     String  @id @default(cuid())
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  name  String
-  email String
-  phone String?
-
+  id          String                @id @default(cuid())
+  userId      String?
+  name        String
+  email       String
+  phone       String?
   /// saree | dupatta | painting | home-decor | other
-  pieceType String
-  fabric    String?
+  pieceType   String
+  fabric      String?
   /// The narrative or motif the customer wants painted.
-  brief     String
+  brief       String
   /// Newline-delimited reference image paths, if uploaded.
-  references String?
-  budgetMin Int?
-  budgetMax Int?
+  references  String?
+  budgetMin   Int?
+  budgetMax   Int?
   /// Free text — "before Sankranti", "no deadline".
-  timeline  String?
-
-  status    String   @default("NEW") // NEW | IN_DISCUSSION | ACCEPTED | IN_PROGRESS | COMPLETED | DECLINED
-  adminNote String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  timeline    String?
+  status      String                @default("NEW")
+  adminNote   String?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
   attachments CommissionReference[]
+  user        User?                 @relation(fields: [userId], references: [id])
 
   @@index([status])
   @@index([createdAt])
@@ -461,7 +415,7 @@ model CommissionRequest {
 /// They are never public: the only way to read one is the admin route, which
 /// calls requireAdmin() before it touches the row.
 model CommissionReference {
-  id           String   @id @default(cuid())
+  id           String            @id @default(cuid())
   commissionId String
   /// Original name, kept so the store can refer to it in a reply.
   filename     String
@@ -469,16 +423,15 @@ model CommissionReference {
   /// Bytes, so the admin list can show a size without loading the blob.
   size         Int
   data         Bytes
-  createdAt    DateTime @default(now())
-
-  commission CommissionRequest @relation(fields: [commissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime          @default(now())
+  commission   CommissionRequest @relation(fields: [commissionId], references: [id], onDelete: Cascade)
 
   @@index([commissionId])
 }
 
 model BlogPost {
-  id          String    @id @default(cuid())
-  slug        String    @unique
+  id          String   @id @default(cuid())
+  slug        String   @unique
   title       String
   excerpt     String
   /// Markdown-ish body rendered by src/lib/markdown.ts.
@@ -487,10 +440,10 @@ model BlogPost {
   author      String
   /// Newline-delimited tags.
   tags        String
-  readMinutes Int       @default(5)
-  published   Boolean   @default(true)
-  publishedAt DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  readMinutes Int      @default(5)
+  published   Boolean  @default(true)
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([published, publishedAt])
 }
@@ -509,8 +462,8 @@ model Enquiry {
 }
 
 model NewsletterSubscriber {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  confirmed    Boolean  @default(false)
-  createdAt    DateTime @default(now())
+  id        String   @id @default(cuid())
+  email     String   @unique
+  confirmed Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

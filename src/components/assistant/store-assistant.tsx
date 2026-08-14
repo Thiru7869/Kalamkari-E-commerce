@@ -4,8 +4,14 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUp, MessageCircle, Square, X } from 'lucide-react';
-import { assistantIdentity, starterPrompts } from '@/content/assistant';
+import { ArrowUp, ArrowUpRight, MessageCircle, Mic, Square, X } from 'lucide-react';
+import {
+  assistantIdentity,
+  bookingActions,
+  bookingIntent,
+  starterPrompts,
+} from '@/content/assistant';
+import { site } from '@/content/site';
 import { cn } from '@/lib/utils';
 
 /**
@@ -32,6 +38,21 @@ type Message = {
 
 const HISTORY_LIMIT = 20;
 
+/** How long a pair of suggestions stays before the next pair takes its place. */
+const SUGGESTION_ROTATE_MS = 2000;
+
+/**
+ * Has the visitor started asking to order something rather than to understand
+ * something?
+ *
+ * Matched against their own words. See `bookingIntent` for why the list is
+ * deliberately narrow and why "price" is not in it.
+ */
+function wantsToOrder(text: string) {
+  const t = text.toLowerCase();
+  return bookingIntent.some((phrase) => t.includes(phrase));
+}
+
 /** Turns bare site paths in the model's text into real links. */
 function renderWithLinks(text: string) {
   const parts = text.split(/(\/(?:process|our-story|shop|custom|care|shipping|journal|contact|product)[a-z0-9/-]*)/gi);
@@ -56,6 +77,148 @@ function newId() {
   return Math.random().toString(36).slice(2);
 }
 
+/**
+ * The two places a person can actually start an order.
+ *
+ * Links, not chat messages — the handover to a human happens on a page.
+ *
+ * ---------------------------------------------------------------------------
+ * Nothing closes the panel here, and that is deliberate
+ * ---------------------------------------------------------------------------
+ *
+ * The obvious addition is `onClick={() => setOpen(false)}` so the sheet gets
+ * out of the way. It is not here for two reasons. It is redundant — the
+ * `pathname` effect already closes the panel on every route change, which is
+ * the correct place for it because it fires *after* the navigation rather than
+ * alongside it. And it is a hazard: closing the panel unmounts the portal these
+ * anchors live in, in the same commit as the click, which is a good way to lose
+ * the navigation the click was for.
+ *
+ * Verified end to end — pressing "Have a piece painted for you" lands on
+ * `/custom` and the panel is gone when it gets there.
+ */
+function BookingActions() {
+  return (
+    <div className="pt-1">
+      <p className="font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-muted-foreground">
+        To start one
+      </p>
+      <ul className="mt-2 flex flex-col gap-2">
+        {bookingActions.map((action) => (
+          <li key={action.href}>
+            <Link
+              href={action.href}
+              className="group flex min-h-[2.75rem] items-center gap-3 rounded-sm border border-primary/35 bg-primary/[0.06] px-3 py-2 text-left transition-colors hover:border-primary/60 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-[0.8125rem] font-medium leading-snug text-foreground">
+                  {action.label}
+                </span>
+                <span className="mt-0.5 block text-[0.6875rem] leading-snug text-muted-foreground">
+                  {action.hint}
+                </span>
+              </span>
+              <ArrowUpRight
+                className="h-4 w-4 shrink-0 text-primary transition-transform duration-300 motion-safe:group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * Two suggestions, in two rows, changing every couple of seconds.
+ *
+ * Two rather than all eight because the panel opens on a phone at 78svh with a
+ * greeting, a disclosure and a composer already in it — four buttons filled the
+ * remaining space and turned an invitation into a form. Two is a pair of
+ * examples; the rotation is what keeps it from also being a narrow one.
+ *
+ * ---------------------------------------------------------------------------
+ * Reduced motion shows all eight instead
+ * ---------------------------------------------------------------------------
+ *
+ * This is the site's rule applied literally: decorative motion stops, but
+ * scroll- or time-driven *content* must still resolve to its full state. The
+ * rotation is not decoration — it is the only way the other six questions are
+ * ever seen — so switching it off has to be paired with showing them, or a
+ * reduced-motion reader silently loses three quarters of the content.
+ *
+ * The buttons carry no `key` tied to the text, so React updates the label in
+ * place rather than remounting: the pair cross-fades instead of the list
+ * reflowing, and a button under the pointer stays the same DOM node.
+ */
+function Suggestions({
+  pair,
+  ordering,
+  onAsk,
+  onHoverChange,
+}: {
+  pair: number;
+  ordering: boolean;
+  onAsk: (prompt: string) => void;
+  onHoverChange: (hovering: boolean) => void;
+}) {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setReduced(query.matches);
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
+
+  // Ordering wins over everything: the visitor has stopped browsing.
+  if (ordering) return <BookingActions />;
+
+  const shown = reduced
+    ? [...starterPrompts]
+    : [starterPrompts[pair], starterPrompts[(pair + 1) % starterPrompts.length]];
+
+  return (
+    <div
+      className="pt-1"
+      onMouseEnter={() => onHoverChange(true)}
+      onMouseLeave={() => onHoverChange(false)}
+      onFocusCapture={() => onHoverChange(true)}
+      onBlurCapture={() => onHoverChange(false)}
+    >
+      <ul className="flex flex-col gap-2">
+        {shown.map((prompt, i) => (
+          <li key={reduced ? prompt : i}>
+            <button
+              type="button"
+              onClick={() => onAsk(prompt)}
+              className={cn(
+                'w-full rounded-sm border border-border bg-background px-3 py-2 text-left text-[0.8125rem] leading-snug',
+                'transition-colors hover:border-primary/40 hover:bg-primary/5',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              )}
+            >
+              {prompt}
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      {/*
+        The pair is not announced as it changes.
+
+        A live region here would read two new questions aloud every two seconds,
+        which is the `aria-live` failure this codebase already documents for
+        streaming replies. A screen reader user gets the full list instead —
+        `prefers-reduced-motion` is commonly set alongside, and the composer
+        below is the real affordance in any case.
+      */}
+    </div>
+  );
+}
+
 export function StoreAssistant() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -68,6 +231,17 @@ export function StoreAssistant() {
    * transcript cannot re-trigger an announcement.
    */
   const [announcement, setAnnouncement] = useState('');
+
+  /**
+   * Which pair of suggestions is showing.
+   *
+   * An index into `starterPrompts`, stepping by two. See the rotation effect.
+   */
+  const [pair, setPair] = useState(0);
+  /** Latched once the visitor asks to order something. Never unlatched. */
+  const [ordering, setOrdering] = useState(false);
+  /** The pointer is over the suggestions, so the rotation holds still. */
+  const [hoveringPrompts, setHoveringPrompts] = useState(false);
 
   /**
    * `document.body` does not exist while the tree is being described on the
@@ -89,6 +263,41 @@ export function StoreAssistant() {
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  /*
+    The two suggestions, changing every couple of seconds.
+
+    Four conditions stop it, and each is a real one rather than a precaution:
+
+      - **The panel is shut.** A timer running behind a closed sheet is pure
+        waste on a control that sits on every page of the site.
+      - **The conversation has started.** The suggestions are only rendered
+        while `messages` is empty; rotating an unmounted list is the same waste.
+      - **The pointer is on them.** Text that changes under a cursor about to
+        click it is the oldest trap in this pattern — the visitor presses one
+        question and sends another.
+      - **Reduced motion.** Content that swaps itself on a timer is movement,
+        and a reader who asked for less of it should get the first pair and be
+        left alone. This is not a decorative animation that can simply be
+        skipped: the other six questions have to stay reachable, so under
+        reduced motion the panel shows all eight at once instead. Nothing is
+        lost, which is the rule for reduced motion on this site.
+  */
+  useEffect(() => {
+    if (!open || messages.length > 0 || ordering || hoveringPrompts) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const id = setInterval(() => {
+      setPair((p) => (p + 2) % starterPrompts.length);
+    }, SUGGESTION_ROTATE_MS);
+    return () => clearInterval(id);
+  }, [open, messages.length, ordering, hoveringPrompts]);
+
+  // A fresh panel starts at the first pair rather than wherever the last
+  // conversation left the rotation.
+  useEffect(() => {
+    if (open) setPair(0);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -115,6 +324,22 @@ export function StoreAssistant() {
     async (question: string) => {
       const trimmed = question.trim();
       if (!trimmed || streaming) return;
+
+      /*
+        Latch the ordering intent from the visitor's own words.
+
+        This changes what is offered *alongside* the answer; it does not
+        intercept the question. Lakshmi still answers "can you paint something
+        to my own design" properly — she simply also puts the two places a
+        person can actually start one in front of the reader, because she is
+        explicitly not allowed to agree a price or a date herself.
+
+        Latched, never unlatched: somebody who has said "commission" once is in
+        that conversation now, and taking the links away again when their next
+        message happens not to contain a keyword would be worse than leaving
+        them.
+      */
+      if (wantsToOrder(trimmed)) setOrdering(true);
 
       setError(null);
       setInput('');
@@ -288,7 +513,9 @@ export function StoreAssistant() {
               'inset-x-0 bottom-0 h-[78svh] rounded-t-xl',
               // Desktop: anchored panel above the launcher.
               'md:inset-x-auto md:bottom-24 md:right-6 md:h-[min(34rem,72svh)] md:w-[24.5rem] md:rounded-sm',
-              'motion-safe:animate-rise-in',
+              // Comes up out of the launcher rather than fading in where it
+              // already was. See the `panel-open` keyframe note.
+              'motion-safe:animate-panel-open',
             )}
           >
             {/* Header */}
@@ -313,10 +540,35 @@ export function StoreAssistant() {
                   />
                 </svg>
               </span>
+              {/*
+                The store's name in full, at every width — phones included.
+
+                It used to read "Store assistant · Srikalahasti", which names
+                the job and the town but never the shop. A visitor who opens a
+                chat panel on a phone should be able to see whose shop they
+                have walked into without going back to the header, and on a
+                phone the header wordmark is behind the sheet.
+
+                Not `truncate`. "Sri Vijaya Lakshmi Fine Kalamkari Arts" is
+                thirty-eight characters and truncating it produces "Sri Vijaya
+                Lakshmi Fine Kalam…", which is worse than the line it replaced.
+                It wraps to two lines on the narrowest phone instead, which the
+                header has the room for. The role is still announced — it is in
+                this dialog's `aria-label`.
+              */}
+              {/*
+                "Ask Lakshmi", not "Lakshmi".
+
+                A bare name is a signature; the invitation is the point of the
+                panel, and it is the same words the launcher says — so opening
+                the sheet confirms the visitor pressed what they meant to press
+                rather than presenting them with a slightly different label.
+                `assistantIdentity.label` is the single source for both.
+              */}
               <div className="min-w-0">
-                <p className="font-display text-lg leading-none">{assistantIdentity.name}</p>
-                <p className="mt-1 truncate text-[0.6875rem] uppercase tracking-[0.14em] text-cotton-200/70">
-                  {assistantIdentity.role}
+                <p className="font-display text-lg leading-none">{assistantIdentity.label}</p>
+                <p className="mt-1 font-inscription text-[0.625rem] uppercase leading-snug tracking-[0.12em] text-cotton-200/70">
+                  {site.name}
                 </p>
               </div>
               <button
@@ -349,20 +601,25 @@ export function StoreAssistant() {
               {messages.length === 0 && (
                 <>
                   <p className="text-sm leading-relaxed">{assistantIdentity.greeting}</p>
-                  <ul className="flex flex-col gap-2 pt-1">
-                    {starterPrompts.map((prompt) => (
-                      <li key={prompt}>
-                        <button
-                          type="button"
-                          onClick={() => void send(prompt)}
-                          className="w-full rounded-sm border border-border bg-background px-3 py-2 text-left text-[0.8125rem] leading-snug transition-colors hover:border-primary/40 hover:bg-primary/5"
-                        >
-                          {prompt}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                  <Suggestions
+                    pair={pair}
+                    ordering={ordering}
+                    onAsk={(prompt) => void send(prompt)}
+                    onHoverChange={setHoveringPrompts}
+                  />
                 </>
+              )}
+
+              {/*
+                The ordering pair, once the conversation is under way.
+
+                Above, it replaces the suggestions before anybody has typed. Here
+                it sits under the transcript, because a visitor who asked about a
+                commission three messages ago should not have to scroll back to
+                the top of the panel to find the way through to it.
+              */}
+              {messages.length > 0 && ordering && (
+                <BookingActions />
               )}
 
               {messages.map((message) => (
@@ -447,6 +704,35 @@ export function StoreAssistant() {
                   placeholder="Ask about the craft, a piece, or your order…"
                   className="max-h-24 flex-1 resize-none bg-transparent text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
                 />
+
+                {/*
+                  Voice, present and honestly disabled.
+
+                  Speech-to-text good enough for a Telugu place-name and a
+                  Sanskrit motif is a paid service, and none is wired up. The
+                  control is here because the layout has to be right the day one
+                  is — a mic button added later would move the send button and
+                  re-teach the composer — but it is `disabled` with a title
+                  saying so, rather than a live-looking button that does nothing.
+
+                  A button that silently fails is worse than no button. This one
+                  states its state to the pointer, to the keyboard and to a
+                  screen reader, and takes no focus out of the tab order it would
+                  otherwise be wasting.
+
+                  To enable: drop in a transcription provider, write its result
+                  into `setInput`, and remove `disabled` plus the two hints.
+                */}
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  title="Voice input is not connected yet"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground/60 disabled:cursor-not-allowed"
+                >
+                  <Mic className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span className="sr-only">Speak your question — not available yet</span>
+                </button>
 
                 {streaming ? (
                   <button

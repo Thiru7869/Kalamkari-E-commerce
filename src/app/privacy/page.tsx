@@ -87,7 +87,7 @@ export default function PrivacyPage() {
               {email ? (
                 <a
                   href={`mailto:${email}`}
-                  className="text-primary underline underline-offset-4"
+                  className="text-primary underline underline-offset-4 [overflow-wrap:anywhere]"
                 >
                   {email}
                 </a>

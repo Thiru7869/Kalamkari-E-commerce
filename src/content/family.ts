@@ -184,6 +184,60 @@ export const storyChapters = [
 ];
 
 /* -------------------------------------------------------------------------- */
+/* How we tell the story                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The narrative tradition, and how a composition is actually built.
+ *
+ * Same editorial rule as the rest of this file. Everything below is either
+ * documented history of the craft (the panels as narrative instruments, the
+ * register layout, the Vijayanagara-period record) or already stated elsewhere
+ * on this site — `storyChapters` above, the paintings entry in `catalogue.ts`,
+ * and the four commission-first motifs in `narrativeMotifs`. No episode, no
+ * commission and no customer is invented.
+ *
+ * This exists because /our-story explained who the family are and what the
+ * craft is, and never explained the thing they actually do all day, which is
+ * *tell stories on cloth*. That is the subject of every piece in the store and
+ * it had no section of its own.
+ */
+export type StoryMethod = {
+  id: string;
+  /** The heading. Two to six words. */
+  title: string;
+  body: string;
+};
+
+export const storyMethod: StoryMethod[] = [
+  {
+    id: 'why-narrative',
+    title: 'The cloth was the storyteller',
+    body: 'A painted panel from this town was not decoration; it was equipment. It would be hung and unrolled section by section while a performer narrated the episode it showed to an audience who could not read it. Everything about how these compositions are built follows from that job — and it is why the subjects here are epics and deities rather than patterns.',
+  },
+  {
+    id: 'registers',
+    title: 'Read it the way it was drawn',
+    body: 'Scenes are set out in registers — horizontal bands, separated by rule and border rather than by empty cloth — and are read left to right, in order, like lines of writing. The borders are not framing in the decorative sense: they are punctuation, telling you where one moment ends and the next begins.',
+  },
+  {
+    id: 'scale',
+    title: 'Faces drawn for the back of the room',
+    body: 'A figure has to carry its expression at the distance the panel was meant to be seen from, in the light a temple actually has. That is why the eyes are large and the gestures are held: not stylisation for its own sake, but a solution to a problem of legibility that the composition was built around.',
+  },
+  {
+    id: 'saree',
+    title: 'The same logic, on nine yards',
+    body: 'A saree inherits all of it and adds a constraint: the body, the border and the pallu are three compositions that have to agree, and only the pallu is really seen when the cloth is worn. So the pallu carries the episode and the body carries the rhythm — a jaal that has to hold over nine yards without a single mechanical repeat.',
+  },
+  {
+    id: 'commission',
+    title: 'Which is why the big ones are drawn to order',
+    body: 'Ramayana, Mahabharata, Krishna Leela and the Tree of Life are the hardest drawing this workshop does, and the composition is settled before the pen is picked up. Because nothing is repeated from a block, the same composition is never painted twice — so whatever is in the store is what exists, and a piece of your own is a commission rather than a restock.',
+  },
+];
+
+/* -------------------------------------------------------------------------- */
 /* Handmade against printed                                                   */
 /* -------------------------------------------------------------------------- */
 
@@ -236,6 +290,56 @@ export const handVsPrinted: Comparison[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
+/* How the work is actually divided                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The workshop as an organisation rather than as a craft.
+ *
+ * Everything below comes from the store's own printed brochure, supplied on
+ * 2026-08-14, and nothing has been added to it. It is the first material on
+ * this site that describes how the work is *shared out* — who draws, who fills,
+ * where the cloth and the dye are bought — and that is worth having because it
+ * is the part a visitor cannot infer from photographs of finished pieces.
+ *
+ * Two figures from the same source are deliberately **not** here. The brochure
+ * gives a headcount for the group and a count of local artists working with it;
+ * both are undated, and this site already states the household in
+ * `family` above and the cluster figure on the FAQ. Publishing a third,
+ * differently-scoped number without knowing when it was true would make all
+ * three less trustworthy rather than the page more informative. If the store
+ * confirms current numbers they belong here, with a date.
+ */
+export type WorkshopNote = {
+  id: string;
+  title: string;
+  body: string;
+};
+
+export const workshopNotes: WorkshopNote[] = [
+  {
+    id: 'drawing',
+    title: 'The drawing is done by the senior hands',
+    body: 'The freehand drawing and sketching of the figures is the most difficult part of the process, and it is done by the senior artists — the mother of the house, the elder sister, who is a State Award winner in her own right, the younger sister, and Viswanath Reddy himself. Nothing about that stage can be corrected later, which is why it is not delegated.',
+  },
+  {
+    id: 'filling',
+    title: 'The painting is then passed on',
+    body: 'Once the figures are down, the piece goes to other artists for the dyeing and for filling in the detail. That division is what makes the work possible at all: the drawing sets what the piece will be, and the filling is weeks of patient work that a second pair of hands can carry without changing the composition.',
+  },
+  {
+    id: 'materials',
+    title: 'Where the cloth and the colour come from',
+    body: 'The vegetable dyes are procured from Chennai; the gada — the greige cotton the whole process starts on — comes from Chittoor. Neither is made in the house, and neither is bought as a finished colour: what arrives is raw material that still has to be fermented, boiled or steeped before anything can be drawn with it.',
+  },
+  {
+    id: 'time',
+    title: 'How long a painting takes, as opposed to a saree',
+    body: 'A big, intricate painting takes between nine months and a year to complete. A smaller and less intricate picture takes about fifteen days. That range is much wider than the fifteen to forty-five days a saree takes, and it is the honest reason a narrative panel is priced the way it is — the cost is somebody’s year.',
+  },
+];
+
+/* -------------------------------------------------------------------------- */
 /* Awards                                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -251,6 +355,55 @@ export const handVsPrinted: Comparison[] = [
  * The one award named anywhere on this site is the 2008 National Award for pen
  * Kalamkari, which is on the record and appears in the family entry.
  */
+/**
+ * The one award this site names, and what it actually means.
+ *
+ * Everything below is either already on the record elsewhere on this site (the
+ * year, the discipline, the recipient — see the family entry above) or is a
+ * statement about the *craft* rather than about the award's administration.
+ * That line is drawn deliberately. It is easy to write a confident paragraph
+ * about which ministry confers what and how many are given each year, and this
+ * file has no source for any of it; what it does have a source for is what pen
+ * Kalamkari is and why doing it well is difficult, which is the part a reader
+ * actually needs in order to understand what was recognised.
+ *
+ * So: no citation text, no conferring body beyond "national", no prize detail.
+ * If the store supplies the certificate, those belong here and the component
+ * will render them.
+ */
+export const principalAward = {
+  year: 2008,
+  name: 'National Award',
+  discipline: 'Pen Kalamkari',
+  recipient: 'M Viswanath Reddy',
+  /** What the award is for, in craft terms. */
+  what: 'A national recognition for mastery of pen Kalamkari — the freehand bamboo-pen tradition specific to Srikalahasti, judged as a distinct discipline from the block-printed cloth sold under the same name.',
+  /**
+   * Why it is worth more than a line in a list. Three points, each of which is
+   * defended somewhere else on this site rather than asserted here.
+   */
+  why: [
+    {
+      title: 'It is an award for a hand, not a design',
+      body: 'There is no device anywhere in this craft that repeats a mark. A border that looks regular was drawn again and again by eye, and a face is legible or it is not. What is being judged is the consistency of a line held over nine yards by one person across several weeks — which is why the discipline is assessed separately from printed work at all.',
+      href: '/process',
+      hrefLabel: 'See what the drawing involves',
+    },
+    {
+      title: 'It recognises the whole sequence, not the picture',
+      body: 'A finished piece is the last of twenty-three operations, and most of them are invisible in it: the myrobalan that decides whether the black will hold, the alum painted in a liquid nobody can see, the twenty passes through the sun. A piece can look right and be wrong, and it shows two washes later.',
+      href: '/process',
+      hrefLabel: 'All twenty-three steps',
+    },
+    {
+      title: 'It belongs to a town as much as a household',
+      body: 'Srikalahasti Kalamkari holds a registered Geographical Indication, and the family works alongside roughly forty other artisans here. The knowledge, the water, the washing ground and the dye recipes are shared. An award to one workshop in a cluster this size is a statement about the cluster.',
+      href: '/faq',
+      hrefLabel: 'Questions about the craft',
+    },
+  ],
+} as const;
+
 export type Award = {
   n: number;
   label: string;

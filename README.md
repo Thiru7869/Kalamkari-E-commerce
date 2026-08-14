@@ -478,7 +478,12 @@ First-load JS: 103 kB shared, 162–174 kB on the heaviest content routes and
 ## Browsing
 
 `/shop` is the working grid — everything, filterable, paginated, three across on
-a phone. Around it sit pages that are pages rather than filtered views:
+a phone. It filters on **story & motif, colour, cloth and price**, all in the
+URL. Colour is backed by a real `Dye` relation rather than a text match (see
+`CLAUDE.md`), and price is offered as four bands struck against the catalogue's
+actual spread rather than as a two-handle slider — bands that cannot return
+anything in the current category are dropped rather than shown. Around it sit
+pages that are pages rather than filtered views:
 
 | Route | What it is |
 | --- | --- |

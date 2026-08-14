@@ -165,11 +165,77 @@ export const knowledge: KnowledgeEntry[] = [
 ];
 
 /** Openers offered before the visitor has typed anything. */
+/**
+ * The pool the two visible suggestions rotate through.
+ *
+ * Two at a time, in two rows, swapping every couple of seconds — so the panel
+ * shows a small, calm pair rather than a wall of four, and a visitor who does
+ * not see their question in the first pair sees six more without scrolling or
+ * pressing anything.
+ *
+ * Eight rather than four, because a rotation of four turns over in eight
+ * seconds and starts repeating while somebody is still reading the greeting.
+ * They are ordered so that consecutive pairs are unalike: the rotation steps by
+ * two, so entries 0/1 show together, then 2/3, and a reader never sees two
+ * questions about price or two about the process at once.
+ */
 export const starterPrompts = [
   'How is a Kalamkari saree actually made?',
   'How do I tell hand-painted from printed?',
   'Help me choose a piece under ₹15,000',
+  'Where do the colours come from?',
   'Can you paint something to my own design?',
+  'How should I wash it?',
+  'How long does one saree take?',
+  'Can I visit the workshop?',
+] as const;
+
+/**
+ * What replaces the suggestions once somebody asks about ordering.
+ *
+ * The moment a visitor says "book", "order", "custom" or similar, more
+ * questions are the wrong thing to offer — they have stopped browsing and
+ * started asking for something, and the assistant is explicitly not allowed to
+ * agree a price or a date (see `disclosure`). So the pair becomes the two
+ * places a person can actually do that.
+ *
+ * These navigate rather than sending another message, which is the whole point:
+ * the handover to a human happens on a page, not in the chat.
+ */
+export const bookingActions = [
+  {
+    label: 'Have a piece painted for you',
+    hint: 'Your subject, your cloth — no payment to start',
+    href: '/custom',
+  },
+  {
+    label: 'Write to the store',
+    hint: 'One of the family replies',
+    href: '/contact',
+  },
+] as const;
+
+/**
+ * What counts as "they want to order something".
+ *
+ * Matched on the visitor's own words, lowercased, as whole-ish substrings.
+ * Deliberately narrow: this swaps the suggestions away, so a false positive
+ * costs somebody the questions they were reading. "Price" is *not* here —
+ * asking what something costs is a browsing question and Lakshmi answers it.
+ */
+export const bookingIntent = [
+  'book',
+  'booking',
+  'order a',
+  'place an order',
+  'buy',
+  'purchase',
+  'custom',
+  'commission',
+  'made to order',
+  'my own design',
+  'paint something for me',
+  'can you make',
 ] as const;
 
 /**
@@ -189,8 +255,14 @@ export const assistantIdentity = {
   label: 'Ask Lakshmi',
   /** Shown under the name in the chat header. */
   role: `Store assistant · ${site.location.town}`,
-  greeting:
-    'I can talk you through the craft, the twenty-three steps, what is in the store right now, or a piece made to your own design. What brings you here?',
+  /**
+   * Short, and warm, and that is the whole brief for it.
+   *
+   * It used to list four things it could do in one thirty-word sentence, which
+   * is a menu rather than a greeting — and the suggestions underneath are
+   * already the menu. Two short sentences: hello, and an open question.
+   */
+  greeting: 'Namaskaram. Ask me anything about the cloth, the colours or the store.',
   /** Displayed once, so nobody mistakes this for a person in the workshop. */
   disclosure:
     'I am an AI assistant for this store — helpful on the craft and the catalogue, but not a member of the family. For prices agreed in conversation, delivery dates or anything binding, I will hand you to them.',

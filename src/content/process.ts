@@ -268,6 +268,48 @@ export const allSteps = processPhases.flatMap((p) => p.steps);
 /** Sanity check used by the process page rail — the count is a claim we make. */
 export const totalSteps = allSteps.length;
 
+/* -------------------------------------------------------------------------- */
+/* The cloth, as a set of layers                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Which layers of the drawing are showing.
+ *
+ * This lives in the content layer rather than beside the SVG that renders it,
+ * because three different things now declare a cloth state — the eight public
+ * stages, the fourteen main stages, and the twelve-stage journey — and two of
+ * them are content files. A content module importing a type out of a
+ * `'use client'` component to describe its own data has the dependency the
+ * wrong way round; components depend on content here, not the reverse.
+ */
+export type ClothLayers = {
+  /** Myrobalan and buffalo milk: the ground turns cream. */
+  prepared: boolean;
+  /** Charcoal composition is down. */
+  drawn: boolean;
+  /** Iron liquor has struck: the outline is black rather than pale. */
+  blackened: boolean;
+  /** Alum painted, before the bath — visible only as a damp shadow. */
+  alum: boolean;
+  /** The madder bath has been run. */
+  madder: boolean;
+  /** Indigo dipped and the yellows painted. */
+  indigo: boolean;
+  /** Twenty washings and the sun. */
+  finished: boolean;
+};
+
+/** Loom cotton: nothing has been done to it yet. */
+export const NO_LAYERS: ClothLayers = {
+  prepared: false,
+  drawn: false,
+  blackened: false,
+  alum: false,
+  madder: false,
+  indigo: false,
+  finished: false,
+};
+
 /**
  * The dye index, shown as a reference table on /process#dyes.
  * `hex` values are approximations of the finished colour on cotton, used for
@@ -292,8 +334,8 @@ export const naturalDyes = [
   {
     colour: 'Pink',
     hex: '#C66857',
-    source: 'Madder root, thin alum',
-    how: 'Same bath as the reds; a lighter alum layer takes less dye.',
+    source: 'Seval podi, worked with roots kept for it',
+    how: 'Prepared as its own colour, not thinned out of the red.',
   },
   {
     colour: 'Yellow',
@@ -304,22 +346,22 @@ export const naturalDyes = [
   {
     colour: 'Blue',
     hex: '#2C4268',
-    source: 'Indigo',
+    source: 'Indigo leaves, pressed down into crystals',
     localName: 'neeli',
     how: 'Dipped in a vat, with wax resist. Oxidises to blue in open air.',
   },
   {
     colour: 'Green',
     hex: '#4A5D3A',
-    source: 'Indigo over yellow',
-    how: 'Not a dye of its own — two layers, in that order.',
+    source: 'Yellow with kasim, yellow and blue either way, or hibiscus',
+    how: 'Not a dye of its own — four traditional routes, and the order is the recipe.',
   },
   {
     colour: 'Brown',
     hex: '#6F4B31',
-    source: 'Catechu bark',
+    source: 'Processed crystals, kept until needed',
     localName: 'katha',
-    how: 'Painted directly.',
+    how: 'Dissolved from crystal and painted directly.',
   },
   {
     colour: 'Cream ground',
@@ -378,12 +420,18 @@ export const dyeWash: DyeTone[] = [
 /* -------------------------------------------------------------------------- */
 
 /**
- * The colour walk-through on /process, using the same progressive pattern as
- * the home page's eight stages.
+ * The colour walk-through on /process, and the storytelling panel behind the
+ * swatches on the home page.
  *
- * One entry per colour actually used in this workshop. Each says where it
- * comes from, how it is applied, and the one thing about it that surprises
- * people — all of it drawn from the dye index above rather than invented.
+ * One entry per colour actually used in this workshop. Each says where it comes
+ * from, how it is worked, what it carries culturally, and where on a piece it
+ * actually lands — all of it as the store gives it, not as a dye manual would.
+ *
+ * **The account here is the family's own.** Where a published description of
+ * Srikalahasti Kalamkari differs from what this workshop does — pink is the
+ * clearest case, and brown the other — this file follows the workshop. The
+ * craft is a living practice with real regional and household variation, and a
+ * store describing its own pots outranks a general account of the craft.
  */
 export type ColourStory = {
   id: string;
@@ -400,6 +448,23 @@ export type ColourStory = {
   body: string;
   /** The single fact worth remembering. */
   note: string;
+  /**
+   * What the colour carries beyond its chemistry — why it is reached for.
+   *
+   * Kept to what the craft itself supports: a colour's association in temple
+   * and festival use, or its structural role in the palette. No horoscopes and
+   * no invented symbolism.
+   */
+  meaning?: string;
+  /** Where on an actual piece it lands. Concrete places, not adjectives. */
+  usedFor?: string;
+  /**
+   * More than one traditional way to the same colour.
+   *
+   * Only green has these, and it is the most interesting thing in the palette:
+   * four separate routes, giving shades a printer would need four inks for.
+   */
+  routes?: { label: string; body: string }[];
 };
 
 export const colourStories: ColourStory[] = [
@@ -413,6 +478,10 @@ export const colourStories: ColourStory[] = [
     method: 'Steeped, not dyed',
     body: 'Every Kalamkari begins on this colour, and it is the only one that is not a decision. The cloth is soaked in ground myrobalan and buffalo milk and comes out of the sun a warm, uneven cream. Nothing has been added to make it that shade — it is simply what the nut leaves behind.',
     note: 'The ground was never bleached white. Any Kalamkari on a brilliant white cloth has had help from something that did not come out of a pot.',
+    meaning:
+      'The colour of the cloth before anybody has spoken on it. Every other colour in this palette is judged against it, and a piece is only ever as warm as the ground underneath it.',
+    usedFor:
+      'The whole field — the unpainted cloth between motifs, the space inside a border, the sky behind a figure.',
   },
   {
     id: 'black',
@@ -424,6 +493,10 @@ export const colourStories: ColourStory[] = [
     method: 'Drawn with the kalam',
     body: 'Scrap iron and palm jaggery sit sealed in an earthen pot for three weeks until the sugars pull the iron into solution. What you pour off is thin, foul-smelling and very nearly colourless. Drawn onto myrobalan-treated cloth it darkens as you watch, because the iron is meeting the tannin already waiting in the fibre.',
     note: 'The liquid that makes the black is not black. The colour forms in the cloth, not on it — which is why the outline is still there after fifty years.',
+    meaning:
+      'The grounding colour, and the one the whole palette depends on. Kasim is drawn first and everything else is filled inside it, so the black is not an outline added to a picture — it is the structure the picture is built on. Nothing else in the pot yard is asked to hold that much.',
+    usedFor:
+      'Every outline on the piece: the contour of a figure, the rule between registers, the fine hatching inside a border, and the features of a face — which are the last marks made and the ones that decide whether it is any good.',
   },
   {
     id: 'red',
@@ -433,18 +506,26 @@ export const colourStories: ColourStory[] = [
     ink: 'light',
     source: 'Madder or chay root, boiled with dried flowers',
     method: 'Struck in a bath, over an alum mordant',
-    body: 'The artist never touches a red pigment. Every area that will be red is painted first with a clear solution of alum, which reads as a faint damp shadow and nothing more. Days later the whole cloth goes into a boiling pot of madder root, and the alizarin binds only where the alum went.',
-    note: 'One bath gives pink through deep maroon in a single pass. The variation was decided days earlier, by hand, in a liquid nobody could see.',
+    body: 'The artist never touches a red pigment. Every area that will be red is painted first with alum water — a clear solution that reads as a faint damp shadow on the cloth and nothing more. Days later the whole piece goes into a boiling pot of madder root, and the colour strikes only where the alum was laid.',
+    note: 'The red is painted in water you cannot see. An artisan works a whole pallu in a liquid that shows nothing, and finds out days later whether the drawing was right.',
+    meaning:
+      'The auspicious colour, and the one a piece is usually built around. Red is what the eye goes to first on a finished saree, so it is given the borders and the motifs meant to carry energy rather than the quiet passages.',
+    usedFor:
+      'Borders, the ground of a pallu, the garments of principal figures, and the repeating motif of a jaal — wherever the piece needs to assert itself across a room.',
   },
   {
     id: 'pink',
     name: 'Pink',
     hex: '#C66857',
     ink: 'dark',
-    source: 'The same madder bath, over a thinner alum layer',
-    method: 'Struck in a bath',
-    body: 'Pink is not a separate dye and never was. It is the same root, in the same pot, on the same day — the only difference is how much alum the artist laid down underneath it. A thin mordant takes less colour.',
-    note: 'On a printed cloth pink and red are two inks. Here they are one bath and two thicknesses of an invisible liquid.',
+    source: 'Seval podi, worked with roots kept for the purpose',
+    method: 'Prepared as its own colour',
+    body: 'Pink is made rather than diluted. Seval podi is worked together with roots the family keeps for this colour alone, and the strength is judged in the pot rather than corrected on the cloth — once it is down, it is down. It comes up soft, and then refuses to behave like a soft colour: against kasim black it is one of the sharpest things in the palette.',
+    note: 'Not a weak red. It has its own powder, its own roots and its own preparation, and a piece is planned for it in advance.',
+    meaning:
+      'The colour of tenderness in a composition that is otherwise built on assertion. It is where a piece softens — and because it is prepared separately rather than thinned out of the red, choosing it is a decision made days before it appears.',
+    usedFor:
+      'Flowers and petal-work in a jaal, the inner fields of a border, and the passages of a narrative panel meant to be gentle — a figure at rest, a garment that is not the principal one.',
   },
   {
     id: 'yellow',
@@ -453,8 +534,12 @@ export const colourStories: ColourStory[] = [
     ink: 'dark',
     source: 'Myrobalan flower and pomegranate rind, boiled with alum',
     method: 'Painted directly',
-    body: 'Yellow is one of only three colours drawn straight onto the cloth with the pen. It arrives as a soft mustard-gold and settles further in a day of open sun. Natural yellow does not go bright, and it never has.',
+    body: 'Yellow comes out of flowers, and it is one of the few colours drawn straight onto the cloth with the pen rather than struck in a bath or dipped in a vat. It arrives as a soft mustard-gold and settles a shade further in a day of open sun. Natural yellow does not go bright, and it never has.',
     note: 'If the yellow glows acid-lemon, the piece has been helped along. That is the quickest tell there is.',
+    meaning:
+      'Light and prosperity, and the colour a piece is lit from. Yellow is also the workshop’s hinge: it is the layer that indigo and kasim are laid over to reach green, so more of a finished piece passes through it than ever stays it.',
+    usedFor:
+      'Lamps, ornament and jewellery, the gold passages of a border, the ground behind a deity — and, invisibly, underneath every green on the cloth.',
   },
   {
     id: 'blue',
@@ -462,33 +547,91 @@ export const colourStories: ColourStory[] = [
     localName: 'neeli',
     hex: '#2C4268',
     ink: 'light',
-    source: 'Vat indigo',
+    source: 'Indigo leaves, fermented and pressed down into crystals',
     method: 'Dipped, with wax resist',
-    body: 'Indigo is the exception in this craft: it refuses to be painted. Areas that must stay clear are covered in wax and the whole cloth is lowered into the vat. It comes out yellow-green and turns blue in front of you as the air reaches it. Repeat dips make deeper blues.',
-    note: 'The blue is made by the air, not by the vat. Nothing in the pot is the colour you end up with.',
+    body: 'The blue begins as a tree’s leaves. They are fermented, beaten and settled until what is left can be dried into hard, dark crystals — a colour reduced to something you can hold in a hand and keep for years. The crystals go back into a vat, and the cloth is lowered in. It comes out yellow-green and turns blue in front of you as the air reaches it.',
+    note: 'The blue is made by the air, not by the vat. Nothing in the pot is the colour you end up with — indigo is the one dye here that changes after it has left the liquid.',
+    meaning:
+      'The oldest and most travelled colour in the palette, and the one that gives Kalamkari its depth. Indigo is also the discipline of the craft: it cannot be painted, so a piece with blue in it has to be planned around the vat from the first drawing.',
+    usedFor:
+      'Skies and water, the deep field of a border, the blue-skinned deities of the epics — and every green on the cloth, which is indigo passing over a yellow that is already there.',
   },
   {
     id: 'green',
     name: 'Green',
     hex: '#4A5D3A',
     ink: 'light',
-    source: 'Indigo laid over yellow',
-    method: 'Two layers, in that order',
-    body: 'There is no green dye in this palette and there never has been. Green exists only where the indigo vat passes over cloth that was already painted with myrobalan yellow. Reverse the order and it does not work.',
-    note: 'This is why a piece with green in it takes noticeably longer than one without: it needs both the painting and the dipping, and they cannot be swapped.',
+    source: 'Four routes: yellow with kasim, yellow and blue in either order, or hibiscus',
+    method: 'Layered — the order is the recipe',
+    body: 'There is no green pot in this yard. Green is always something else arriving on top of something else, and this workshop keeps four ways of getting there — which means four greens, not one. A printer reaching the same range would need four separate inks; here it is the same few pots in a different order.',
+    note: 'Order is not a detail in this colour, it is the whole recipe. Yellow under blue and blue under yellow are two different greens, and an artisan chooses between them before either goes down.',
+    meaning:
+      'The proof that this palette is knowledge rather than a shelf of colours. Nothing about green can be bought ready-made — it exists only as a sequence somebody has to remember, and the fact that four sequences survive in one household is the tradition still being practised rather than recalled.',
+    usedFor:
+      'Foliage and the tree of life, the leaves of a jaal, the ground a figure stands on, and the borders where a piece needs a colour that is neither warm nor cold.',
+    routes: [
+      {
+        label: 'Yellow with kasim',
+        body: 'The original, and still the workshop’s own. Iron liquor drawn over a yellow that is already on the cloth pulls it down into a deep, shadowed green with the weight of the black still in it. It is the least bright of the four and the one that ages best.',
+      },
+      {
+        label: 'Yellow, then blue',
+        body: 'Yellow painted first with the pen, then the whole cloth into the indigo vat. The blue settles over the yellow and the green comes up cool and even — the most predictable of the four, and the one used where a large area has to hold one tone.',
+      },
+      {
+        label: 'Blue, then yellow',
+        body: 'The same two colours in the other order, and a different green entirely. Yellow drawn on top of a dipped blue sits over it rather than sinking into it, and reads warmer and more alive. Two shades from two pots, decided only by which went down first.',
+      },
+      {
+        label: 'From hibiscus',
+        body: 'A green out of the flower itself, without either of the other pots. It is the softest of the four and the least expected, and it is the kind of thing that stays in a craft only because somebody kept doing it.',
+      },
+    ],
   },
   {
     id: 'brown',
-    name: 'Catechu brown',
+    name: 'Brown',
     localName: 'katha',
     hex: '#6F4B31',
     ink: 'light',
-    source: 'Catechu bark',
-    method: 'Painted directly',
-    body: 'A quiet, warm brown boiled out of catechu bark and drawn on with the pen like the yellow. It is used for earth, for tree trunks, for the ground a figure stands on — the parts of a narrative panel nobody looks at directly and everybody would miss.',
-    note: 'The third and last of the colours that are painted rather than struck or dipped.',
+    source: 'Crystals, processed and kept until they are needed',
+    method: 'Dissolved from crystal, painted directly',
+    body: 'Brown arrives in the workshop already reduced — processed down to crystals that keep, and brought back into a colour with water when a piece calls for it. Like indigo it is a colour stored rather than brewed on the day, and like the yellow it goes on with the pen. It is the most patient thing in the palette: nobody notices it, and every narrative panel would fall apart without it.',
+    note: 'A colour kept as a solid. Most of this palette has to be made the week it is used — brown and indigo are the two that wait on a shelf.',
+    meaning:
+      'The earth of the picture. Brown is what everything else stands on, and its job is to be unremarkable — a panel where the ground draws attention is a panel that has gone wrong.',
+    usedFor:
+      'Soil and the ground line, tree trunks and branches, animal hide, and the secondary motifs that hold a composition together between its principal figures.',
   },
 ];
+
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The ninth tile: the palette that has no fixed number.
+ *
+ * The eight above are the pots this workshop keeps standing. They are not the
+ * limit of the craft, and saying so matters — the knowledge being practised
+ * here is a method for getting colour out of living material, not a set of
+ * eight recipes. A flower nobody has boiled this year is still a colour.
+ *
+ * Deliberately **not** a member of `colourStories`. That array mirrors the
+ * closed `Dye` set in the database, which is what the shop filters on, and an
+ * open-ended ninth entry with no single hex would corrupt both. It renders
+ * beside them and is clearly a different kind of thing.
+ */
+export const openPalette = {
+  id: 'traditional',
+  name: 'Traditional colours',
+  /** Drawn as a sweep rather than a swatch — it is not one colour. */
+  sweep: ['#8E2F22', '#D4A337', '#2C4268', '#4A5D3A', '#C66857', '#6F4B31'],
+  source: 'Flowers, roots, leaves, bark and mineral earth',
+  method: 'Whatever the material asks for',
+  body: 'Eight pots stand in this yard because eight is what a working week needs, not because eight is what the craft has. Countless shades are reachable from flowers, roots, leaves and mineral processes, and the family has made colours that appear on one piece and are not mixed again for years.',
+  note: 'This is living knowledge rather than a recipe card. It is held in a household, tested against cloth, and changed when the material changes.',
+  meaning:
+    'The reason this is a tradition and not a product line. A palette that can still be extended is a palette somebody still understands — the moment it becomes a fixed list of eight, the knowledge behind it has already gone.',
+} as const;
 
 /** Used on the home page and the process page to answer the obvious objection. */
 export const whatWeDoNotUse = [

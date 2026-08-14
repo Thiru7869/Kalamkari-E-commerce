@@ -11,9 +11,11 @@ import { KnowMore } from '@/components/ui/know-more';
 import { Button } from '@/components/ui/button';
 import { TypeBanner, type BannerSlide } from '@/components/shop/type-banner';
 import { ClothSubnav, type ClothLink } from '@/components/shop/cloth-subnav';
+import { HowThisIsMade, WhatToLookFor } from '@/components/shop/craft-notes';
 import { primaryImage } from '@/lib/serialize';
 import {
   getTypeVarieties,
+  getTypeDyes,
   getTypeMotifs,
   getTypePriceRange,
   getTypeProducts,
@@ -27,7 +29,7 @@ import {
   FAMILY_NOTES,
   isNarrativeMotif,
 } from '@/content/catalogue';
-import { formatPrice, absoluteUrl } from '@/lib/utils';
+import { formatPrice, absoluteUrl, cn } from '@/lib/utils';
 import { site } from '@/content/site';
 
 /**
@@ -45,6 +47,7 @@ import { site } from '@/content/site';
  */
 
 type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export const revalidate = 300;
 
@@ -65,21 +68,52 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-export default async function TypePage({ params }: { params: Params }) {
+export default async function TypePage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const { slug } = await params;
+  const sp = await searchParams;
   const type = findType(slug);
   if (!type) notFound();
 
-  const [category, varieties, motifs, range, { items, total }, wishlistIds] = await Promise.all([
-    getCategoryBySlug(type.category),
-    getTypeVarieties(type.category),
-    getTypeMotifs(type.category),
-    getTypePriceRange(type.category),
-    getTypeProducts(type.category, 8),
-    getWishlistIds(),
-  ]);
+  /*
+    The cloth filter, applied in place.
+
+    A single `fabric` slug, not a list. `/shop` supports multi-select because it
+    is the working grid; this page's cloth cards are one-per-card, so a second
+    value could only arrive from a hand-edited URL. Taking the first is the
+    behaviour that surprises nobody.
+  */
+  const activeFabric = Array.isArray(sp.fabric) ? sp.fabric[0] : sp.fabric;
+
+  const [category, varieties, motifs, dyes, range, { items, total }, wishlistIds] =
+    await Promise.all([
+      getCategoryBySlug(type.category),
+      getTypeVarieties(type.category),
+      getTypeMotifs(type.category),
+      getTypeDyes(type.category),
+      getTypePriceRange(type.category),
+      // Thirty when a cloth is chosen, eight otherwise. Unfiltered, this grid
+      // is a sample above an editorial page and eight is the right size for
+      // it; filtered, it is the answer to the question the reader just asked,
+      // and cutting that to eight would send them to /shop for the rest —
+      // which is the navigation this change exists to remove.
+      getTypeProducts(type.category, activeFabric ? 30 : 8, activeFabric),
+      getWishlistIds(),
+    ]);
 
   if (!category) notFound();
+
+  /** The chosen cloth, resolved for the heading. Undefined if the slug is unknown. */
+  const activeFabricName = activeFabric
+    ? [...varieties.values()]
+        .flat()
+        .find((f) => f.slug === activeFabric)?.name
+    : undefined;
 
   // Families in the order this type wants them, then anything unexpected.
   const families = [
@@ -277,23 +311,82 @@ export default async function TypePage({ params }: { params: Params }) {
       {/* ------------------------------------------------------------------ */}
       {/* A few pieces                                                        */}
       {/* ------------------------------------------------------------------ */}
-      {items.length > 0 && (
-        <section className="border-t border-border section-y">
+      {/*
+        The grid, and the target of every "choose by cloth" card on this page.
+
+        It renders whenever a cloth has been chosen, even with nothing in it —
+        that is the whole difference between a filter and a link. Scrolling
+        somebody to a section that has silently vanished because their cloth is
+        out of stock leaves them at whatever section happens to be there
+        instead, with no idea their choice was registered.
+      */}
+      {(items.length > 0 || activeFabric) && (
+        <section
+          id="pieces"
+          className="scroll-mt-28 border-t border-border section-y md:scroll-mt-32"
+        >
           <div className="container">
             <RevealOnScroll>
               <SectionHeader
-                eyebrow="In the store now"
-                title={`${type.label} ready to send`}
-                action={{ label: `All ${total}`, href: `/shop/${type.category}` }}
+                eyebrow={activeFabricName ? 'Filtered by cloth' : 'In the store now'}
+                title={
+                  activeFabricName
+                    ? `${activeFabricName} ${type.label.toLowerCase()}`
+                    : `${type.label} ready to send`
+                }
+                action={
+                  activeFabric
+                    ? { label: 'Clear the cloth filter', href: `/types/${type.slug}#pieces` }
+                    : { label: `All ${total}`, href: `/shop/${type.category}` }
+                }
               />
             </RevealOnScroll>
 
-            <div className="mt-8">
-              <ProductGrid products={items} wishlistIds={wishlistIds} />
-            </div>
+            {items.length > 0 ? (
+              <div className="mt-8">
+                {/* Grouped only when the filter is on, because only then can
+                    this run reach thirty. Ten cards need no signposting. */}
+                <ProductGrid
+                  products={items}
+                  wishlistIds={wishlistIds}
+                  groupEvery={activeFabric ? 10 : undefined}
+                />
+              </div>
+            ) : (
+              <div className="mt-8 rounded-sm border border-border bg-cotton-100 p-7 dark:bg-card">
+                <p className="max-w-xl leading-relaxed text-muted-foreground">
+                  Nothing on {activeFabricName ?? 'this cloth'} is finished at the moment.
+                  Every piece here is one of one and takes weeks, so a cloth empties and
+                  fills again — try another below, or ask for one to be painted.
+                </p>
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <Button asChild variant="outline">
+                    <Link href={`/types/${type.slug}#varieties`}>Try another cloth</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/custom">Commission one</Link>
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* What happened to it before it reached the shelf                     */}
+      {/* ------------------------------------------------------------------ */}
+      {/*
+        Placed straight after the pieces rather than at the foot of the page,
+        and that is the whole point of adding it. A visitor who has just looked
+        at a price is the one with the question this section answers; a visitor
+        who has already scrolled past the varieties, the colours and the motifs
+        has either decided or gone.
+
+        It also breaks up what was four consecutive grids of cards — pieces,
+        cloths, colours, motifs — with a section that is prose and numerals.
+      */}
+      <HowThisIsMade typeLabel={type.label} />
 
       {/* ------------------------------------------------------------------ */}
       {/* Varieties — the substance of the page                               */}
@@ -338,34 +431,81 @@ export default async function TypePage({ params }: { params: Params }) {
                         </p>
                       )}
 
+                      {/*
+                        Each card filters this page rather than leaving it.
+
+                        `?fabric=<slug>#pieces` does all three things the brief
+                        asks for in one plain anchor: it stays on this page, it
+                        applies the filter, and the fragment scrolls to the
+                        grid. No click handler, no `scrollIntoView`, no state —
+                        which means it also survives JavaScript being off, can
+                        be opened in a new tab, and can be linked to from
+                        outside. `scroll-mt` on the target clears the sticky
+                        header.
+
+                        The card is marked as the current one when its own
+                        filter is on, so somebody returning to this section
+                        after scrolling up can see which cloth they chose.
+                      */}
                       <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {fabrics.map((fabric) => (
-                          <li key={fabric.slug}>
-                            <Link
-                              href={`/shop/${type.category}?fabric=${fabric.slug}`}
-                              className="group flex h-full flex-col rounded-sm border border-border bg-background p-4 transition-colors hover:border-primary/40"
-                            >
-                              <div className="flex items-baseline justify-between gap-3">
-                                <h4 className="font-display text-lg leading-snug">
-                                  {fabric.name}
-                                </h4>
-                                <span className="tabular shrink-0 text-sm text-muted-foreground">
-                                  {fabric._count.products}
-                                </span>
+                        {fabrics.map((fabric) => {
+                          const on = activeFabric === fabric.slug;
+                          return (
+                            <li key={fabric.slug}>
+                              <div
+                                className={cn(
+                                  'group flex h-full flex-col rounded-sm border bg-background p-4 transition-colors',
+                                  on
+                                    ? 'border-primary/60 bg-primary/[0.04]'
+                                    : 'border-border hover:border-primary/40',
+                                )}
+                              >
+                                <div className="flex items-baseline justify-between gap-3">
+                                  <h4 className="font-display text-lg leading-snug">
+                                    {fabric.name}
+                                  </h4>
+                                  <span className="tabular shrink-0 text-sm text-muted-foreground">
+                                    {fabric._count.products}
+                                  </span>
+                                </div>
+                                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                                  {fabric.description}
+                                </p>
+
+                                {/*
+                                  Two controls, and `mt-auto` so they sit on the
+                                  same line across a row of cards whose
+                                  descriptions differ in length. The clamp came
+                                  off the description above for the same reason
+                                  the brief asks for "read more": a card that
+                                  truncates and then offers to show you the
+                                  cloth is hiding the sentence that would help
+                                  you choose it.
+                                */}
+                                <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-4">
+                                  <Link
+                                    href={`/types/${type.slug}?fabric=${fabric.slug}#pieces`}
+                                    className="inline-flex min-h-[2.75rem] items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                                    aria-current={on ? 'true' : undefined}
+                                  >
+                                    {on ? 'Showing these' : 'See these'}
+                                    <ArrowRight
+                                      className="h-3.5 w-3.5 transition-transform duration-300 motion-safe:group-hover:translate-x-0.5"
+                                      aria-hidden="true"
+                                    />
+                                  </Link>
+
+                                  <Link
+                                    href={`/types/${type.slug}?fabric=${fabric.slug}#pieces`}
+                                    className="inline-flex min-h-[2.75rem] items-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                                  >
+                                    Read more
+                                  </Link>
+                                </div>
                               </div>
-                              <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                                {fabric.description}
-                              </p>
-                              <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                                See these
-                                <ArrowRight
-                                  className="h-3.5 w-3.5 transition-transform duration-300 motion-safe:group-hover:translate-x-0.5"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   </RevealOnScroll>
@@ -375,6 +515,86 @@ export default async function TypePage({ params }: { params: Params }) {
           )}
         </div>
       </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Choose by colour — the same idea as the varieties, one axis over    */}
+      {/* ------------------------------------------------------------------ */}
+      {/*
+        Deliberately lighter than the cloth section above it.
+
+        Cloth is a decision with consequences — it changes how the dye strikes,
+        how the piece drapes and how it must be washed — so it gets a card each,
+        with the description and the care note behind it. Colour is a
+        preference. It gets a swatch, a name, its source and a count, and it
+        goes straight to the filtered grid.
+
+        The source line is the part worth keeping: "Indigo — dipped, never
+        painted" tells somebody something true about how this cloth is made,
+        which a colour chip on any other shop does not.
+      */}
+      {dyes.length > 1 && (
+        <section
+          id="colours"
+          /*
+            The bottom rule is load-bearing, not decoration.
+
+            The motif section below carries no border of its own — it never
+            needed one, because the varieties section above it is tinted and
+            bordered and did the separating. Dropping this section in between
+            took that away and left two untinted `section-y` blocks stacked,
+            which is 144px of unbroken ground at desktop and reads as the page
+            having run out rather than having moved on.
+          */
+          className="scroll-mt-24 border-b border-border section-y"
+          aria-labelledby="type-colours-heading"
+        >
+          <div className="container">
+            <RevealOnScroll>
+              <SectionHeader
+                eyebrow="Choose by colour"
+                title={`The pots these ${type.label.toLowerCase()} come out of`}
+                lead="Every colour on this cloth was boiled, fermented or dipped from something that grew or rusted. Nothing here is mixed to a swatch — these are the pots the workshop keeps, and a piece is listed under each one it actually carries."
+                id="type-colours-heading"
+              />
+            </RevealOnScroll>
+
+            <RevealOnScroll delay={0.06}>
+              <ul className="mt-8 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:mt-10 lg:grid-cols-4">
+                {dyes.map((dye) => (
+                  <li key={dye.slug}>
+                    <Link
+                      href={`/shop/${type.category}?dye=${dye.slug}`}
+                      className="group flex h-full items-start gap-3 rounded-sm border border-border bg-background p-3 transition-colors hover:border-primary/40 sm:p-3.5"
+                    >
+                      {/* Keeps its own hairline: myrobalan cream is within a
+                          few percent of the page ground and would otherwise be
+                          an invisible swatch. */}
+                      <span
+                        aria-hidden="true"
+                        className="mt-0.5 h-8 w-8 shrink-0 rounded-[2px] ring-1 ring-inset ring-foreground/20 transition-transform duration-500 motion-safe:group-hover:scale-[1.06]"
+                        style={{ backgroundColor: dye.hex }}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline justify-between gap-2">
+                          <span className="font-display text-[0.9375rem] leading-tight">
+                            {dye.name}
+                          </span>
+                          <span className="tabular shrink-0 text-xs text-muted-foreground">
+                            {dye._count.products}
+                          </span>
+                        </span>
+                        <span className="mt-1 block text-xs leading-snug text-muted-foreground">
+                          {dye.source}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </RevealOnScroll>
+          </div>
+        </section>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* What is drawn on them                                               */}
@@ -426,6 +646,17 @@ export default async function TypePage({ params }: { params: Params }) {
           </div>
         </section>
       )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* How to tell it from a print                                         */}
+      {/* ------------------------------------------------------------------ */}
+      {/*
+        Last before the cross-links, because it is the section a visitor takes
+        away rather than acts on. It is also the most useful thing this site can
+        give somebody who is not going to buy from it: six checks that work in
+        any shop, on any cloth, with no expertise.
+      */}
+      <WhatToLookFor typeLabel={type.label} />
 
       {/* ------------------------------------------------------------------ */}
       {/* The other types                                                     */}

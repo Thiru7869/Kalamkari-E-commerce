@@ -242,7 +242,7 @@ export function SearchOverlay({
                         onClick={() => setOpen(false)}
                         className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.04] focus-visible:outline-none"
                       >
-                        <span className="relative h-16 w-12 shrink-0 overflow-hidden rounded-[2px] bg-cotton-200 dark:bg-kasim-800">
+                        <span className="relative h-16 w-12 shrink-0 overflow-hidden rounded-[2px] bg-cotton-200 dark:bg-muted">
                           <Image
                             src={hit.image}
                             alt=""

@@ -3,6 +3,7 @@ import { MapPin } from 'lucide-react';
 import { footerNav, site } from '@/content/site';
 import { NewsletterForm } from '@/components/forms/newsletter-form';
 import { SocialLinks } from './social-links';
+import { BrandName } from './wordmark';
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -12,7 +13,19 @@ export function SiteFooter() {
       <div className="container section-y">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)]">
           <div className="max-w-sm">
-            <p className="font-display text-2xl leading-tight text-cotton-50">{site.name}</p>
+            {/*
+              The store's own lettering, and the one repeating animation on
+              the site outside the header's kalam.
+
+              `motion-safe:` — under reduced motion the sheen is not attached
+              at all and the name renders in flat cream, which is the whole
+              content of the element. Nothing is lost.
+            */}
+            <BrandName
+              as="p"
+              align="left"
+              className="brand-sheen text-[1.75rem] text-cotton-50 motion-safe:animate-name-sheen"
+            />
             <p className="mt-3 text-sm leading-relaxed text-cotton-200/80">
               {site.description}
             </p>

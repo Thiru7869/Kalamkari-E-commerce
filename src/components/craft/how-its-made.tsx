@@ -88,6 +88,9 @@ export function HowItsMade() {
     <section
       className="relative overflow-hidden border-y border-border bg-cotton-100 section-y dark:bg-card"
       aria-labelledby="how-its-made-heading"
+      // The quick tour's second stop travels here while the ring stays on the
+      // "The Process" link in the header. See src/content/welcome.ts.
+      data-tour-section="process"
     >
       <div className="container">
         <div className="max-w-2xl">
@@ -189,9 +192,13 @@ export function HowItsMade() {
         >
           <div
             ref={clothRef}
-            className="relative aspect-[46/60] overflow-hidden rounded-sm bg-cotton-200 shadow-[0_18px_50px_-30px_rgb(0_0_0/0.6)] will-change-transform dark:bg-kasim-800"
+            className="relative aspect-[46/60] overflow-hidden rounded-sm bg-cotton-200 shadow-[0_18px_50px_-30px_rgb(0_0_0/0.6)] will-change-transform dark:bg-muted"
           >
-            <SareeCanvas stage={stage} />
+            {/* Layers stated, not derived. The eight public stages no longer
+                advance the cloth by exactly one layer each — stage 5 covers
+                the alum and the bath that follows it — so index gating showed
+                the wrong cloth under two of the eight headings. */}
+            <SareeCanvas stage={stage} layers={current.layers} />
 
             <span
               className="tabular absolute left-2 top-2 rounded-sm bg-kasim-950/60 px-2 py-1 font-inscription text-[0.625rem] uppercase tracking-[0.14em] text-cotton-100 backdrop-blur-sm md:left-3 md:top-3"
@@ -211,12 +218,73 @@ export function HowItsMade() {
             <h3 data-animate className="mt-2 font-display text-xl leading-tight md:mt-3 md:text-3xl">
               {current.title}
             </h3>
+
+            {/*
+              The workshop's own word for the operation.
+
+              Bracketed and set small, under the English rather than beside it:
+              this is the name the thing is called in the room where it happens,
+              and a reader should be able to take it or leave it without it
+              competing with the heading. The transliteration follows in roman
+              because most readers here cannot sound out the script, and a label
+              nobody can pronounce is decoration.
+
+              `lang` is on the script alone. Marking the whole line as Telugu
+              would have a screen reader attempt the roman gloss and the
+              brackets in a Telugu voice.
+            */}
+            <p
+              data-animate
+              className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-muted-foreground"
+            >
+              <span lang="te" className="font-telugu text-sm text-primary/90 md:text-base">
+                [{current.telugu.script}]
+              </span>
+              <span className="font-inscription text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/75">
+                {current.telugu.roman}
+              </span>
+            </p>
+
             <p
               data-animate
               className="mt-2.5 text-[0.8125rem] leading-relaxed text-muted-foreground md:mt-5 md:text-base"
             >
               {current.body}
             </p>
+
+            {/*
+              The materials, in the workshop's words, under the paragraph that
+              describes them in English.
+
+              Placed *after* the body rather than before it, and that is the
+              whole editorial decision. Before, it is a glossary the reader has
+              to get past to reach the point; after, it is the set of words they
+              have just been given the meaning of — "the black is kasim" lands
+              in the sentence that explains what the black is, and this line
+              only names it.
+
+              One `<p>` per term, each opening with the script in brackets, so
+              a reader scanning down the column sees a column of Telugu rather
+              than a paragraph with Telugu in it. `lang="te"` is on the script
+              alone: marking the whole line would have a screen reader read the
+              roman gloss and the English in a Telugu voice.
+            */}
+            <div data-animate className="mt-3.5 space-y-1 md:mt-5">
+              {current.terms.map((term) => (
+                <p
+                  key={term.roman}
+                  className="flex flex-wrap items-baseline gap-x-2 text-[0.75rem] leading-snug md:text-[0.8125rem]"
+                >
+                  <span lang="te" className="font-telugu text-primary/90">
+                    [{term.script}]
+                  </span>
+                  <span className="font-inscription text-[0.625rem] uppercase tracking-[0.12em] text-muted-foreground/80">
+                    {term.roman}
+                  </span>
+                  <span className="text-muted-foreground/90">— {term.gloss}</span>
+                </p>
+              ))}
+            </div>
 
             <div className="mt-5 flex items-center gap-2 md:mt-8 md:gap-3">
               <button

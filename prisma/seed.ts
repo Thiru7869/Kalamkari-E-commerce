@@ -190,6 +190,55 @@ const motifs = [
     story: 'Painted in a town built around a Shaiva temple, so it is close to home. Usually a seated central pair framed by an arch, with attendant figures in the border.' },
 ];
 
+/**
+ * The eight pots.
+ *
+ * The same eight the home page lets you stand inside (`two-crafts.tsx`), with
+ * the same swatches, because they are the same eight pots in the same yard.
+ * The set is closed: nothing else is used on the cloth, which is what makes
+ * colour a checklist here rather than a search box.
+ */
+const dyes = [
+  { slug: 'kasim-black', name: 'Kasim black', position: 1,
+    source: 'Rusted iron, fermented 21 days', hex: '#22201D' },
+  { slug: 'madder-red', name: 'Madder red', position: 2,
+    source: 'Chay root, struck over alum', hex: '#8E2F22' },
+  { slug: 'pink', name: 'Pink', position: 3,
+    source: 'Seval podi, worked with roots', hex: '#C66857' },
+  { slug: 'myrobalan-yellow', name: 'Myrobalan yellow', position: 4,
+    source: 'Flower and pomegranate rind', hex: '#D4A337' },
+  { slug: 'indigo', name: 'Indigo', position: 5,
+    source: 'Dipped, never painted', hex: '#2C4268' },
+  { slug: 'green', name: 'Green', position: 6,
+    source: 'Layered — four traditional routes', hex: '#4A5D3A' },
+  { slug: 'katha-brown', name: 'Katha brown', position: 7,
+    source: 'Processed crystals, painted', hex: '#6F4B31' },
+  { slug: 'myrobalan-cream', name: 'Myrobalan cream', position: 8,
+    source: 'The ground it all begins on', hex: '#EFE2C6' },
+];
+
+/**
+ * Every phrase a product's `dyes` array is allowed to contain, and the pot it
+ * names.
+ *
+ * This exists so that `naturalDyes` (the sentence on the product page) and
+ * `ProductDye` (the thing the filter queries) are written from one array and
+ * cannot drift. An unrecognised phrase throws during the seed rather than
+ * quietly producing a piece that is invisible to its own colour filter — the
+ * exact failure that made a `contains` match on the newline text the wrong
+ * design.
+ */
+const DYE_BY_LABEL: Record<string, string> = {
+  'Kasim black': 'kasim-black',
+  'Madder red': 'madder-red',
+  'Pink': 'pink',
+  'Myrobalan yellow': 'myrobalan-yellow',
+  'Myrobalan cream ground': 'myrobalan-cream',
+  'Indigo': 'indigo',
+  'Indigo over yellow (green)': 'green',
+  'Katha brown': 'katha-brown',
+};
+
 type SeedProduct = {
   slug: string;
   name: string;
@@ -1099,6 +1148,8 @@ async function main() {
   await prisma.productMotif.deleteMany();
   await prisma.product.deleteMany();
   await prisma.motif.deleteMany();
+  // After products: the join rows go with the pieces, by cascade.
+  await prisma.dye.deleteMany();
   await prisma.fabric.deleteMany();
   await prisma.category.deleteMany();
   await prisma.blogPost.deleteMany();
@@ -1120,6 +1171,11 @@ async function main() {
   }
   console.log(`  ${motifs.length} motifs`);
 
+  for (const d of dyes) {
+    await prisma.dye.create({ data: d });
+  }
+  console.log(`  ${dyes.length} dyes`);
+
   const categoryIds = new Map(
     (await prisma.category.findMany({ select: { id: true, slug: true } })).map((c) => [c.slug, c.id]),
   );
@@ -1129,10 +1185,37 @@ async function main() {
   const motifIds = new Map(
     (await prisma.motif.findMany({ select: { id: true, slug: true } })).map((m) => [m.slug, m.id]),
   );
+  const dyeIds = new Map(
+    (await prisma.dye.findMany({ select: { id: true, slug: true } })).map((d) => [d.slug, d.id]),
+  );
 
   for (const p of products) {
     const categoryId = categoryIds.get(p.category);
     if (!categoryId) throw new Error(`Unknown category "${p.category}" on product ${p.slug}`);
+
+    /*
+      The filterable index over `naturalDyes`, built from the same array.
+
+      Deduplicated because the join table's primary key is the pair, and a
+      piece that legitimately names one pot twice ("Madder red" for the border
+      and again for the pallu) would otherwise abort the whole seed on a
+      unique-constraint violation rather than on anything the data got wrong.
+    */
+    const dyeLinks = [
+      ...new Set(
+        p.dyes.map((label) => {
+          const slug = DYE_BY_LABEL[label];
+          if (!slug) {
+            throw new Error(
+              `Unknown dye "${label}" on product ${p.slug}. ` +
+                `Add it to DYE_BY_LABEL (and to \`dyes\` if it is a new pot), ` +
+                `or the piece will not appear under its own colour filter.`,
+            );
+          }
+          return dyeIds.get(slug)!;
+        }),
+      ),
+    ];
 
     await prisma.product.create({
       data: {
@@ -1165,6 +1248,7 @@ async function main() {
             .filter((id): id is string => Boolean(id))
             .map((motifId) => ({ motifId })),
         },
+        dyes: { create: dyeLinks.map((dyeId) => ({ dyeId })) },
       },
     });
   }

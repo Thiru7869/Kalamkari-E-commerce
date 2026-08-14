@@ -57,5 +57,11 @@ yarn-error.log*
 # Layout-audit screenshots (scripts/shots.mjs). Generated, never reviewed.
 .shots/
 
+# Throwaway verification scripts written while working on a change — one-off
+# probes for a specific bug, not part of the checked-in tooling. Anything here
+# that proves worth keeping gets promoted to scripts/ and a package.json entry,
+# the way scripts/ink-check.mjs was.
+scripts/tmp/
+
 .vercel
 .env*

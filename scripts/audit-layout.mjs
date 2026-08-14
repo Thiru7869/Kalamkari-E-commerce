@@ -54,6 +54,18 @@ const SEEN_STAGES =
  * page ~990px sideways at every phone width and nothing caught it, because the
  * only route in this list that reached one was `/search?q=saree` — and that
  * only started redirecting here once search learned to route section names.
+ *
+ * `/privacy`, `/terms`, `/care` and a product page were added after the same
+ * lesson was learned a second time, and more expensively. The store's own
+ * email address — forty characters with no break opportunity in it — pushed
+ * `/contact` fifty-six pixels off a 320px phone. `/contact` was in this list,
+ * so it was caught. The identical bug on `/privacy`, on the error boundary and
+ * on the order detail was not, because none of those routes were measured. A
+ * prose page is exactly where a long unbreakable string ends up, and a product
+ * page is the single most-visited layout on the site and was never here at all.
+ *
+ * The product slug is a seeded one. If the seed is rewritten this becomes a
+ * 404 and the audit will say so loudly rather than silently measuring nothing.
  */
 const ROUTES = arg(
   'routes',
@@ -61,7 +73,13 @@ const ROUTES = arg(
     '/',
     '/shop',
     '/shop/sarees',
+    '/product/tree-of-life-tussar-silk-saree',
     '/types/sarees',
+    // The cloth filter applied in place. A different render of the same route
+    // — thirty cards with group markers instead of eight, plus the "clear the
+    // filter" header — and therefore a layout the unfiltered URL never
+    // exercises.
+    '/types/sarees?fabric=cotton',
     '/types/dupattas',
     '/collections/premium',
     '/process',
@@ -69,6 +87,15 @@ const ROUTES = arg(
     '/journal',
     '/custom',
     '/contact',
+    '/care',
+    '/faq',
+    // The long-form essay, and the only route on the site that is a single
+    // capped measure with a wrapping contents rail above it. Neither shape is
+    // exercised anywhere else in this list.
+    '/heritage',
+    '/shipping',
+    '/privacy',
+    '/terms',
     '/cart',
     '/search?q=indigo',
   ].join(','),
@@ -212,6 +239,18 @@ const PROBE = () => {
     overflowPx,
     offenders: offenders.slice(0, 10),
     clipped: clipped.slice(0, 6),
+    /*
+      Every page on this site has exactly one h1 — that is an accessibility
+      rule the README states, and it doubles here as the only reliable way to
+      tell that a route rendered the thing it was meant to.
+
+      An HTTP status is not enough on its own. An unknown *product slug*
+      answers 200 and paints the error boundary: no heading, no product, and a
+      layout that measures perfectly clean. A route in this list that quietly
+      stops rendering its page would otherwise report `ok` forever, which is
+      the exact failure mode this script exists to prevent.
+    */
+    h1Count: document.querySelectorAll('h1').length,
   };
 };
 
@@ -258,28 +297,59 @@ for (const width of WIDTHS) {
 
   for (const route of ROUTES) {
     let result;
+    let response;
     try {
-      await page.goto(BASE + route, { waitUntil: 'networkidle', timeout: 45000 });
+      response = await page.goto(BASE + route, { waitUntil: 'networkidle', timeout: 45000 });
     } catch {
       // networkidle never settles on pages holding an open connection; the
       // layout is already resolved by then, so measure anyway.
     }
+
+    /*
+      A 404 renders a perfectly well-behaved page.
+
+      Without this, a route whose slug has changed measures the not-found
+      layout, reports `ok`, and quietly stops covering the thing it was added
+      to cover — which is the same shape of failure this whole script exists to
+      catch. One route in the list is a seeded product slug, so this is not
+      hypothetical.
+    */
+    const status = response?.status();
+    if (status && status >= 400) {
+      console.log(
+        `${String(width).padStart(4)}px  ${String(route).padEnd(38)} HTTP ${status} — not measured`,
+      );
+      failures++;
+      continue;
+    }
+
     await page.waitForTimeout(900);
     try {
       result = await page.evaluate(PROBE);
     } catch (err) {
-      console.log(`  ${String(route).padEnd(22)} probe failed: ${err.message}`);
+      console.log(`  ${String(route).padEnd(38)} probe failed: ${err.message}`);
       continue;
     }
 
     const scrolls = result.overflowPx > 0;
     const clips = result.clipped.length > 0;
     const hangs = result.offenders.length > 0;
-    const bad = scrolls || clips || hangs;
+    // No heading means the route did not render its page — see the note in
+    // PROBE. A clean measurement of the error boundary is not a pass.
+    const empty = result.h1Count === 0;
+    const bad = scrolls || clips || hangs || empty;
     if (bad) failures++;
-    const mark = scrolls ? 'OVERFLOW' : hangs ? 'OFF-EDGE' : clips ? 'CLIPPED' : 'ok';
+    const mark = empty
+      ? 'NO <H1>'
+      : scrolls
+        ? 'OVERFLOW'
+        : hangs
+          ? 'OFF-EDGE'
+          : clips
+            ? 'CLIPPED'
+            : 'ok';
     console.log(
-      `${String(width).padStart(4)}px  ${String(route).padEnd(22)} ` +
+      `${String(width).padStart(4)}px  ${String(route).padEnd(38)} ` +
         `${mark.padEnd(9)} ${scrolls ? `+${result.overflowPx}px (scrollWidth ${result.scrollWidth} vs ${result.limit})` : ''}`,
     );
     for (const o of result.offenders) {

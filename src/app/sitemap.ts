@@ -25,9 +25,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // most linkable thing on the site.
     { url: absoluteUrl('/process'), lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: absoluteUrl('/our-story'), lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    // Reachable from the footer alone inside the site, and deliberately still
+    // here. That rule is about how the site navigates — an essay does not
+    // belong in a header built for shopping — not an instruction to hide the
+    // page. It answers "what is Kalamkari and why does it matter", which is a
+    // thing people search for without knowing this store exists.
+    { url: absoluteUrl('/heritage'), lastModified: now, changeFrequency: 'yearly', priority: 0.8 },
     { url: absoluteUrl('/custom'), lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: absoluteUrl('/journal'), lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: absoluteUrl('/contact'), lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    // Ranked with the guides rather than the legal pages: it answers the
+    // questions people actually search ("is kalamkari printed", "how to wash
+    // kalamkari") and carries FAQPage structured data.
+    { url: absoluteUrl('/faq'), lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: absoluteUrl('/care'), lastModified: now, changeFrequency: 'yearly', priority: 0.5 },
     { url: absoluteUrl('/shipping'), lastModified: now, changeFrequency: 'yearly', priority: 0.4 },
     { url: absoluteUrl('/orders/track'), lastModified: now, changeFrequency: 'yearly', priority: 0.4 },

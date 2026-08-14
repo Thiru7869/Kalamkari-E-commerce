@@ -38,84 +38,133 @@
 
     /* 30 — the ink. Warmed and deepened: kasim is a blue-grey-brown, never a
        neutral grey, and at 8% saturation it was reading as one. */
-    --foreground: 28 14% 12%;      /* kasim-900, the outline black */
-    --card-foreground: 28 14% 12%;
-    --popover-foreground: 28 14% 12%;
-    --secondary-foreground: 30 22% 20%;
-    --muted-foreground: 32 12% 34%;
+    --foreground: 28 16% 11%;      /* kasim-900, the outline black */
+    --card-foreground: 28 16% 11%;
+    --popover-foreground: 28 16% 11%;
+    --secondary-foreground: 30 22% 19%;
+    --muted-foreground: 30 14% 32%;
 
     /* 10 — the madder. The colour of the craft's signature, so it is allowed
        to be a colour. */
-    --primary: 6 68% 36%;          /* chay-600 */
+    --primary: 6 70% 34%;          /* chay-600 */
     --primary-foreground: 42 60% 97%;
 
     /* Indigo — the one colour that is dipped, not painted. */
-    --accent: 214 46% 30%;         /* indigo-600 */
+    --accent: 214 48% 28%;         /* indigo-600 */
     --accent-foreground: 42 60% 97%;
 
-    --destructive: 0 62% 40%;
+    --destructive: 0 64% 38%;
     --destructive-foreground: 42 60% 97%;
 
-    /* Gold, struck from myrobalan. Not part of the 60-30-10 scheme — it is
-       reserved for whatever is being pointed at right now. See tailwind.config. */
-    --gold: 39 63% 42%;
+    /*
+      Gold, struck from myrobalan — and it was the one broken colour on the
+      light side.
+
+      At `39 63% 42%` it measured **3.32:1** on the cotton ground: below AA for
+      text, and below the 3:1 that non-text UI needs as well. That is not a
+      cosmetic miss, because gold is not a decorative colour here — it is the
+      site's single *pointing* colour, spent on the quick tour's ring, the
+      active mark in a sub-navigation, and the rule under the name. Every one
+      of those is a thing whose entire job is to be noticed, and on a cream
+      page none of them quite were.
+
+      Down eight points of lightness and up five of saturation puts it at
+      4.71:1 on the ground and 4.89:1 on a card, and it now reads as struck
+      metal rather than as a highlighter. The dark value was already fine and
+      is untouched in kind.
+    */
+    --gold: 38 68% 34%;
     --gold-foreground: 42 60% 97%;
 
     /* Pachcha — indigo laid over a myrobalan yellow, which is the only way
        this cloth makes a green. The one semantic colour on the site: it means
-       "confirmed", never "good", and never "go". 7.2:1 on the cotton ground,
-       7.5:1 on card; the dark value is 8.3:1 and 7.4:1. */
-    --success: 82 27% 27%;
+       "confirmed", never "good", and never "go". */
+    --success: 82 30% 25%;
     --success-foreground: 42 60% 97%;
 
     /* Visible. A rule the reader cannot quite see is a section break that does
        not happen, and a long page of them is why this site read as one
        undifferentiated scroll. */
-    --border: 36 26% 78%;
-    --input: 36 26% 76%;
-    --ring: 6 68% 36%;
+    --border: 36 26% 74%;
+    --input: 36 26% 72%;
+    --ring: 6 70% 34%;
 
     --radius: 0.25rem; /* Hand-drawn work does not need rounded chrome. */
   }
 
+  /*
+    The dark theme is the indigo vat, and this is the second attempt at it.
+
+    The first one said so in a comment and did not do it. Every ground was hue
+    30 at 9–12% saturation, which is not "the store at night" — it is warm
+    neutral grey, the default dark theme every framework ships, and it is what
+    made this side of the site look borrowed. The craft has exactly one dark
+    material to be named after: the indigo pot, the only colour on this cloth
+    applied by dipping rather than by pen.
+
+    So the grounds are indigo now (hue 215–217, 24–38% saturation), and the ink
+    on them stays *warm* cream at hue 40. That opposition is the whole idea and
+    it is not decoration: cotton hanging over an indigo vat is warm cloth
+    against cold liquid, and a page built that way reads as a material rather
+    than as a UI. A blue-white foreground would have collapsed it back into
+    grey-on-grey.
+
+    Saturation is deliberately highest at the very bottom (38% on the page
+    ground) and falls as surfaces lift — card 30%, muted 24%, border 20%. That
+    is what a vat does: the colour is deepest where the liquid is deepest.
+    Reversing it makes cards look tinted rather than lit.
+
+    Every pair is measured, not judged. `node scripts/contrast.mjs` prints the
+    ratios; nothing below is under AA, and the weakest link is madder on a card
+    at 5.69:1.
+  */
   .dark {
-    /* Dark theme = the store at night, or an indigo vat. Not neutral grey.
-       Same three proportions, same re-striking. */
-    --background: 30 12% 8%;
-    --foreground: 40 30% 92%;
+    --background: 217 38% 7%;
+    --foreground: 40 34% 93%;      /* warm cloth over cold liquid */
 
-    --card: 30 10% 12%;
-    --card-foreground: 40 30% 92%;
+    --card: 216 30% 11%;
+    --card-foreground: 40 34% 93%;
 
-    --popover: 30 10% 12%;
-    --popover-foreground: 40 30% 92%;
+    --popover: 216 30% 11%;
+    --popover-foreground: 40 34% 93%;
 
-    --primary: 9 55% 56%;          /* chay lifts in the dark to stay readable */
-    --primary-foreground: 30 12% 8%;
+    --primary: 9 66% 63%;          /* madder lifts to clear the indigo ground */
+    --primary-foreground: 217 38% 7%;
 
-    --secondary: 30 9% 19%;
-    --secondary-foreground: 40 30% 92%;
+    --secondary: 215 24% 18%;
+    --secondary-foreground: 40 34% 93%;
 
-    --muted: 30 9% 17%;
-    --muted-foreground: 38 16% 69%;
+    --muted: 215 24% 16%;
+    --muted-foreground: 38 22% 74%;
 
-    --accent: 214 38% 64%;
-    --accent-foreground: 30 12% 8%;
+    /*
+      Indigo cannot be the accent on an indigo ground.
 
-    --destructive: 0 55% 48%;
-    --destructive-foreground: 40 30% 92%;
+      In the light theme `--accent` is indigo-600, the cool counterpart to
+      madder. Carried into a theme whose *background* is indigo it stopped
+      being a counterpart and became camouflage. The dark value is pulled
+      towards the sky end of the ramp and lightened well past the ground, so it
+      still reads as the cool half of the pair while actually separating.
+    */
+    --accent: 205 52% 68%;
+    --accent-foreground: 217 38% 7%;
 
-    /* Gold lifts in the dark for the same reason madder does. */
-    --gold: 44 71% 62%;
-    --gold-foreground: 30 12% 8%;
+    --destructive: 0 58% 55%;
+    --destructive-foreground: 40 34% 93%;
 
-    /* And so does pachcha. At its light value it is invisible on kasim. */
-    --success: 80 25% 61%;
-    --success-foreground: 30 12% 8%;
+    /* Gold lifts in the dark for the same reason madder does — and against
+       indigo it is the strongest thing on the page, which is exactly what the
+       one pointing colour should be. */
+    --gold: 44 76% 64%;
+    --gold-foreground: 217 38% 7%;
 
-    --border: 32 10% 25%;
-    --input: 32 10% 27%;
-    --ring: 9 55% 56%;
+    /* And so does pachcha. At its light value it is invisible on the vat. */
+    --success: 82 32% 62%;
+    --success-foreground: 217 38% 7%;
+
+    --border: 214 20% 26%;
+    --input: 214 20% 29%;
+    --ring: 9 66% 63%;
   }
 
   * {
@@ -154,26 +203,31 @@
       document.documentElement.scrollWidth - document.documentElement.clientWidth
   */
 
-  /* Cormorant's regular is a *book* weight — correct for running text, too
-     light for a heading standing alone on a cream ground. 500 is the weight at
-     which its thin strokes still hold at 16px on a phone. */
+  /*
+    Fraunces, and the weights re-struck for it.
+
+    Under Cormorant these were 500 and 600, and both were compensation: a
+    Garamond revival's regular is a *book* weight, so every heading had to be
+    pushed a step up just to hold its colour on a cream ground. Fraunces does
+    not need the apology. 600 is the running weight for the small headings and
+    700 is a real bold on the two that carry a page — which is what "bold,
+    minimal, official" asks for, and what the old face could not give at any
+    setting.
+
+    `font-optical-sizing: auto` is the part that matters most on a phone.
+    Fraunces carries an `opsz` axis, and letting the browser drive it means the
+    display sizes get the high-contrast cut and a 16px `h4` gets the sturdier
+    one, from a single font file.
+  */
   h1, h2, h3, h4 {
     @apply font-display;
-    font-weight: 500;
+    font-weight: 600;
+    font-optical-sizing: auto;
     text-wrap: balance;
   }
 
-  /*
-    The two that carry a page get 600.
-
-    An old-style face loses weight as it gets larger — the thin strokes stay
-    thin while the thick ones grow — so a 500 set at `display-xl` reads lighter
-    on the page than the same 500 at `display-sm`, and the biggest words on the
-    site were the faintest. 600 restores the intended colour at display sizes.
-    h3 and h4 stay at 500: they run at text sizes, where 600 would shout.
-  */
   h1, h2 {
-    font-weight: 600;
+    font-weight: 700;
   }
 
   p {
@@ -227,14 +281,20 @@
   }
 
   /* The section eyebrow used across the site: small, tracked, in kasim grey.
-     Set in the inscriptional face — these labels name a thing rather than say
-     something about it, which is what carved capitals are for.
+     Set in the inscriptional role — these labels name a thing rather than say
+     something about it.
 
      The tracking opens up from `sm`. At 11px on a 320px screen, 0.2em is what
      pushed a three-part location label onto a second line; the letters have
-     room to breathe again once there is a screen to breathe into. */
+     room to breathe again once there is a screen to breathe into.
+
+     `font-weight: 600` arrived with Plus Jakarta Sans and is not a preference.
+     Marcellus had a single weight cut for capitals, so its 400 already read as
+     a label; a geometric sans at 400, 11px, uppercase and tracked to 0.2em is
+     a hairline, and twenty-eight of these are the only thing separating one
+     section of this site from the next. 600 puts the stroke back. */
   .eyebrow {
-    @apply font-inscription text-eyebrow uppercase tracking-[0.14em] text-muted-foreground sm:tracking-[0.2em];
+    @apply font-inscription text-eyebrow font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:tracking-[0.2em];
   }
 
   /*
@@ -261,6 +321,144 @@
     vertical-align: 0.28em;
     background-color: currentColor;
     opacity: 0.55;
+  }
+
+  /*
+    The footer name's sheen.
+
+    The gradient is painted into the *text* and the animation moves it across;
+    see the `name-sheen` keyframe in tailwind.config for why nothing about the
+    letters themselves is allowed to move.
+
+    `background-image` has to live here rather than in a utility class because
+    it needs three colour stops built from a token, and the two `-webkit-`
+    properties are still the only way to clip a background to glyphs in Safari
+    and Chrome alike.
+
+    The base colour is set on the element and the gradient sits over it, so if
+    `background-clip: text` is unsupported the name simply renders in the base
+    colour rather than vanishing — the failure mode of this technique is an
+    invisible heading, and it is worth one extra declaration to not have it.
+  */
+  /*
+    The gradient carries the base colour, and the text fill is transparent.
+
+    The first version of this had the gradient run `transparent → gold →
+    transparent` and set `-webkit-text-fill-color: currentColor`, which is
+    self-defeating: `background-clip: text` paints the background *behind* the
+    glyph fill, so an opaque fill hides it completely. The sheen was not subtle,
+    it was invisible — it could never have shown at any point in the cycle.
+
+    The fix is the standard shape for this effect. The gradient's outer stops
+    are `currentColor`, so the name renders in exactly the colour it would have
+    anyway, and only the band travelling through the middle differs. The fill
+    then has to be transparent for any of it to show.
+
+    Making the outer stops `currentColor` rather than a hard-coded cream is what
+    lets this be used on the indigo footer and on a cream page without a second
+    variant, and it means the name still changes colour correctly with the
+    theme.
+
+    The `@supports` guard is doing real safety work: `-webkit-text-fill-color:
+    transparent` on a browser without `background-clip: text` is an invisible
+    heading. Both properties ship together in every engine that has either, but
+    the guard costs one line and the failure mode it prevents is the store's
+    name disappearing.
+  */
+  .brand-sheen {
+    /*
+      The highlight colour is fixed, not `hsl(var(--gold))`, and that is a
+      correction rather than a simplification.
+
+      `--gold` is theme-aware: it darkens to 38 68% 34% in the light theme so it
+      clears AA on a cream page. The footer is *not* a cream page — it is a
+      permanently dark band in both themes — so in the light theme the sheen was
+      painting a colour darker than the cream text it travelled through. The
+      name did not catch the light; a shadow swept across it.
+
+      A surface that never changes colour needs a highlight that never changes
+      either. This is the myrobalan value from the dark ramp, which is what gold
+      looks like when it is lit. Exposed as a custom property so a caller on a
+      pale ground can override it without a second class.
+    */
+    --sheen: 44 76% 64%;
+    background-image: linear-gradient(
+      100deg,
+      currentColor 40%,
+      hsl(var(--sheen)) 50%,
+      currentColor 60%
+    );
+    background-size: 220% 100%;
+    /*
+      `repeat-x`, and this is load-bearing rather than tidy.
+
+      With `no-repeat` the gradient is a single 220%-wide strip slid across the
+      element by `background-position`. Anywhere the strip is not covering, the
+      element has *no background at all* — and since the text fill has to be
+      transparent for the effect to show, "no background" means invisible
+      glyphs. The name did not shimmer; it disappeared a word at a time, and a
+      screenshot of one frame caught it rendering as "kshmi".
+
+      Tiling closes the gap. Both outer stops are `currentColor`, so the seam
+      between one tile and the next is currentColor meeting currentColor and
+      cannot be seen; every pixel of the element is covered at every position,
+      and only the gold band travelling through it ever differs.
+    */
+    background-repeat: repeat-x;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .brand-sheen {
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  /*
+    The underline a link draws when you point at it.
+
+    Three properties matter and all three are about *not* disturbing the page:
+
+      - It is a `::after`, absolutely positioned. `text-decoration` and
+        `border-bottom` both participate in layout — a border adds a pixel to
+        the element's height on hover, and in a flex row of nav links that one
+        pixel re-centres every sibling. This cannot move anything, ever.
+      - It animates `transform: scaleX` rather than `width`. Width is layout on
+        every frame; scaleX is a compositor transform and costs nothing.
+      - The origin flips. It grows from the left on the way in and retracts to
+        the right on the way out, so the mark reads as a stroke laid down and
+        then lifted — the same gesture the wordmark's kalam makes — rather than
+        as a bar being switched on and off.
+
+    `currentColor`, so it works on the cream ground, on the indigo footer, and
+    over a photograph without three variants.
+
+    Applied to a link that already owns `transform` for something else, the two
+    would collide — but the transform here is on the pseudo-element, not on the
+    link, so there is nothing to collide with.
+  */
+  .link-underline {
+    position: relative;
+  }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.18em;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .link-underline:hover::after,
+  .link-underline:focus-visible::after,
+  .link-underline[aria-current='true']::after,
+  .link-underline[data-active='true']::after {
+    transform: scaleX(1);
+    transform-origin: left;
   }
 
   /* A hairline rule that reads like a drawn line rather than a CSS border. */
@@ -323,6 +521,53 @@
   /* Set before paint by the inline script in the root layout. */
   html[data-announce='closed'] [data-announce-bar] {
     display: none;
+  }
+
+  /*
+    Where a sub-navbar sticks — Amazon's behaviour, built out of two rules.
+
+    The header hides on scroll-down and returns on scroll-up (see
+    `header-shell.tsx`). The shop and cloth rails sit under it and were pinned
+    at a fixed `4rem`/`5rem`, which is correct only while the header is on
+    screen: the moment it slid away the rail stayed where it was and a band of
+    scrolling page appeared above it, so the rail read as floating rather than
+    as the top of the window.
+
+    So the offset is a variable, and the header publishes its state to
+    `documentElement`. Scrolling down, the rail rises to the top of the viewport
+    and becomes the navigation. Scrolling up, the header comes back and the rail
+    steps down to sit under it — both visible, which is the behaviour asked for.
+
+    Driven entirely in CSS off a data attribute. The alternative is threading
+    the header's state through React to two leaf components on every scroll
+    frame, which is a re-render per frame to move one box.
+  */
+  :root {
+    --subnav-top: 4rem;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --subnav-top: 5rem;
+    }
+  }
+
+  html[data-header='hidden'] {
+    --subnav-top: 0px;
+  }
+
+  [data-subnav] {
+    position: sticky;
+    top: var(--subnav-top);
+    /* Matches the header's own 300ms so the two move as one mechanism rather
+       than as two things that happen to both be animating. */
+    transition: top 300ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-subnav] {
+      transition: none;
+    }
   }
 
   /* Skip link — visible only on keyboard focus. */

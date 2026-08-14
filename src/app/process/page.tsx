@@ -14,18 +14,20 @@ import {
   dyeWash,
   colourStories,
 } from '@/content/process';
+import { mainStages, TOTAL_MAIN_STAGES } from '@/content/stages';
+import { whatIsKalamkari, kalamkariInFull } from '@/content/kalamkari';
 import { site } from '@/content/site';
 import { absoluteUrl } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'The 23 steps of Srikalahasti Kalamkari',
+  title: 'How a Kalamkari saree is made — the 14 stages, step by step',
   description:
-    'How a hand-painted Kalamkari saree is actually made: myrobalan and buffalo milk, tamarind charcoal, iron liquor fermented for 21 days, alum mordants, a boiling madder bath, indigo, and twenty cycles of river water and sun.',
+    'The full Srikalahasti pen Kalamkari process: myrobalan and buffalo milk, the bamboo kalam, kasim kaaram fermented from rusted iron for 21 days, alum mordants, a boiling chay-root bath, the indigo vat, and twenty cycles of river water and sun.',
   alternates: { canonical: '/process' },
   openGraph: {
-    title: 'The 23 steps of Srikalahasti Kalamkari',
+    title: 'How a Kalamkari saree is made — all 14 stages',
     description:
-      'The full sequence, from washing the mill starch out of the cloth to the last of twenty sun-dryings.',
+      'Fourteen stages and twenty-three operations, from washing the mill starch out of the cloth to the last of twenty sun-dryings.',
     images: ['/images/og/process.jpg'],
   },
 };
@@ -43,18 +45,33 @@ export default function ProcessPage() {
             <Breadcrumbs trail={[{ label: 'The process' }]} className="mb-6" />
             <p className="eyebrow">The making of a Kalamkari saree</p>
             <h1 className="mt-4 text-display-xl">
-              Twenty-three steps.
-              <span className="block text-primary">Six weeks. One pen.</span>
+              Fourteen stages.
+              <span className="block text-primary">
+                Twenty-three operations. One pen.
+              </span>
             </h1>
             <p className="mt-7 text-body-lg text-muted-foreground">
-              Nothing on this page is a metaphor. Every stage below is a real operation
-              performed on real cloth in {site.location.town}, in this order, using these
-              materials — and if any one of them is skipped, the piece fails.
+              Nothing on this page is a metaphor. Every stage below is real work performed
+              on real cloth in {site.location.town}, in this order, with these materials —
+              and if any one of them is skipped, the piece fails.
             </p>
+            {/*
+              Both numbers, and why there are two of them.
+
+              Fourteen is the shape of the work — the stages an artisan would
+              name if you asked what they were doing this week. Twenty-three is
+              the count of individual operations, and it is the figure this site
+              states everywhere else. A reader who meets "fourteen" here after
+              reading "twenty-three" on the home page is owed the explanation in
+              the same breath rather than being left to assume one of the two is
+              marketing.
+            */}
             <p className="mt-4 leading-relaxed text-muted-foreground">
-              Scroll through it. The cloth in the frame beside the text moves through
-              twelve states as you read, and the ground behind the page warms and cools
-              with it.
+              The {TOTAL_MAIN_STAGES} stages are how the work is actually divided; the{' '}
+              {totalSteps} steps are the individual operations inside them, and each stage
+              carries its own. Scroll through it: the cloth in the frame beside the text
+              advances as you read, and the ground behind the page warms and cools with the
+              pots.
             </p>
           </div>
 
@@ -63,10 +80,10 @@ export default function ProcessPage() {
 
           <dl className="mt-12 grid gap-6 border-t border-border pt-8 sm:grid-cols-3 lg:grid-cols-5">
             {[
-              { k: `${totalSteps}`, v: 'steps, all by hand' },
+              { k: `${TOTAL_MAIN_STAGES}`, v: 'main stages' },
+              { k: `${totalSteps}`, v: 'operations, all by hand' },
               { k: `${site.craft.kasimFermentDays} days`, v: 'to ferment the black' },
               { k: `${site.craft.washCycles}×`, v: 'washed and sun-dried' },
-              { k: `${site.craft.sareeDaysMin}–${site.craft.sareeDaysMax}`, v: 'days for one saree' },
               { k: '0', v: 'synthetic ingredients' },
             ].map((stat) => (
               <div key={stat.v}>
@@ -83,8 +100,95 @@ export default function ProcessPage() {
         </div>
       </section>
 
-      {/* The scroll-driven sequence: dye wash, framed cloth, twenty-three steps. */}
-      <ProcessJourney phases={processPhases} tones={dyeWash} />
+      {/* ------------------------------------------------------------------ */}
+      {/* What the word means                                                 */}
+      {/* ------------------------------------------------------------------ */}
+      {/*
+        The target of every "What is Kalamkari?" link on the site — the home
+        page section, the Process menu and the footer's Craft column all point
+        at this anchor.
+
+        It is here rather than on a page of its own on purpose. A standalone
+        /kalamkari route would have to restate the pen, the town, the two
+        traditions and the pots, all of which are said on this page and on
+        /our-story already, and this content layer does not keep two copies of
+        an argument. Putting the definition at the head of the sequence it
+        introduces also means the reader who came for the definition is already
+        standing at the top of the answer.
+
+        Every clause is read from `src/content/kalamkari.ts`; the landing page
+        renders the same object, shorter.
+      */}
+      <section
+        id="what-is-kalamkari"
+        className="scroll-mt-24 border-b border-border section-y"
+        aria-labelledby="what-is-kalamkari-heading"
+      >
+        <div className="container">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
+            <div>
+              <p className="eyebrow">{whatIsKalamkari.eyebrow}</p>
+              <h2
+                id="what-is-kalamkari-heading"
+                className="mt-4 text-display-lg font-semibold tracking-[-0.015em]"
+              >
+                {whatIsKalamkari.heading}
+              </h2>
+              <p className="mt-6 text-body-lg leading-relaxed text-muted-foreground">
+                {whatIsKalamkari.lead}
+              </p>
+
+              {/* The two paragraphs this page gets and the landing page does
+                  not. The section there is a doorway; a doorway that takes
+                  four screens to walk through is a corridor. */}
+              {kalamkariInFull.map((para, i) => (
+                <p key={i} className="mt-4 leading-relaxed text-muted-foreground">
+                  {para}
+                </p>
+              ))}
+
+              <blockquote className="mt-8 border-l-2 border-primary bg-primary/[0.045] py-4 pl-5 pr-4">
+                <p className="font-display text-lg italic leading-snug md:text-xl">
+                  {whatIsKalamkari.test}
+                </p>
+              </blockquote>
+            </div>
+
+            <ol className="flex flex-col">
+              {whatIsKalamkari.facets.map((facet, i) => (
+                <li
+                  key={facet.id}
+                  className="group border-t border-border py-6 first:border-t-0 first:pt-0 md:py-7"
+                >
+                  <div className="flex items-baseline gap-3.5">
+                    <span
+                      aria-hidden="true"
+                      className="tabular font-inscription text-sm text-primary/70"
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="font-inscription text-[0.6875rem] uppercase tracking-[0.18em] text-muted-foreground">
+                      {facet.label}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="ml-auto block h-px w-0 bg-primary/50 transition-[width] duration-700 ease-out motion-safe:group-hover:w-12"
+                    />
+                  </div>
+                  <h3 className="mt-3 font-display text-display-sm leading-snug">
+                    {facet.heading}
+                  </h3>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">{facet.body}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      {/* The scroll-driven sequence: dye wash, framed cloth, fourteen stages,
+          and all twenty-three operations inside the stages that contain them. */}
+      <ProcessJourney stages={mainStages} tones={dyeWash} />
 
       {/* The palette, one colour at a time. */}
       <ColourWalk colours={colourStories} />

@@ -228,13 +228,30 @@ const config: Config = {
         },
       },
       fontFamily: {
-        // Display: the storytelling voice. An old-style Garamond revival — nib
-        // contrast, not machine contrast — beside hand-drawn line work.
+        // Display: Fraunces. The storytelling voice, and the only face on the
+        // site allowed to be loud. Nib contrast, not machine contrast, but it
+        // holds a real 700 — see the note in `src/app/layout.tsx`.
         display: ['var(--font-display)', 'Georgia', 'serif'],
-        // Inscription: Roman capitals, for eyebrows, numerals and the wordmark.
-        inscription: ['var(--font-inscription)', 'var(--font-display)', 'serif'],
-        // Body: high x-height humanist sans, for long-form legibility on phones.
+        /*
+          Inscription: eyebrows, the wordmark's second line, step numerals.
+
+          This now resolves to the *body* face rather than to a third family.
+          The name is kept — seventy-one files ask for `font-inscription` — but
+          what it points at changed, so those files inherited tracked capitals
+          in Plus Jakarta Sans without one of them being edited. Keeping the
+          role name and repointing the variable is the whole reason the swap
+          was a two-file change instead of a two-hundred-file one.
+        */
+        inscription: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        // Body: high x-height geometric humanist, for long-form legibility.
         sans: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        /*
+          There was a `brand` family here, pointing at Kalam, for the company
+          name alone. It is gone: the name is set in `display` now, because a
+          script face cannot be read at 15px in a phone header and a wordmark
+          that is only legible when it is large is not a wordmark. See the note
+          in `src/components/layout/wordmark.tsx`.
+        */
         // Telugu, for the few places the local name of a thing is the true name.
         telugu: ['var(--font-telugu)', 'var(--font-body)', 'sans-serif'],
       },
@@ -389,6 +406,143 @@ const config: Config = {
           from: { transform: 'translateX(0)' },
           to: { transform: 'translateX(-50%)' },
         },
+        /**
+         * The scroll cue at the foot of the hero — a short mark travelling
+         * down a hairline, then gone.
+         *
+         * Not a bouncing chevron. A chevron that bounces forever is a piece of
+         * generic UI and reads as one; a line drawn downward is the same
+         * gesture the wordmark's kalam makes, and it is the mark this site
+         * already owns. Two thirds of the cycle is the pause between passes,
+         * for the same reason `kalam-trail` is mostly rest: continuous motion
+         * in the corner of the eye is a distraction, a thing that happens and
+         * stops is a detail.
+         *
+         * `translateY` and `opacity` only, so it never leaves the compositor.
+         */
+        'scroll-hint': {
+          '0%': { transform: 'translateY(-100%)', opacity: '0' },
+          '25%': { opacity: '1' },
+          '60%': { transform: 'translateY(160%)', opacity: '0' },
+          '100%': { transform: 'translateY(160%)', opacity: '0' },
+        },
+        /**
+         * A colour story arriving when its pot is pressed.
+         *
+         * Shorter and shallower than `rise-in`: this fires on six or seven
+         * elements at once behind a stagger, and at 14px each the block reads
+         * as a list assembling itself rather than as one thing arriving. Eight
+         * pixels and a hair of blur is the smallest move that still tracks the
+         * eye down the column.
+         *
+         * `opacity`, `transform` and `filter` only — all compositor
+         * properties, and the element is in normal flow, so nothing else is
+         * competing for `transform` on it.
+         */
+        'story-in': {
+          from: { opacity: '0', transform: 'translateY(8px)', filter: 'blur(3px)' },
+          to: { opacity: '1', transform: 'translateY(0)', filter: 'blur(0)' },
+        },
+
+        /* ------------------------------------------------------------------
+           The doorway sequence
+           ------------------------------------------------------------------
+           Five animations that run once, in order, at the top of the landing
+           page: the film settles, a keyline draws itself around it, four
+           corner rosettes open, the greeting arrives, and the store's name is
+           inked in. The order is the whole point — the name is the last thing
+           to appear, so it lands on a reader who has already watched a hand
+           draw a line.
+
+           Every one is `both`-filled and delay-staggered from the component,
+           and every one is applied through `motion-safe:`. Under reduced
+           motion no class is attached at all, so the entire block is simply
+           present at its final state — the delays never get a chance to hold
+           anything invisible, which is the failure mode a `!important`
+           duration override does not fix.
+           ------------------------------------------------------------------ */
+
+        /* The keyline, drawn by a pen rather than switched on. `pathLength`
+           is normalised to 100 on the path so one keyframe fits any perimeter. */
+        'frame-draw': {
+          from: { strokeDashoffset: '100' },
+          to: { strokeDashoffset: '0' },
+        },
+
+        /* A corner rosette opening once the line has reached it. Rotation is
+           small and one-directional: a petal that spins reads as a loader. */
+        'petal-open': {
+          from: { opacity: '0', transform: 'scale(0.35) rotate(-14deg)' },
+          to: { opacity: '1', transform: 'scale(1) rotate(0deg)' },
+        },
+
+        /* The vines at the edge of the screen, breathing.
+
+           Opacity only, and it never reaches 0.4. This runs forever in the
+           reader's peripheral vision on every screen of the landing page, so
+           it is held to the shallowest change that still reads as alive; a
+           vine that pulses to full is a notification, not a border. */
+        'vine-breathe': {
+          '0%, 100%': { opacity: '0.14' },
+          '50%': { opacity: '0.32' },
+        },
+
+        /* The name, arriving the way dye arrives in cloth: out of focus first,
+           then sharp.
+
+           `opacity`, `filter` and `transform` only. The obvious alternative —
+           opening the letter-spacing as it lands — reflows the heading on
+           every frame, and this heading is the widest line on the page. */
+        'ink-in': {
+          from: { opacity: '0', filter: 'blur(9px)', transform: 'translateY(9px)' },
+          '65%': { opacity: '1' },
+          to: { opacity: '1', filter: 'blur(0)', transform: 'translateY(0)' },
+        },
+
+        /**
+         * The footer name, catching the light every two and a half seconds.
+         *
+         * The rule this has to obey is the one already written up on the
+         * wordmark: **the letters never move.** A wordmark that breathes,
+         * drifts or changes weight buys a moment of interest and pays for it
+         * with the only thing a name has to do, which is sit still and be
+         * read. So nothing here touches geometry — no scale, no translate, no
+         * tracking. A gold band travels across the glyphs through
+         * `background-clip: text` and the letterforms underneath are
+         * bit-for-bit identical at every frame.
+         *
+         * It is `background-position` only, which is paint, not layout: it
+         * cannot reflow the name and cannot shift the footer around it.
+         *
+         * Two thirds of the cycle is rest, exactly as `kalam-trail` and
+         * `scroll-hint` are. A 2.5s loop that is *moving* for 2.5s is a
+         * distraction sitting at the bottom of every page on the site; one
+         * that happens, stops, and happens again is a detail somebody notices
+         * once and then stops seeing.
+         */
+        'name-sheen': {
+          '0%': { backgroundPosition: '160% 0' },
+          '38%, 100%': { backgroundPosition: '-60% 0' },
+        },
+
+        /**
+         * The assistant panel, arriving from the launcher.
+         *
+         * A short lift with a small scale, not a fade. The panel is anchored to
+         * a button in the corner and should read as having come out of it; a
+         * cross-fade reads as a modal that was always there and has just become
+         * visible, which is the wrong relationship between a launcher and the
+         * thing it launches.
+         *
+         * `scale` is 0.98 rather than something dramatic — this opens on top of
+         * the page the reader is on, several times a session, and a panel that
+         * makes an entrance is a panel that becomes irritating by the third
+         * time. Under reduced motion the class is not applied at all.
+         */
+        'panel-open': {
+          from: { opacity: '0', transform: 'translateY(18px) scale(0.98)' },
+          to: { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.22s ease-out',
@@ -415,6 +569,30 @@ const config: Config = {
         'rule-draw': 'rule-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both',
         'kalam-trail': 'kalam-trail 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite',
         marquee: 'marquee var(--marquee-duration, 42s) linear infinite',
+        'scroll-hint': 'scroll-hint 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+        // `both`, for the same reason `enter-rise` uses it: every one of these
+        // carries a stagger delay, and `forwards` would flash each line fully
+        // formed before blinking out to its first keyframe.
+        'story-in': 'story-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both',
+
+        // The doorway sequence. `both` throughout — see the keyframe note.
+        'frame-draw': 'frame-draw 1.5s cubic-bezier(0.65, 0, 0.35, 1) both',
+        'petal-open': 'petal-open 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) both',
+        'vine-breathe': 'vine-breathe 9s ease-in-out infinite',
+        'ink-in': 'ink-in 1.15s cubic-bezier(0.16, 1, 0.3, 1) both',
+        // Exactly 2.5s, and mostly rest. See the keyframe note.
+        'name-sheen': 'name-sheen 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+        /*
+          The assistant panel opening.
+
+          `rise-in` did this before and was borrowed from the page-load
+          entrance: a 14px lift over 600ms, which on a bottom sheet reads as the
+          sheet arriving late rather than as being opened. This is shorter, lifts
+          further, and settles on a spring-ish curve — the panel comes *up* from
+          the launcher instead of fading in where it already was. Opacity and
+          transform only, so it never leaves the compositor.
+        */
+        'panel-open': 'panel-open 0.34s cubic-bezier(0.16, 1, 0.3, 1) both',
       },
     },
   },

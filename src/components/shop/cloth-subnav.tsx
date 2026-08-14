@@ -93,8 +93,12 @@ export function ClothSubnav({
           visible so the focus ring on a chip is never sliced.
         */
         style={{ overflowX: 'clip', overflowY: 'visible' }}
+        // `data-subnav` — stickiness and the offset come from globals.css, so
+        // this rail follows the header up and down instead of being pinned
+        // under where the header used to be. See the note in shop-subnav.tsx.
+        data-subnav=""
         className={cn(
-          'sticky top-[4rem] z-30 border-y border-border bg-background/95 backdrop-blur-md md:top-[5rem]',
+          'z-30 border-y border-border bg-background/95 backdrop-blur-md',
           'transition-shadow duration-300',
           stuck && 'shadow-[0_10px_30px_-24px_rgb(0_0_0/0.7)]',
           className,
