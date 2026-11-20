@@ -312,10 +312,12 @@ So there are two failures to look for, not one, and
 npm run audit:layout          # dev server or `npm start` must be running
 ```
 
-checks every important route at 320/375/390/430px for **four** failures:
+checks every important route at 320/375/390/430px for **five** failures:
 documents that scroll sideways, elements that clip their own text, visible
-elements hanging past the viewport edge, and pages that rendered no `<h1>` at
-all. The last one is not a layout rule — it is how the script knows a route
+elements hanging past the viewport edge, pages that rendered no `<h1>` at
+all, and tap targets under 24px (WCAG 2.2 AA 2.5.8 — links inside a sentence and
+stretched card links are exempt; 36px chips are a decision, a 15px footer link
+is a bug). The last one is not a layout rule — it is how the script knows a route
 still renders its page. An unknown product slug answers **200** and paints the
 error boundary, which measures perfectly clean; without the heading check a
 stale route in the list would report `ok` forever while covering nothing. It excludes `sr-only` (a 1×1 box
@@ -447,11 +449,33 @@ search engines index. The root one made every dynamic route without its own
 loading file answer `200` for a missing record. With it gone, `/heritage/motifs/<bad>`,
 `/types/<bad>` and `/collections/<bad>` return a real `404`.
 
-Segments that keep their own `loading.tsx` (`product/[slug]`, `shop/[[...category]]`,
-`search`, `account`, `wishlist`) still return `200` for a missing record. Fixing
-those means choosing between their skeletons and a true status code; check the
-status with `curl -I` before adding any new `loading.tsx` to a route that can
-`notFound()`.
+`product/[slug]` and `shop/[[...category]]` lost theirs for the same reason:
+`/product/<bad>` and `/shop/<bad>` now return a real `404`. The cost is that
+navigating to them shows no skeleton while the server renders, which on this
+catalogue is a few hundred milliseconds. Segments that still keep a
+`loading.tsx` (`search`, `account`, `wishlist`) cannot `notFound()` on a slug, so
+they are unaffected. `npm run smoke` asserts the status of five unknown routes
+and four known ones; check with `curl -I` before adding a `loading.tsx` to any
+route that can `notFound()`.
+
+## First-load JavaScript
+
+Three things were costing every page main-thread time before it could respond
+to a tap, and `src/components/ui/bundle-boundaries.test.ts` fails if they return:
+
+- **`ui/primitives.tsx` is a `'use client'` barrel.** Importing one export from
+  it — even `Badge`, which has no state — ships Select, Tabs, Accordion,
+  Checkbox and RadioGroup. Site-wide components import `ui/badge` and
+  `ui/dialog`, which are separate modules. `primitives` re-exports both so older
+  imports keep working, but new site-wide code must not use it.
+- **GSAP, ScrollTrigger and Lenis are imported lazily**, only for a fine pointer
+  without reduced motion, after idle. Touch scrolling is native, so on a phone
+  they did nothing but download. `/process` imports GSAP itself.
+- **The toast layer (`sonner`) is a dynamic import** (`providers/lazy-toaster`).
+
+Lighthouse's mobile score is a *simulation* (4x CPU, slow 4G) and swings 10–20
+points between identical runs on a busy machine. Compare transferred JS and
+main-thread time across several runs, not a single score.
 
 ## Errors
 
