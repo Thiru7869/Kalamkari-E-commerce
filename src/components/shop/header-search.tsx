@@ -58,7 +58,7 @@ export function HeaderSearch({ className }: { className?: string }) {
 
         {/* The typed phrase is decorative — it changes on a timer and would
             make a nonsense accessible name. The button is named below. */}
-        <span className="truncate text-muted-foreground/80" aria-hidden="true">
+        <span className="truncate text-muted-foreground" aria-hidden="true">
           {placeholder}
         </span>
 

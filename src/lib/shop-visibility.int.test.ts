@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { prisma } from '@/lib/prisma';
-import { getProducts, getRelatedProducts, getSoldProducts } from '@/lib/queries';
+import {
+  getCollectionProducts,
+  getProducts,
+  getRelatedProducts,
+  getSoldProducts,
+  getTypeProducts,
+} from '@/lib/queries';
 import { makeProduct } from '@/test/fixtures';
 
 /**
@@ -53,5 +59,21 @@ describe('shop visibility — available versus sold', () => {
     expect(ids).toContain(available.id);
     expect(ids).not.toContain(sold.id);
     expect(ids).not.toContain(subject.id);
+  });
+
+  it('collection and type listings hold only available pieces and count the sold ones', async () => {
+    const available = await makeProduct({ stock: 1 });
+    const sold = await makeProduct({ stock: 0 });
+    const { slug } = await categoryOf(available.id);
+
+    const collection = await getCollectionProducts('new', slug, 50);
+    expect(collection.items.map((p) => p.id)).toContain(available.id);
+    expect(collection.items.map((p) => p.id)).not.toContain(sold.id);
+    expect(collection.soldTotal).toBeGreaterThan(0);
+
+    const type = await getTypeProducts(slug, 50);
+    expect(type.items.map((p) => p.id)).toContain(available.id);
+    expect(type.items.map((p) => p.id)).not.toContain(sold.id);
+    expect(type.soldTotal).toBeGreaterThan(0);
   });
 });

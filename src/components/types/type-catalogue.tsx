@@ -54,7 +54,6 @@ export function TypeCatalogue({
   initialCloth?: string;
 }) {
   const [choice, setChoice] = useState(initialCloth ?? 'all');
-  const [availableOnly, setAvailableOnly] = useState(false);
   const [page, setPage] = useState(1);
   const topRef = useRef<HTMLDivElement>(null);
   const wished = useMemo(() => new Set(wishlistIds), [wishlistIds]);
@@ -76,13 +75,12 @@ export function TypeCatalogue({
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
-      if (availableOnly && p.stock < 1) return false;
       if (choice === 'all') return true;
       const slug = p.fabric?.slug;
       if (choice.startsWith('family:')) return slug != null && familyOf.get(slug) === choice.slice(7);
       return slug === choice;
     });
-  }, [products, choice, availableOnly, familyOf]);
+  }, [products, choice, familyOf]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pageCount);
@@ -131,19 +129,6 @@ export function TypeCatalogue({
             ))}
           </select>
         </div>
-
-        <label className="flex min-h-[2.75rem] cursor-pointer items-center gap-2.5 text-sm">
-          <input
-            type="checkbox"
-            checked={availableOnly}
-            onChange={(e) => {
-              setAvailableOnly(e.target.checked);
-              setPage(1);
-            }}
-            className="h-4 w-4 accent-primary"
-          />
-          Available now only
-        </label>
       </div>
 
       <p role="status" className="tabular mt-4 text-sm text-muted-foreground">

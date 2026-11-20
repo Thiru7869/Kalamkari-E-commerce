@@ -438,6 +438,21 @@ server-rendered and hidden *before paint* by an inline script in the root
 layout, not in an effect. Deciding it in an effect either shifts the page down
 36px on every first load or flashes the bar at everybody who has closed it.
 
+## Not-found status codes
+
+**There is deliberately no root `src/app/loading.tsx`.** A `loading.tsx` wraps its
+segment in a Suspense boundary, the shell is flushed with `200` immediately, and
+a later `notFound()` can then only paint the not-found page — a soft 404 that
+search engines index. The root one made every dynamic route without its own
+loading file answer `200` for a missing record. With it gone, `/heritage/motifs/<bad>`,
+`/types/<bad>` and `/collections/<bad>` return a real `404`.
+
+Segments that keep their own `loading.tsx` (`product/[slug]`, `shop/[[...category]]`,
+`search`, `account`, `wishlist`) still return `200` for a missing record. Fixing
+those means choosing between their skeletons and a true status code; check the
+status with `curl -I` before adding any new `loading.tsx` to a route that can
+`notFound()`.
+
 ## Errors
 
 Use typed errors, not sentinel strings. `SoldOutError` in `src/lib/errors.ts`

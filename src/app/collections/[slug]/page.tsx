@@ -48,7 +48,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
   const collection = findCollection(slug);
   if (!collection) notFound();
 
-  const [{ items, total }, wishlistIds, bestWorksItems] = await Promise.all([
+  const [{ items, total, soldTotal }, wishlistIds, bestWorksItems] = await Promise.all([
     getCollectionProducts(collection.kind, collection.category, 24),
     getWishlistIds(),
     // Best works lives on the premium collection: the hardest drawing the
@@ -117,6 +117,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
       <div className="container section-y-sm">
         {items.length > 0 ? (
           <>
+            <h2 className="sr-only">Pieces in this collection</h2>
             <ProductGrid products={items} wishlistIds={wishlistIds} />
 
             {total > items.length && (
@@ -159,6 +160,18 @@ export default async function CollectionPage({ params }: { params: Params }) {
       {bestWorksItems.length > 0 && <BestWorks works={bestWorksItems} />}
 
       <div className="container section-y-sm">
+        {soldTotal > 0 && (
+          <p className="mt-10 text-center text-sm text-muted-foreground">
+            <Link
+              href="/archive"
+              className="inline-flex min-h-[2.75rem] items-center text-primary underline underline-offset-4"
+            >
+              {soldTotal} {soldTotal === 1 ? 'piece' : 'pieces'} chosen for this collection{' '}
+              {soldTotal === 1 ? 'has' : 'have'} already found a home
+            </Link>
+          </p>
+        )}
+
         <RevealOnScroll className="mt-16">
           <NarrativeNote />
         </RevealOnScroll>

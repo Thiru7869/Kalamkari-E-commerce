@@ -137,7 +137,7 @@ export default async function TypePage({
 
   const requestedCloth = Array.isArray(sp.fabric) ? sp.fabric[0] : sp.fabric;
 
-  const [category, varieties, motifs, dyes, range, { items }, wishlistIds, fromPrices] =
+  const [category, varieties, motifs, dyes, range, { items, soldTotal }, wishlistIds, fromPrices] =
     await Promise.all([
       getCategoryBySlug(type.category),
       getTypeVarieties(type.category),
@@ -331,6 +331,17 @@ export default async function TypePage({
               initialCloth={initialCloth}
             />
           </div>
+          {soldTotal > 0 && (
+            <p className="mt-6 text-sm text-muted-foreground">
+              <Link
+                href="/archive"
+                className="inline-flex min-h-[2.75rem] items-center text-primary underline underline-offset-4"
+              >
+                {soldTotal} {soldTotal === 1 ? 'piece' : 'pieces'} of this kind{' '}
+                {soldTotal === 1 ? 'has' : 'have'} already found a home
+              </Link>
+            </p>
+          )}
         </div>
       </section>
 

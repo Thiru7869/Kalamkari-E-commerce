@@ -229,6 +229,7 @@ export async function ShopView({
               {/* `id` and `scroll-mt`: the anchor the "choose by cloth" links
                   jump to; the offset clears the sticky header. */}
               <div id="pieces" className="scroll-mt-28 pt-6 md:scroll-mt-32">
+                <h2 className="sr-only">Pieces available</h2>
                 <ProductGrid products={first} wishlistIds={wishlistIds} />
                 {showStory && (
                   <>

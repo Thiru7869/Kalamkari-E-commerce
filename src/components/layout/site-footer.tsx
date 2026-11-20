@@ -111,7 +111,7 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          <p className="mt-5 max-w-2xl text-xs leading-relaxed text-cotton-200/45">
+          <p className="mt-5 max-w-2xl text-xs leading-relaxed text-cotton-200/70">
             Srikalahasti Kalamkari holds a registered Geographical Indication. Small
             irregularities in line, colour depth and repeat are inherent to hand painting
             with natural dye — they are how the work is identified, not defects.

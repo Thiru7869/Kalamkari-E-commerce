@@ -457,6 +457,7 @@ export const getBlogPost = cache(async (slug: string) => {
 export const getTypeVarieties = cache(async (categorySlug: string) => {
   const scope: Prisma.ProductWhereInput = {
     status: 'ACTIVE',
+    stock: { gt: 0 },
     category: { slug: categorySlug },
   };
 
@@ -498,6 +499,7 @@ export const getTypeVarieties = cache(async (categorySlug: string) => {
 export const getTypeDyes = cache(async (categorySlug: string) => {
   const scope: Prisma.ProductWhereInput = {
     status: 'ACTIVE',
+    stock: { gt: 0 },
     category: { slug: categorySlug },
   };
 
@@ -540,6 +542,7 @@ export const getTypeFabricFromPrices = cache(async (categorySlug: string) => {
 export const getTypeMotifs = cache(async (categorySlug: string) => {
   const scope: Prisma.ProductWhereInput = {
     status: 'ACTIVE',
+    stock: { gt: 0 },
     category: { slug: categorySlug },
   };
 
@@ -579,24 +582,27 @@ export const getTypePriceRange = cache(async (categorySlug: string) => {
  */
 export const getCollectionProducts = cache(
   async (kind: 'featured' | 'premium' | 'new', categorySlug?: string, take = 24) => {
-    const where: Prisma.ProductWhereInput = {
+    const base: Prisma.ProductWhereInput = {
       status: 'ACTIVE',
       ...(categorySlug ? { category: { slug: categorySlug } } : {}),
       ...(kind === 'featured' ? { featured: true } : {}),
       ...(kind === 'premium' ? { masterpiece: true } : {}),
     };
+    // Purchasable pieces only; sold ones are counted and live in the archive.
+    const where: Prisma.ProductWhereInput = { ...base, stock: { gt: 0 } };
 
     const orderBy: Prisma.ProductOrderByWithRelationInput[] =
       kind === 'new'
         ? [{ createdAt: 'desc' }]
         : [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }];
 
-    const [items, total] = await Promise.all([
+    const [items, total, soldTotal] = await Promise.all([
       prisma.product.findMany({ where, select: productCardSelect, orderBy, take }),
       prisma.product.count({ where }),
+      prisma.product.count({ where: { ...base, stock: { lte: 0 } } }),
     ]);
 
-    return { items, total };
+    return { items, total, soldTotal };
   },
 );
 
@@ -616,18 +622,21 @@ export const getCollectionProducts = cache(
  * had been narrowed to organza.
  */
 export const getTypeProducts = cache(async (categorySlug: string, take = 8, fabric?: string) => {
-  const where: Prisma.ProductWhereInput = { status: 'ACTIVE', category: { slug: categorySlug } };
-  if (fabric) where.fabric = { slug: fabric };
-  const [items, total] = await Promise.all([
+  const base: Prisma.ProductWhereInput = { status: 'ACTIVE', category: { slug: categorySlug } };
+  if (fabric) base.fabric = { slug: fabric };
+  // Purchasable pieces only. Sold ones are counted so the page can point at the
+  // archive, and are never in the grid beside work that can be bought.
+  const [items, total, soldTotal] = await Promise.all([
     prisma.product.findMany({
-      where,
+      where: { ...base, stock: { gt: 0 } },
       select: productCardSelect,
-      orderBy: [{ stock: 'desc' }, { masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
       take,
     }),
-    prisma.product.count({ where }),
+    prisma.product.count({ where: { ...base, stock: { gt: 0 } } }),
+    prisma.product.count({ where: { ...base, stock: { lte: 0 } } }),
   ]);
-  return { items, total };
+  return { items, total, soldTotal };
 });
 
 /**
