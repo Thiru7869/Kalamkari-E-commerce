@@ -7,7 +7,6 @@ import { SectionHeader } from '@/components/layout/section-header';
 import { TrustStrip } from '@/components/layout/trust-strip';
 import { NarrativeNote } from '@/components/shop/narrative-note';
 import { HowThisIsMade, WhatToLookFor } from '@/components/shop/craft-notes';
-import { ReadyToSend } from '@/components/types/ready-to-send';
 import { TypeCatalogue } from '@/components/types/type-catalogue';
 import { ClothGuide, type GuideFamily } from '@/components/types/cloth-guide';
 import { DyePots, type PotStory } from '@/components/types/dye-pots';
@@ -23,7 +22,6 @@ import {
   getTypeFabricFromPrices,
   getTypeProducts,
   getCategoryBySlug,
-  type ProductCardData,
 } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import {
@@ -93,36 +91,6 @@ const POT_STORY: Record<string, string> = {
   'myrobalan-cream': 'cream',
 };
 
-/**
- * One piece from each cloth in turn, so the first screen shows the range
- * rather than a run of whichever cloth came off the line most recently. Order
- * inside each cloth is the catalogue's own (signed work and featured first).
- */
-function mixAcrossCloths(items: ProductCardData[], take: number): ProductCardData[] {
-  const groups = new Map<string, ProductCardData[]>();
-  for (const p of items) {
-    if (p.stock < 1) continue;
-    const key = p.fabric?.slug ?? 'other';
-    const list = groups.get(key) ?? [];
-    list.push(p);
-    groups.set(key, list);
-  }
-  const lists = [...groups.values()];
-  const out: ProductCardData[] = [];
-  for (let round = 0; out.length < take; round++) {
-    let added = false;
-    for (const list of lists) {
-      if (list[round]) {
-        out.push(list[round]);
-        added = true;
-        if (out.length >= take) break;
-      }
-    }
-    if (!added) break;
-  }
-  return out;
-}
-
 export default async function TypePage({
   params,
   searchParams,
@@ -164,7 +132,6 @@ export default async function TypePage({
   const initialCloth = cloths.some((c) => c.slug === requestedCloth) ? requestedCloth : undefined;
 
   const wishlist = [...wishlistIds];
-  const ready = mixAcrossCloths(items, 24);
 
   const guide: GuideFamily[] = families.map((family) => ({
     family,
@@ -224,7 +191,7 @@ export default async function TypePage({
         <div className="container">
           <Breadcrumbs
             trail={[{ label: 'Shop', href: '/' }, { label }]}
-            className="mb-6"
+           
           />
 
           <div className="max-w-3xl">
@@ -269,7 +236,7 @@ export default async function TypePage({
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link href="#ready">
+              <Link href="#catalogue">
                 Browse all {label.toLowerCase()}
                 <ArrowRight aria-hidden="true" />
               </Link>
@@ -280,30 +247,6 @@ export default async function TypePage({
           </div>
         </div>
       </header>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Ready to send — a mix across every cloth                            */}
-      {/* ------------------------------------------------------------------ */}
-      <section id="ready" className="scroll-mt-20 section-y" aria-labelledby="ready-heading">
-        <div className="container">
-          <SectionHeader
-            eyebrow="In the store now"
-            title={`${label} ready to send`}
-            lead={`A selection across every cloth, one from each in turn.`}
-            id="ready-heading"
-          />
-          <div className="mt-8">
-            {ready.length > 0 ? (
-              <ReadyToSend products={ready} wishlistIds={wishlist} label={label} />
-            ) : (
-              <p className="max-w-xl leading-relaxed text-muted-foreground">
-                Nothing of this kind is finished at the moment. Work comes off the line
-                continuously — or ask for one to be painted.
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* ------------------------------------------------------------------ */}
       {/* Every piece, by cloth                                               */}

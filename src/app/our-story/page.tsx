@@ -259,9 +259,7 @@ export default async function OurStoryPage() {
               The family
             </h2>
             <p className="mt-5 text-body-lg text-muted-foreground">
-              What follows is only what is known and can be stood behind. Where the public
-              record establishes something, it is stated. Where it does not, the page stays
-              with the craft rather than inventing a life.
+              The five members of the family who draw, dye and run the store.
             </p>
           </RevealOnScroll>
 
@@ -576,10 +574,8 @@ export default async function OurStoryPage() {
                     Best works
                   </h2>
                   <p className="mt-5 text-body-lg text-muted-foreground">
-                    The pieces that took a month of somebody&rsquo;s undivided attention —
-                    narrative pallus, dense jaal, the finest line this workshop draws. Some
-                    have sold. They are here because of what they show, not because they are
-                    for sale.
+                    Signed and exhibition-grade pieces, shown for what they demonstrate.
+                    Some have sold.
                   </p>
                 </div>
 

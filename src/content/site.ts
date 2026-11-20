@@ -180,7 +180,7 @@ export const exploreSections = [
       { label: 'Everything in the store', href: '/', hint: 'The full grid, filterable by cloth, story and price' },
       { label: 'Sarees', href: '/types/sarees', hint: 'Nine yards, drawn end to end — and which cloth to choose' },
       { label: 'Paintings', href: '/types/paintings', hint: 'Narrative panels, the tradition the craft grew out of' },
-      { label: 'New arrivals', href: '/collections/new-arrivals', hint: 'The most recent work to finish its twentieth washing' },
+      { label: 'New arrivals', href: '/collections/new-arrivals', hint: 'The most recently finished work' },
     ],
   },
   {

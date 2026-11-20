@@ -275,8 +275,8 @@ export async function ShopView({
           <section className="section-y border-t border-border" aria-labelledby="collections-heading">
             <div className="container">
               <SectionHeader
-                eyebrow="Collections"
-                title="Ways into the store"
+                eyebrow="Browse"
+                title="Collections"
                 action={{ label: 'All collections', href: '/collections' }}
                 id="collections-heading"
               />

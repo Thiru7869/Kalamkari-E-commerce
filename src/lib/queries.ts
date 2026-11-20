@@ -46,13 +46,13 @@ export const collections = {
     label: 'Featured',
     title: 'Featured pieces',
     blurb:
-      'What the family would put in your hands first this week. Chosen for the drawing, not for the margin — the selection changes as work comes off the line.',
+      'The pieces the family would show you first, picked for the drawing.',
   },
   premium: {
     label: 'Premium',
     title: 'Premium and signed work',
     blurb:
-      'Exhibition-grade pieces: signed, award-lineage, or simply the ones that took a month of somebody\'s undivided attention. Narrative pallus, dense jaal, the hardest drawing this workshop does.',
+      'Signed and exhibition-grade work: narrative pallus, dense jaal and the finest line the workshop draws.',
   },
 } as const;
 
