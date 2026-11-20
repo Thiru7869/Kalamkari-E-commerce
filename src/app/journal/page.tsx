@@ -24,7 +24,7 @@ export default async function JournalPage() {
       <section className="border-b border-border bg-cotton-100 pb-12 pt-16 md:pb-16 md:pt-24 dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
-            <Breadcrumbs trail={[{ label: 'Journal' }]} className="mb-6" />
+            <Breadcrumbs trail={[{ label: 'Journal' }]} />
             <p className="eyebrow">Journal</p>
             <h1 className="mt-4 text-display-xl">Notes from the store</h1>
             <p className="mt-6 text-body-lg text-muted-foreground">
@@ -137,7 +137,7 @@ export default async function JournalPage() {
                           />
                         </div>
 
-                        <div className="mt-3 flex flex-wrap gap-2 text-[0.5625rem] uppercase tracking-[0.12em] text-muted-foreground md:text-xs">
+                        <div className="mt-3 flex flex-wrap gap-2 text-[0.625rem] uppercase tracking-[0.12em] text-muted-foreground md:text-xs">
                           {toList(post.tags).slice(0, wide ? 2 : 1).map((tag) => (
                             <span key={tag}>{tag}</span>
                           ))}

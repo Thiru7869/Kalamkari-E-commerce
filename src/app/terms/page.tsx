@@ -13,7 +13,7 @@ export default function TermsPage() {
   return (
     <div className="container section-y">
       <div className="mx-auto max-w-[46rem]">
-        <Breadcrumbs trail={[{ label: 'Terms' }]} className="mb-6" />
+        <Breadcrumbs trail={[{ label: 'Terms' }]} />
         <h1 className="text-display-lg">Terms</h1>
 
         <div className="mt-12 flex flex-col gap-10">

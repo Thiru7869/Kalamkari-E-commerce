@@ -26,13 +26,13 @@ export default function CollectionsPage() {
     <>
       <header className="border-b border-border bg-cotton-100 pb-12 pt-12 md:pb-16 md:pt-16 dark:bg-card">
         <div className="container">
-          <Breadcrumbs trail={[{ label: 'Collections' }]} className="mb-6" />
+          <Breadcrumbs trail={[{ label: 'Collections' }]} />
           <SectionHeader
             as="h1"
             size="lg"
-            eyebrow="Collections"
-            title="Ways into the store"
-            lead="Each collection says how its pieces are chosen. A piece can belong to more than one, and every one is one of one."
+            eyebrow="The store"
+            title="Collections"
+            lead="Each collection shows how its pieces are chosen. A piece can belong to more than one."
           />
         </div>
       </header>

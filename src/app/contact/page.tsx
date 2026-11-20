@@ -24,11 +24,11 @@ export default function ContactPage() {
       <section className="border-b border-border bg-cotton-100 pb-8 pt-8 md:pb-12 md:pt-10 dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
-            <Breadcrumbs trail={[{ label: 'Visit us' }]} className="mb-4" />
+            <Breadcrumbs trail={[{ label: 'Visit us' }]} />
             <p className="eyebrow">Visit us</p>
             <h1 className="mt-3 text-display-lg">Come and see it being made</h1>
             <p className="mt-4 text-body-lg text-muted-foreground">
-              Photographs of Kalamkari are not very convincing. The cloth in your hands is.
+              See the drawing and dyeing in progress, and handle the cloth before you decide.
               If you are anywhere near {site.location.town} — and if you are visiting the
               temple, you are — the store is worth an hour.
             </p>
@@ -155,7 +155,7 @@ export default function ContactPage() {
                 )}
               </dl>
 
-              <div className="mt-10 rounded-2xl border border-border bg-muted/40 p-5">
+              <div className="mt-10 rounded-sm border border-border bg-muted/40 p-5">
                 <h3 className="font-display text-lg">Before you travel</h3>
                 <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
                   Send a message first. The store is a working home, and the difference
@@ -170,7 +170,7 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <div className="rounded-2xl border border-border bg-card p-5 md:p-7">
+              <div className="rounded-sm border border-border bg-card p-5 md:p-7">
                 <h2 className="text-display-sm">Write to us</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   About a piece, a visit, wholesale, an exhibition, or a question about the

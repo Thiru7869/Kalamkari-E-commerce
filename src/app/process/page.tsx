@@ -43,7 +43,7 @@ export default function ProcessPage() {
               drops under it below lg rather than shrinking to nothing. */}
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)] lg:items-start lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-14">
           <div className="max-w-3xl">
-            <Breadcrumbs trail={[{ label: 'The process' }]} className="mb-6" />
+            <Breadcrumbs trail={[{ label: 'The process' }]} />
             <p className="eyebrow">The making of a Kalamkari saree</p>
             <h1 className="mt-4 text-display-xl">
               Fourteen stages.

@@ -67,7 +67,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
         <div className="container">
           <Breadcrumbs
             trail={[{ label: 'Collections', href: '/collections' }, { label: collection.label }]}
-            className="mb-6"
+           
           />
 
           <SectionHeader

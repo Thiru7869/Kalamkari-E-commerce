@@ -29,10 +29,10 @@ export function PageHero({
 }) {
   return (
     <header className={cn('container pt-6 md:pt-8', className)}>
-      <Breadcrumbs trail={trail} className="mb-4" />
+      <Breadcrumbs trail={trail} />
       <div
         className={cn(
-          'grid overflow-hidden rounded-3xl border border-border bg-cotton-100 dark:bg-card',
+          'grid overflow-hidden rounded-sm border border-border bg-cotton-100 dark:bg-card',
           image && 'md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]',
         )}
       >
