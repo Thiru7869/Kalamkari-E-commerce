@@ -1,4 +1,4 @@
-  'use server';
+'use server';
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
@@ -265,7 +265,7 @@ export async function cancelOrder(_prev: FormState, formData: FormData): Promise
 
   revalidatePath('/account');
   revalidatePath('/admin/orders');
-  revalidatePath('/');
+  revalidatePath('/shop');
   return {
     status: 'success',
     message: wasPaid
