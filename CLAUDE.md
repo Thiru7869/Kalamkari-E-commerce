@@ -422,6 +422,10 @@ with `/shop/<category>`. `/shop` itself is a permanent (308) redirect to `/` in
 - **Story cards** in the grid (`GridStory`) and the two bands below it read
   `heritageModules`. Nothing is written in the component, so it cannot say what
   the destination page does not.
+- **Motif pages** (`/heritage/motifs/<slug>`) read the motif's own `story` and the
+  `ProductMotif` relation: available pieces as cards, sold ones only counted
+  with a link to the archive. The motif list, the product page and the motif
+  page all show the same `story` column, so they cannot disagree.
 - **The header** is `src/content/nav.ts` (it lives outside `site.ts` because it
   reads `heritageModules`, which reads `site` — one file would be an import
   cycle).

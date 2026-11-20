@@ -501,6 +501,33 @@ export async function getSoldProducts(page = 1) {
   return { items, total, page: current, pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 
+/**
+ * One motif and the pieces that carry it, for `/heritage/motifs/<slug>`.
+ *
+ * Available pieces are returned as cards; the sold ones are only counted, so
+ * the page can point at the archive without listing pieces nobody can buy.
+ * Cached: `generateMetadata` and the page body both resolve the same slug.
+ */
+export const getMotifWithPieces = cache(async (slug: string) => {
+  const motif = await prisma.motif.findUnique({
+    where: { slug },
+    select: { id: true, slug: true, name: true, story: true },
+  });
+  if (!motif) return null;
+
+  const carries = { motifs: { some: { motifId: motif.id } }, status: 'ACTIVE' };
+  const [available, soldCount] = await Promise.all([
+    prisma.product.findMany({
+      where: { ...carries, stock: { gt: 0 } },
+      select: productCardSelect,
+      orderBy: [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
+    }),
+    prisma.product.count({ where: { ...carries, stock: { lte: 0 } } }),
+  ]);
+
+  return { motif, available, soldCount };
+});
+
 /** Cached: `generateMetadata` and the shop page each resolve the same slug. */
 export const getCategoryBySlug = cache(async (slug: string) => {
   return prisma.category.findUnique({ where: { slug } });

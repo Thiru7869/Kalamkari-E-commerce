@@ -79,6 +79,8 @@ const ROUTES = arg(
     // capped measure with a wrapping contents rail above it. Neither shape is
     // exercised anywhere else in this list.
     '/heritage',
+    '/heritage/motifs',
+    '/heritage/motifs/ramayana',
     '/shipping',
     '/privacy',
     '/terms',

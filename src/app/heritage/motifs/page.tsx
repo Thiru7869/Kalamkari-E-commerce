@@ -72,13 +72,22 @@ export default async function MotifsPage() {
                       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                         {motif.story}
                       </p>
-                      <Link
-                        href={`/?motif=${motif.slug}`}
-                        className="mt-4 inline-flex min-h-[2.75rem] items-center gap-1.5 self-start text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        See {motif.name} pieces
-                        <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-                      </Link>
+                      <div className="mt-4 flex flex-wrap gap-x-6">
+                        <Link
+                          href={`/heritage/motifs/${motif.slug}`}
+                          className="inline-flex min-h-[2.75rem] items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          About {motif.name}
+                          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                        <Link
+                          href={`/?motif=${motif.slug}`}
+                          className="inline-flex min-h-[2.75rem] items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          See {motif.name} pieces
+                          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                      </div>
                     </div>
                   </article>
                 </RevealOnScroll>

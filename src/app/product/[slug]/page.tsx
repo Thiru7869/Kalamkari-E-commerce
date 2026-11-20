@@ -265,13 +265,22 @@ export default async function ProductPage({ params }: { params: Params }) {
                           <li key={motif.id}>
                             <h3 className="font-medium text-foreground">{motif.name}</h3>
                             <p className="mt-1">{motif.story}</p>
-                            <Link
-                              href={`/?motif=${motif.slug}`}
-                              className="mt-2 inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
-                            >
-                              See other {motif.name} pieces
-                              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                            </Link>
+                            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+                              <Link
+                                href={`/heritage/motifs/${motif.slug}`}
+                                className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+                              >
+                                About {motif.name}
+                                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                              </Link>
+                              <Link
+                                href={`/?motif=${motif.slug}`}
+                                className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+                              >
+                                See other {motif.name} pieces
+                                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                              </Link>
+                            </div>
                           </li>
                         ))}
                       </ul>
