@@ -10,7 +10,7 @@ import {
   DialogDescription,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/primitives';
+} from '@/components/ui/dialog';
 import { exploreSections } from '@/content/site';
 import { cn } from '@/lib/utils';
 

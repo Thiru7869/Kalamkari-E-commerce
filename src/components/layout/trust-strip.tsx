@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Leaf, PenTool, Package, RotateCcw } from 'lucide-react';
 import { site, whatsappHref } from '@/content/site';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 

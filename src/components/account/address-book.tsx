@@ -9,7 +9,7 @@ import { initialFormState } from '@/lib/form-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { FieldError } from '@/components/forms/field-error';
 
 export type AddressRow = {

@@ -6,7 +6,7 @@ import { Heart, Package, MapPin, LogOut, ShieldCheck } from 'lucide-react';
 import { auth, signOut } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { ProfileForm } from '@/components/account/profile-form';
 import { AddressBook } from '@/components/account/address-book';
 import { OrderActions } from '@/components/account/order-actions';

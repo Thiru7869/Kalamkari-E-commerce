@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { KnowMore } from '@/components/ui/know-more';
 import { HandVsPrinted } from '@/components/story/hand-vs-printed';

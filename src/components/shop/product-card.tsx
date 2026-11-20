@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { WishlistButton } from './wishlist-button';
 import { formatPrice, averageRating } from '@/lib/utils';
 import { primaryImage, toList } from '@/lib/serialize';

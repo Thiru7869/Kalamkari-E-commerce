@@ -10,7 +10,7 @@ import {
   DialogDescription,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/primitives';
+} from '@/components/ui/dialog';
 import { site, contactPhone } from '@/content/site';
 import { mainNav } from '@/content/nav';
 import { ThemeToggle } from './theme-toggle';

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Fraunces, Plus_Jakarta_Sans, Noto_Sans_Telugu } from 'next/font/google';
-import { Toaster } from 'sonner';
+import { LazyToaster } from '@/components/providers/lazy-toaster';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SmoothScrollProvider } from '@/components/providers/smooth-scroll-provider';
 import { ServiceWorkerRegistrar } from '@/components/providers/service-worker-registrar';
@@ -198,17 +198,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <FloatingDock />
           </SmoothScrollProvider>
 
-          <Toaster
-            position="bottom-center"
-            // Clear of the phone tab bar.
-            offset={88}
-            toastOptions={{
-              classNames: {
-                toast: 'font-sans rounded-sm border border-border bg-card text-card-foreground',
-                description: 'text-muted-foreground',
-              },
-            }}
-          />
+          <LazyToaster />
           <ServiceWorkerRegistrar />
         </ThemeProvider>
       </body>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/require-admin';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { ORDER_STATUSES, statusLabel } from '@/lib/orders';
 

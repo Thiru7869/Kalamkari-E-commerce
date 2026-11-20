@@ -5,7 +5,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { PageHero } from '@/components/heritage/page-hero';
 import { HeritagePageFooter } from '@/components/heritage/page-footer';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { family, principalAward } from '@/content/family';
 import { heritageSections } from '@/content/heritage';
 import { renderInlineMarkdown } from '@/lib/markdown';

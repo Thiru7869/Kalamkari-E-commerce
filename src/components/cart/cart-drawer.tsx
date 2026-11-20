@@ -12,7 +12,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@/components/ui/primitives';
+} from '@/components/ui/dialog';
 import { CartLineControls } from './cart-line-controls';
 import { CART_OPEN_EVENT, type CartOpenDetail } from './cart-events';
 import type { CartSummary } from '@/lib/totals';
