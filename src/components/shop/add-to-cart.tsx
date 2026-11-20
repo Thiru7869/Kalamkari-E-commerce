@@ -7,15 +7,23 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { QuantityStepper } from '@/components/ui/primitives';
 import { addToCart } from '@/app/actions/cart';
+import { requestCartDrawer } from '@/components/cart/cart-events';
 
 export function AddToCart({
   productId,
   stock,
   className,
+  compact = false,
 }: {
   productId: string;
   stock: number;
   className?: string;
+  /**
+   * Button only: no stepper, no explanatory copy. Used by the sticky phone
+   * purchase bar, which adds one piece through this same component so the cart
+   * call, the toast and the refresh stay in a single place.
+   */
+  compact?: boolean;
 }) {
   const [quantity, setQuantity] = useState(1);
   const [pending, startTransition] = useTransition();
@@ -32,12 +40,41 @@ export function AddToCart({
         toast.error(result.error);
         return;
       }
-      toast.success(result.message ?? 'Added to your bag', {
-        action: { label: 'View bag', onClick: () => router.push('/cart') },
-      });
+      // The bag drawer opens if one is mounted on this page; otherwise the
+      // original toast stands in.
+      if (!requestCartDrawer()) {
+        toast.success(result.message ?? 'Added to your bag', {
+          action: { label: 'View bag', onClick: () => router.push('/cart') },
+        });
+      }
       router.refresh();
     });
   };
+
+  if (compact) {
+    return (
+      <Button
+        size="lg"
+        onClick={onAdd}
+        disabled={pending || soldOut}
+        className={className}
+      >
+        {soldOut ? (
+          'Sold'
+        ) : pending ? (
+          <>
+            <Loader2 className="animate-spin" aria-hidden="true" />
+            Adding…
+          </>
+        ) : (
+          <>
+            <ShoppingBag aria-hidden="true" />
+            Add to bag
+          </>
+        )}
+      </Button>
+    );
+  }
 
   if (soldOut) {
     return (

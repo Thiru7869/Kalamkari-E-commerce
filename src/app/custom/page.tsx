@@ -44,13 +44,13 @@ const stages = [
 export default function CommissionPage() {
   return (
     <>
-      <section className="border-b border-border bg-cotton-100 pb-14 pt-16 md:pb-20 md:pt-24 dark:bg-card">
+      <section className="border-b border-border bg-cotton-100 pb-8 pt-8 md:pb-12 md:pt-10 dark:bg-card">
         <div className="container">
           <div className="max-w-3xl">
-            <Breadcrumbs trail={[{ label: 'Custom' }]} className="mb-6" />
+            <Breadcrumbs trail={[{ label: 'Custom' }]} className="mb-4" />
             <p className="eyebrow">Commissions</p>
-            <h1 className="mt-4 text-display-xl">Have it painted for you</h1>
-            <p className="mt-7 text-body-lg text-muted-foreground">
+            <h1 className="mt-3 text-display-lg">Have it painted for you</h1>
+            <p className="mt-4 text-body-lg text-muted-foreground">
               Because nothing here is printed, nothing here has to be chosen from a
               catalogue. If you want the Tree of Life on tussar rather than cotton, or a
               specific episode of the Ramayana across a pallu, or a panel for a particular
@@ -85,7 +85,7 @@ export default function CommissionPage() {
                 ))}
               </ol>
 
-              <div className="mt-12 rounded-sm border border-border bg-muted/40 p-5 md:p-6">
+              <div className="mt-12 rounded-2xl border border-border bg-muted/40 p-5 md:p-6">
                 <h3 className="font-display text-lg">Two honest warnings</h3>
                 <ul className="mt-4 flex list-disc flex-col gap-3 pl-4 text-sm leading-relaxed text-muted-foreground">
                   <li>
@@ -109,7 +109,7 @@ export default function CommissionPage() {
             </div>
 
             <div>
-              <div className="rounded-sm border border-border bg-card p-5 md:p-7 lg:sticky lg:top-24">
+              <div className="rounded-2xl border border-border bg-card p-5 md:p-7 lg:sticky lg:top-24">
                 <h2 className="text-display-sm">Tell us what you have in mind</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   There is no obligation in this, and no payment is taken here. It starts a

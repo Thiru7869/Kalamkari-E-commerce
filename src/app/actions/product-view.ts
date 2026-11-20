@@ -2,6 +2,8 @@
 
 import { prisma } from '@/lib/prisma';
 import { recordRecentlyViewed } from '@/lib/recently-viewed';
+import { limitByIp } from '@/lib/rate-limit';
+import { idSchema } from '@/lib/schemas/cart';
 
 /**
  * Record that somebody opened a piece.
@@ -20,6 +22,12 @@ import { recordRecentlyViewed } from '@/lib/recently-viewed';
  * module graph; see CLAUDE.md.
  */
 export async function recordProductView(productId: string) {
+  // A counter anybody can call is a counter anybody can inflate.
+  const id = idSchema.safeParse(productId);
+  if (!id.success) return;
+  productId = id.data;
+  if (!(await limitByIp('productView')).ok) return;
+
   /*
     `updateMany`, not `update`.
 

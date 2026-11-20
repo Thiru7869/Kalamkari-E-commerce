@@ -82,9 +82,8 @@ export default async function ShopPage({
   const activeCategory = categorySlug ? await getCategoryBySlug(categorySlug) : null;
   if (categorySlug && !activeCategory) notFound();
 
-  const collectionKey = typeof sp.collection === 'string' && isCollection(sp.collection)
-    ? sp.collection
-    : undefined;
+  const collectionKey =
+    typeof sp.collection === 'string' && isCollection(sp.collection) ? sp.collection : undefined;
   const activeCollection = collectionKey ? collections[collectionKey] : null;
 
   const filters = {
@@ -123,10 +122,7 @@ export default async function ShopPage({
           <Breadcrumbs
             trail={
               activeCategory
-                ? [
-                    { label: 'Shop', href: '/shop' },
-                    { label: activeCategory.name },
-                  ]
+                ? [{ label: 'Shop', href: '/shop' }, { label: activeCategory.name }]
                 : [{ label: 'Shop' }]
             }
           />
@@ -160,104 +156,87 @@ export default async function ShopPage({
               ← Back to everything in the store
             </Link>
           )}
-
         </div>
       </header>
 
       <div className="container section-y-sm">
-        <div className="lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
-          {/* Desktop keeps the inline sidebar; the sheet trigger inside this
-              component is hidden above lg. */}
-          <ShopFilters
-            options={options}
+        <div>
+          <ShopSubnav
             basePath={basePath}
-            selected={{ fabrics: filters.fabrics, motifs: filters.motifs, dyes: filters.dyes }}
-            price={{ min: filters.minPrice, max: filters.maxPrice }}
+            activeCategory={categorySlug}
+            filterSlot={
+              <ShopFilters
+                options={options}
+                basePath={basePath}
+                selected={{
+                  fabrics: filters.fabrics,
+                  motifs: filters.motifs,
+                  dyes: filters.dyes,
+                }}
+                price={{ min: filters.minPrice, max: filters.maxPrice }}
+              />
+            }
+            sortSlot={<ShopSort current={filters.sort} />}
+            countSlot={
+              <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
+                {total === 0 ? (
+                  'No pieces match these filters'
+                ) : (
+                  <>
+                    Showing <span className="tabular">{from}</span>&ndash;
+                    <span className="tabular">{to}</span> of{' '}
+                    <span className="tabular">{total}</span> {total === 1 ? 'piece' : 'pieces'}
+                  </>
+                )}
+              </p>
+            }
           />
 
-          <div>
-            <ShopSubnav
-              basePath={basePath}
-              activeCategory={categorySlug}
-              filterSlot={
-                <div className="lg:hidden">
-                  <ShopFilters
-                    options={options}
-                    basePath={basePath}
-                    selected={{
-                      fabrics: filters.fabrics,
-                      motifs: filters.motifs,
-                      dyes: filters.dyes,
-                    }}
-                    price={{ min: filters.minPrice, max: filters.maxPrice }}
-                    triggerOnly
-                  />
-                </div>
-              }
-              sortSlot={<ShopSort current={filters.sort} />}
-              countSlot={
-                <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
-                  {total === 0 ? (
-                    'No pieces match these filters'
-                  ) : (
-                    <>
-                      Showing <span className="tabular">{from}</span>&ndash;
-                      <span className="tabular">{to}</span> of{' '}
-                      <span className="tabular">{total}</span>{' '}
-                      {total === 1 ? 'piece' : 'pieces'}
-                    </>
-                  )}
-                </p>
-              }
-            />
+          <AppliedFilters
+            basePath={basePath}
+            fabrics={options.fabrics}
+            motifs={options.motifs}
+            dyes={options.dyes}
+            className="mt-4"
+          />
 
-            <AppliedFilters
-              basePath={basePath}
-              fabrics={options.fabrics}
-              motifs={options.motifs}
-              dyes={options.dyes}
-              className="mt-4"
-            />
-
-            {items.length > 0 ? (
-              <>
-                {/*
+          {items.length > 0 ? (
+            <>
+              {/*
                   `id` and `scroll-mt`: this is the anchor the "choose by
                   cloth" cards jump to, and the offset clears the sticky
                   header. Without it a jump lands with the first row of cards
                   hidden underneath the header, which reads as having scrolled
                   to the wrong place.
                 */}
-                <div id="pieces" className="scroll-mt-28 pt-6 md:scroll-mt-32">
-                  <ProductGrid products={items} wishlistIds={wishlistIds} groupEvery={10} />
-                </div>
-                <Pagination page={page} pageCount={pageCount} />
-              </>
-            ) : (
-              <div className="py-20 text-center">
-                <h2 className="font-display text-2xl">Nothing matches that combination</h2>
-                <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-                  The store holds a small number of pieces at any time, because each one
-                  takes weeks. Try widening the filters &mdash; or ask us to paint what you
-                  had in mind.
-                </p>
-                <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-                  <Link
-                    href={basePath}
-                    className="inline-flex h-11 items-center justify-center rounded-sm border border-foreground/25 px-5 text-sm font-medium transition-colors hover:bg-foreground/5"
-                  >
-                    Clear all filters
-                  </Link>
-                  <Link
-                    href="/custom"
-                    className="inline-flex h-11 items-center justify-center rounded-sm bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-chay-700"
-                  >
-                    Commission a piece
-                  </Link>
-                </div>
+              <div id="pieces" className="scroll-mt-28 pt-6 md:scroll-mt-32">
+                <ProductGrid products={items} wishlistIds={wishlistIds} groupEvery={10} />
               </div>
-            )}
-          </div>
+              <Pagination page={page} pageCount={pageCount} />
+            </>
+          ) : (
+            <div className="py-20 text-center">
+              <h2 className="font-display text-2xl">Nothing matches that combination</h2>
+              <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+                The store holds a small number of pieces at any time, because each one takes weeks.
+                Try widening the filters &mdash; or ask us to paint what you had in mind.
+              </p>
+              <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+                <Link
+                  href={basePath}
+                  className="inline-flex h-11 items-center justify-center rounded-sm border border-foreground/25 px-5 text-sm font-medium transition-colors hover:bg-foreground/5"
+                >
+                  Clear all filters
+                </Link>
+                <Link
+                  href="/custom"
+                  className="inline-flex h-11 items-center justify-center rounded-sm bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-chay-700"
+                >
+                  Commission a piece
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -64,6 +64,7 @@ export function FloatingDock() {
   // Matches the `md` breakpoint the tab bar uses, and stays in sync on rotate.
   const isCompact = useMediaQuery('(max-width: 767px)');
 
+  const isProduct = pathname.startsWith('/product/');
   const wantsWhatsApp = WHATSAPP_ROUTES.some((prefix) => pathname.startsWith(prefix));
   const assistantSuppressed = ASSISTANT_SUPPRESSED.some((prefix) => pathname.startsWith(prefix));
 
@@ -84,7 +85,12 @@ export function FloatingDock() {
     <div
       className={cn(
         // Sits above the phone tab bar; clears the safe area on both axes.
-        'pointer-events-none fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-4 z-40',
+        'pointer-events-none fixed right-4 z-40',
+        // Product pages carry the sticky purchase bar (about 4rem) above the
+        // tab bar on phones, so the dock rides above that as well.
+        isProduct
+          ? 'bottom-[calc(8.75rem+env(safe-area-inset-bottom))]'
+          : 'bottom-[calc(4.75rem+env(safe-area-inset-bottom))]',
         'flex flex-col items-end gap-3 md:bottom-6 md:right-6',
       )}
     >

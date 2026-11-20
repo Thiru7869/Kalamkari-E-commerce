@@ -22,6 +22,8 @@ export const site = {
     'A family store in Srikalahasti painting Kalamkari entirely by hand — bamboo kalam, fermented iron black, madder red, indigo blue. No blocks, no screens, no chemical colour.',
 
   location: {
+    /** The street address as printed on the store's visiting card. */
+    street: 'D.No. 15-890, B.P. Agraharam',
     town: 'Srikalahasti',
     district: 'Tirupati district',
     state: 'Andhra Pradesh',
@@ -186,6 +188,7 @@ export const exploreSections = [
     items: [
       { label: 'The twenty-three steps', href: '/process', hint: 'The whole sequence, with the cloth changing as you read' },
       { label: 'The vegetable palette', href: '/process#colours', hint: 'Eight colours, and where each one comes from' },
+      { label: 'Heritage & craft', href: '/heritage', hint: 'History, artisans, motifs and colours, in eight short reads' },
       { label: 'Our story', href: '/our-story', hint: 'Five people in one house, and how the craft passes through it' },
       { label: 'The journal', href: '/journal', hint: 'Notes on dye, motif and season — including how to spot a print' },
     ],
@@ -230,6 +233,14 @@ export type NavItem = {
   /** Shown in the mega-menu / mobile drawer under the label. */
   hint?: string;
   children?: NavItem[];
+  /**
+   * Render the children as a wide panel on desktop instead of a short list.
+   * The mobile drawer ignores it and lists the children as before.
+   */
+  mega?: {
+    /** The child to feature as an image tile; matched by `href`. */
+    feature: { href: string; image: string };
+  };
 };
 
 export const shopCategories = [
@@ -245,6 +256,8 @@ export const mainNav: NavItem[] = [
     label: 'Shop',
     href: '/shop',
     hint: 'Everything currently in the store',
+    // The tile uses the image the home page already shows for this collection.
+    mega: { feature: { href: '/collections/premium', image: '/images/products/hero-paintings.jpg' } },
     children: [
       // The editorial type pages, not the filtered grid: somebody opening this
       // menu is choosing what kind of thing they want, which is exactly the
@@ -302,13 +315,19 @@ export const mainNav: NavItem[] = [
   },
 ];
 
-/** The phone tab bar. Chosen by what a phone user actually does. */
+/**
+ * The phone tab bar: the five things done most often while shopping.
+ *
+ * Search opens the search panel rather than navigating, so it has no `href`.
+ * Story, Process, Custom, Journal, Visit and Account live in the menu drawer.
+ * (`MobileTabBar` holds its own copy of this list with the icon components.)
+ */
 export const mobileTabs = [
   { label: 'Home', href: '/', icon: 'home' },
   { label: 'Shop', href: '/shop', icon: 'grid' },
-  { label: 'Custom', href: '/custom', icon: 'pencil' },
-  { label: 'Process', href: '/process', icon: 'brush' },
-  { label: 'Account', href: '/account', icon: 'user' },
+  { label: 'Search', href: null, icon: 'search' },
+  { label: 'Wishlist', href: '/wishlist', icon: 'heart' },
+  { label: 'Bag', href: '/cart', icon: 'bag' },
 ] as const;
 
 export const footerNav = [

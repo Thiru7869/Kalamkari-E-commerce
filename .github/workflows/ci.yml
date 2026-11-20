@@ -89,6 +89,14 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      # Real-database tests: constraints, concurrency, payments, webhooks,
+      # checkout. They run against the Postgres service above, in their own
+      # schema so they cannot touch the seeded catalogue the smoke test uses.
+      - name: Integration tests
+        run: npm run test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://svl:ci-only-password@localhost:5432/kalamkari?schema=integration
+
       - name: Build
         run: npx next build
 

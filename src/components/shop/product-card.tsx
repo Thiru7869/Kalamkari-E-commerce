@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/primitives';
 import { WishlistButton } from './wishlist-button';
 import { formatPrice, averageRating } from '@/lib/utils';
-import { primaryImage } from '@/lib/serialize';
+import { primaryImage, toList } from '@/lib/serialize';
 import type { ProductCardData } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
@@ -12,8 +12,7 @@ export function ProductCard({
   wishlisted = false,
   priority = false,
   className,
-  sizes = '(min-width: 1280px) 22vw, (min-width: 768px) 30vw, 31vw',
-  density = 'comfortable',
+  sizes = '(min-width: 1280px) 22vw, (min-width: 768px) 30vw, 50vw',
 }: {
   product: ProductCardData;
   wishlisted?: boolean;
@@ -21,20 +20,14 @@ export function ProductCard({
   priority?: boolean;
   className?: string;
   sizes?: string;
-  /**
-   * `compact` is the three-up mobile grid, where a column is roughly 105px.
-   *
-   * At that width the secondary rows — summary, cloth, hand-days, rating —
-   * stop being readable and start being noise, and a 44x44 wishlist target
-   * would cover nearly half the image. So below `sm` the card carries the
-   * piece, its name and its price, and everything else returns at `sm`.
-   * Fewer, larger targets is what makes a dense grid feel deliberate rather
-   * than cramped.
-   */
-  density?: 'comfortable' | 'compact';
 }) {
-  const compact = density === 'compact';
   const image = primaryImage(product.images);
+  /*
+    The second photograph of the piece, where there is one. It is already in
+    `images` — most pieces carry a detail or a reverse as their second frame —
+    so showing it costs no query and no new asset.
+  */
+  const secondImage = toList(product.images)[1];
   const rating = averageRating(product.ratingSum, product.ratingCount);
   const soldOut = product.stock < 1;
   const onSale = product.compareAtPrice != null && product.compareAtPrice > product.price;
@@ -46,10 +39,9 @@ export function ProductCard({
 
         At a fixed column width the card's height is set entirely by this
         ratio: 3:4 makes the plate 1.333 times its own width, 5:6 makes it
-        1.2 — exactly 10% shorter, with nothing else on the card touched. That
-        is the whole size reduction, and it is expressed as a ratio rather than
-        a height so it holds at every column width from the 105px phone grid to
-        the 300px desktop one.
+        1.2 — exactly 10% shorter, with nothing else on the card touched. It is
+        expressed as a ratio rather than a height so it holds at every column
+        width, from the two-up phone grid to the four-up desktop one.
 
         It stops at 5:6 rather than going squarer. A saree photographed for
         this catalogue is a tall object — pallu at the top, body falling away —
@@ -71,103 +63,53 @@ export function ProductCard({
         />
 
         {/*
-          Dye bleeding into the weave.
+          The second view, on hover and on keyboard focus.
 
-          A madder bloom that swells from the lower third of the plate as the
-          cursor arrives — the thing a drop of chay actually does when it meets
-          myrobalan-treated cotton, which is to creep along the thread rather
-          than to spread evenly in a circle. Hence the elongated radial and the
-          `screen`-free, plain-alpha implementation.
+          Only where a pointer can hover. On a touch screen `:hover` sticks to
+          whatever was last tapped, so without the media query a phone would
+          leave one card showing its second photograph for no reason a visitor
+          could see. Phones get the second view on the piece's own page, where
+          the gallery has a swipeable rail.
 
-          It is two composited properties, opacity and a static gradient. No
-          canvas, no filter, no blend mode: this card appears up to forty-eight
-          times on a shop page and the one thing a hover flourish must not do
-          is put forty-eight new compositing layers on a phone. It costs
-          nothing until the pointer is over one card.
-
-          Suppressed under reduced motion, and it carries no information — the
-          cloth, the price and the days are all in the markup underneath.
+          Decorative — the first image carries the alt text — and withheld from
+          sold pieces, whose first image is already dimmed and which nobody is
+          choosing between.
         */}
-        <span
-          aria-hidden="true"
-          className={cn(
-            'pointer-events-none absolute inset-0 opacity-0',
-            'transition-opacity duration-1000 ease-out',
-            'motion-safe:group-hover:opacity-100 motion-reduce:hidden',
-          )}
-          style={{
-            backgroundImage:
-              'radial-gradient(120% 55% at 50% 108%, rgb(142 47 34 / 0.30) 0%, ' +
-              'rgb(142 47 34 / 0.12) 38%, transparent 72%)',
-          }}
-        />
-
-        {/*
-          Days of hand-work, on the plate.
-
-          This was already on the card, filed in a grey specification row
-          between the cloth and the rating — which is where a reader's eye goes
-          last, and it is the single number that explains the price. A saree is
-          priced on how many days one person spent drawing it; putting that
-          figure on the photograph is the shortest honest argument this card
-          can make.
-
-          Same `sm` rule as the rest of the secondary content: on the three-up
-          phone grid a column is about 105px and a chip would cover the
-          drawing. It returns the moment there is room.
-        */}
-        {product.craftDays != null && !soldOut && (
-          <span
+        {secondImage && !soldOut && (
+          <Image
+            src={secondImage}
+            alt=""
+            aria-hidden="true"
+            fill
+            sizes={sizes}
             className={cn(
-              'tabular pointer-events-none absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-sm',
-              'bg-kasim-950/62 px-1.5 py-0.5 font-inscription text-[0.5625rem] uppercase tracking-[0.12em] text-cotton-50',
-              'backdrop-blur-[2px] sm:bottom-2 sm:left-2 sm:px-2 sm:py-1 sm:text-[0.625rem]',
-              compact && 'hidden sm:flex',
+              'pointer-events-none object-cover opacity-0',
+              'transition-opacity duration-300 ease-out motion-reduce:transition-none',
+              '[@media(hover:hover)]:group-hover:opacity-100',
+              'group-focus-within:opacity-100',
             )}
-          >
-            {product.craftDays} days by hand
-          </span>
+          />
         )}
 
-        <div
-          className={cn(
-            'pointer-events-none absolute left-1.5 top-1.5 flex flex-col items-start gap-1.5 sm:left-2 sm:top-2',
-            compact && '[&_*]:text-[0.5625rem] sm:[&_*]:text-inherit',
-          )}
-        >
-          {/* On the compact grid only the one badge that changes a decision. */}
-          {product.masterpiece && (
-            <Badge variant="gold" className={cn(compact && 'hidden sm:inline-flex')}>
-              Signed piece
-            </Badge>
-          )}
+        <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1.5">
+          {product.masterpiece && <Badge variant="gold">Signed piece</Badge>}
           {soldOut ? (
             <Badge variant="muted">Sold</Badge>
           ) : product.stock === 1 ? (
-            <Badge
-              variant="outline"
-              className={cn('bg-background/90', compact && 'hidden sm:inline-flex')}
-            >
+            <Badge variant="outline" className="bg-background/90">
               One of one
             </Badge>
           ) : null}
-          {onSale && !soldOut && (
-            <Badge className={cn(compact && 'hidden sm:inline-flex')}>Reduced</Badge>
-          )}
+          {onSale && !soldOut && <Badge>Reduced</Badge>}
         </div>
 
-        <div className={cn('absolute right-2 top-2', compact && 'hidden sm:block')}>
+        <div className="absolute right-2 top-2">
           <WishlistButton productId={product.id} initialWishlisted={wishlisted} />
         </div>
       </div>
 
-      <div className={cn('flex flex-1 flex-col', compact ? 'pt-2 sm:pt-2.5' : 'pt-2.5')}>
-        <h3
-          className={cn(
-            'font-display leading-snug',
-            compact ? 'line-clamp-2 text-[0.8125rem] sm:line-clamp-none sm:text-[1.0625rem]' : 'text-[1.0625rem]',
-          )}
-        >
+      <div className="flex flex-1 flex-col pt-2.5">
+        <h3 className="font-display text-[1.0625rem] leading-snug">
           <Link
             href={`/product/${product.slug}`}
             className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -176,56 +118,46 @@ export function ProductCard({
           </Link>
         </h3>
 
-        <p
-          className={cn(
-            'mt-1 line-clamp-2 text-sm leading-snug text-muted-foreground',
-            compact && 'hidden sm:line-clamp-2 sm:block',
-          )}
-        >
+        <p className="mt-1 line-clamp-2 text-sm leading-snug text-muted-foreground">
           {product.summary}
         </p>
 
-        {/* The cloth only. Hand-days used to run in behind it here, in grey,
-            at the size of a footnote — it is now on the plate above, where the
-            number can actually do its job. Repeating it would say it twice on
-            one card. */}
+        {/* The cloth only. */}
         {product.fabric && (
-          <div
-            className={cn(
-              'mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground',
-              compact && 'hidden sm:flex',
-            )}
-          >
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <span>{product.fabric.name}</span>
           </div>
         )}
 
         {/*
+          Days of hand-work, as a plain line.
+
+          A saree is priced on how many days one person spent drawing it, so the
+          figure stays on the card. It used to sit on the photograph in a blurred
+          chip, which covered part of the drawing; it now stands under the cloth,
+          in the same tracked capitals the site uses for every label.
+        */}
+        {product.craftDays != null && !soldOut && (
+          <p className="tabular mt-1.5 font-inscription text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
+            {product.craftDays} days by hand
+          </p>
+        )}
+
+        {/*
           Who drew it.
 
-          On its own line rather than appended to the cloth-and-days row: that
-          row is specification, and this is not. It is the one fact on the card
-          that names a person, and running it in behind "Tussar Silk · 42 days"
-          would file a hand under a list of measurements.
+          On its own line rather than appended to the cloth row: that row is
+          specification, and this is not. It is the one fact on the card that
+          names a person.
 
           Only where the store has confirmed it — 15 of the 43 pieces. The rest
           say nothing rather than "artisan unknown", which would read as a gap
           in the record instead of what it is, which is the store not having
           told us yet.
-
-          It follows the same `sm` rule as the row above, so the three-up phone
-          grid — where a column is about 105px — gains no height from it.
         */}
         {product.artisan && (
-          <p
-            className={cn(
-              'mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground',
-              compact && 'hidden sm:flex',
-            )}
-          >
-            {/* The nib, at 10px. The site's one mark for "a hand did this",
-                and the reason this line now reads as an attribution rather
-                than as another grey specification. */}
+          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+            {/* The nib, at 10px. The site's one mark for "a hand did this". */}
             <svg
               viewBox="0 0 24 24"
               className="h-2.5 w-2.5 shrink-0 text-primary/75"
@@ -244,32 +176,15 @@ export function ProductCard({
           </p>
         )}
 
-        <div
-          className={cn(
-            'mt-auto flex items-baseline gap-2',
-            compact ? 'pt-1.5 sm:pt-2.5' : 'pt-2.5',
-          )}
-        >
-          <span className={cn('tabular font-medium', compact && 'text-[0.8125rem] sm:text-base')}>
-            {formatPrice(product.price)}
-          </span>
+        <div className="mt-auto flex items-baseline gap-2 pt-2.5">
+          <span className="tabular font-medium">{formatPrice(product.price)}</span>
           {onSale && (
-            <span
-              className={cn(
-                'tabular text-sm text-muted-foreground line-through',
-                compact && 'hidden sm:inline',
-              )}
-            >
+            <span className="tabular text-sm text-muted-foreground line-through">
               {formatPrice(product.compareAtPrice!)}
             </span>
           )}
           {rating != null && (
-            <span
-              className={cn(
-                'ml-auto text-xs text-muted-foreground',
-                compact && 'hidden sm:inline',
-              )}
-            >
+            <span className="ml-auto text-xs text-muted-foreground">
               <span aria-hidden="true">★ </span>
               {rating.toFixed(1)}
               <span className="sr-only">
@@ -287,16 +202,14 @@ export function ProductCard({
 /**
  * The gaps every grid of pieces uses.
  *
- * Stated once and imported, because there are three of these grids — the shop
- * listing, the home page's featured row and the related pieces on a product
- * page — and they were carrying three hand-copied gap strings that had already
- * begun to disagree.
+ * Stated once and imported, because there are several of these grids — the shop
+ * listing, the type and collection pages and the related pieces on a product
+ * page — and they were carrying hand-copied gap strings that had already begun
+ * to disagree.
  *
- * Tightened along with the 10% the plates lost. A row gap is read against the
- * height of the thing it separates, so leaving `gap-y-9` under a card that is
- * now a tenth shorter would have *increased* the apparent air between rows
- * while the page was supposed to be getting calmer. The column gaps come in a
- * step at the top end for the same reason.
+ * A row gap is read against the height of the thing it separates, so the row
+ * gap stays modest under a 5:6 plate: a larger one would add air between rows
+ * while the page is supposed to be getting calmer.
  */
 export const PRODUCT_GRID_GAP =
   'gap-x-2.5 gap-y-5 sm:gap-x-3.5 sm:gap-y-7 md:gap-x-5';
@@ -304,22 +217,22 @@ export const PRODUCT_GRID_GAP =
 /**
  * The listing grid.
  *
- * Three across at every width. On a phone that is what the store asked for and
- * what suits a catalogue of cloth: at two-up the eye reads one piece at a time,
- * at three-up it reads the collection, and the card switches to its compact
- * density so the extra column costs no legibility.
+ * Two across on a phone, three from `md`, four from `xl`. Two-up lets the card
+ * carry everything it has — name, cloth, days, price, the wishlist heart at a
+ * proper touch size — where the three-up grid it replaced had to strip all of
+ * that away on a phone to fit a column of about 105px.
  *
- * It used to widen to four at `xl`. It no longer does, and that is a decision
- * rather than an oversight — a hand-painted piece is the unit of interest here,
- * and a fourth column buys density by making every drawing smaller on exactly
- * the screens with room to show them properly. Three columns of larger cards
- * shows the work; four shows the inventory.
+ * `withSidebar` is for the shop listing, which gives the filters a 16rem column
+ * from `lg`. Four columns in what is left would make each plate roughly 205px
+ * at `xl`, smaller than the three-up they replace, so that grid stays at three
+ * until `2xl`, where the container stops growing and four fit comfortably.
  */
 export function ProductGrid({
   products,
   wishlistIds,
   priorityCount = 6,
   groupEvery,
+  withSidebar = false,
 }: {
   products: ProductCardData[];
   wishlistIds?: Set<string>;
@@ -327,20 +240,25 @@ export function ProductGrid({
   /**
    * Break the run every N cards with a quiet marker.
    *
-   * Thirty cards in one column is ten rows, and ten rows with nothing between
-   * them is a wall — there is no way to say "about two thirds down" to
-   * yourself, and no way to find your place again after opening a piece and
-   * coming back. A rule and a number every ten gives the run a scale without
-   * turning it back into pages.
+   * Thirty cards in one column is a wall — there is no way to say "about two
+   * thirds down" to yourself, and no way to find your place again after opening
+   * a piece and coming back. A rule and a number every ten gives the run a
+   * scale without turning it back into pages.
    *
-   * Omitted, the grid is one unbroken block, which is what a six-card rail on
-   * the home page wants.
+   * Omitted, the grid is one unbroken block, which is what a short rail wants.
    */
   groupEvery?: number;
+  /** The grid sits beside the filter column, so it has less width to spend. */
+  withSidebar?: boolean;
 }) {
   if (!groupEvery || products.length <= groupEvery) {
     return (
-      <Grid products={products} wishlistIds={wishlistIds} priorityCount={priorityCount} />
+      <Grid
+        products={products}
+        wishlistIds={wishlistIds}
+        priorityCount={priorityCount}
+        withSidebar={withSidebar}
+      />
     );
   }
 
@@ -362,6 +280,7 @@ export function ProductGrid({
               // `i < priorityCount` inside each group would mark the first six
               // of every ten as LCP candidates and eagerly load eighteen images.
               priorityCount={Math.max(0, priorityCount - offset)}
+              withSidebar={withSidebar}
             />
 
             {/*
@@ -392,20 +311,27 @@ function Grid({
   products,
   wishlistIds,
   priorityCount,
+  withSidebar,
 }: {
   products: ProductCardData[];
   wishlistIds?: Set<string>;
   priorityCount: number;
+  withSidebar: boolean;
 }) {
   return (
-    <ul className={cn('grid grid-cols-3', PRODUCT_GRID_GAP)}>
+    <ul
+      className={cn(
+        'grid grid-cols-2 md:grid-cols-3',
+        withSidebar ? '2xl:grid-cols-4' : 'xl:grid-cols-4',
+        PRODUCT_GRID_GAP,
+      )}
+    >
       {products.map((product, i) => (
         <li key={product.id} className="flex">
           <ProductCard
             product={product}
             wishlisted={wishlistIds?.has(product.id)}
             priority={i < priorityCount}
-            density="compact"
             className="w-full"
           />
         </li>

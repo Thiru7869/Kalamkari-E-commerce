@@ -59,13 +59,12 @@ export async function RecentlyViewed({
 
         <ul className="snap-rail mt-6 -mx-5 px-5 sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-x-3.5 sm:gap-y-7 sm:overflow-visible sm:px-0 lg:grid-cols-6">
           {products.map((product) => (
-            <li key={product.id} className="flex w-[38vw] max-w-[10rem] sm:w-auto sm:max-w-none">
+            <li key={product.id} className="flex w-[46vw] max-w-[11rem] sm:w-auto sm:max-w-none">
               <ProductCard
                 product={product}
                 wishlisted={wishlistIds.has(product.id)}
-                density="compact"
                 className="w-full"
-                sizes="(min-width: 1024px) 16vw, (min-width: 640px) 24vw, 38vw"
+                sizes="(min-width: 1024px) 16vw, (min-width: 640px) 24vw, 46vw"
               />
             </li>
           ))}

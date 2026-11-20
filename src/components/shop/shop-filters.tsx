@@ -15,7 +15,12 @@ import { cn } from '@/lib/utils';
 import { FilterTrigger } from './shop-subnav';
 
 type Options = {
-  fabrics: { slug: string; name: string; family: string; _count: { products: number } }[];
+  fabrics: {
+    slug: string;
+    name: string;
+    family: string;
+    _count: { products: number };
+  }[];
   motifs: { slug: string; name: string; _count: { products: number } }[];
   dyes: {
     slug: string;
@@ -70,27 +75,20 @@ const PRICE_BANDS: PriceBand[] = [
  * bookmarkable, survives a refresh, and works with the browser's back button —
  * all of which client-side filter state silently breaks.
  *
- * Desktop shows the panel inline; phones get it in a bottom sheet, because a
- * sidebar on a 390px viewport is not a sidebar.
+ * One control at every width: a Filter button above the type chips that opens a
+ * sheet — from the bottom on a phone, centred on a laptop.
  */
 export function ShopFilters({
   options,
   basePath,
   selected,
   price,
-  triggerOnly = false,
 }: {
   options: Options;
   basePath: string;
   selected: { fabrics: string[]; motifs: string[]; dyes: string[] };
   /** Whatever the URL currently says, in paise. Both sides are optional. */
   price: { min?: number; max?: number };
-  /**
-   * Render only the sheet and its trigger, for placing inside the sticky
-   * sub-navbar. Without this the component would also render its desktop
-   * sidebar a second time.
-   */
-  triggerOnly?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -106,9 +104,7 @@ export function ShopFilters({
   const toggle = (key: 'fabric' | 'motif' | 'dye', value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     const current = params.getAll(key);
-    const next = current.includes(value)
-      ? current.filter((v) => v !== value)
-      : [...current, value];
+    const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
 
     params.delete(key);
     next.forEach((v) => params.append(key, v));
@@ -116,7 +112,9 @@ export function ShopFilters({
     params.delete('page');
 
     startTransition(() => {
-      router.push(`${basePath}${params.toString() ? `?${params}` : ''}`, { scroll: false });
+      router.push(`${basePath}${params.toString() ? `?${params}` : ''}`, {
+        scroll: false,
+      });
     });
   };
 
@@ -130,7 +128,9 @@ export function ShopFilters({
     params.delete('page');
 
     startTransition(() => {
-      router.push(`${basePath}${params.toString() ? `?${params}` : ''}`, { scroll: false });
+      router.push(`${basePath}${params.toString() ? `?${params}` : ''}`, {
+        scroll: false,
+      });
     });
   };
 
@@ -143,7 +143,9 @@ export function ShopFilters({
     params.delete('max');
     params.delete('page');
     startTransition(() => {
-      router.push(`${basePath}${params.toString() ? `?${params}` : ''}`, { scroll: false });
+      router.push(`${basePath}${params.toString() ? `?${params}` : ''}`, {
+        scroll: false,
+      });
     });
   };
 
@@ -233,8 +235,8 @@ export function ShopFilters({
         <fieldset>
           <legend className="text-sm font-medium">Colour</legend>
           <p className="mt-1 text-xs text-muted-foreground">
-            Eight pots, and nothing else goes on the cloth. A piece is listed under
-            every colour it actually carries.
+            Eight pots, and nothing else goes on the cloth. A piece is listed under every colour it
+            actually carries.
           </p>
           <ul className="mt-4 grid grid-cols-2 gap-1.5">
             {options.dyes.map((dye) => {
@@ -361,44 +363,32 @@ export function ShopFilters({
   );
 
   return (
-    <>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <FilterTrigger count={activeCount} />
+      </DialogTrigger>
       {/*
-        The sheet, opened from the trigger in the sticky sub-navbar.
-
-        The trigger used to be a full-width button inside its own sticky
-        wrapper, which meant two sticky bars stacked on a phone and forty
-        pixels of chrome doing one job. It now lives in the bar with
-        everything else.
+        One sheet at every width. From the bottom on a phone; from `lg` it
+        becomes a centred panel, so the same controls serve a laptop without a
+        permanent column taking a quarter of the page from the pieces.
       */}
-      <div className="lg:hidden">
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <FilterTrigger count={activeCount} />
-          </DialogTrigger>
-          <DialogContent side="bottom" className="max-h-[85svh] rounded-t-lg p-0">
-            <DialogTitle className="border-b border-border px-5 py-4 font-display text-lg">
-              Filter
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              Narrow the pieces shown by motif and cloth
-            </DialogDescription>
-            <div className="overflow-y-auto overscroll-contain px-5 py-5">{panel}</div>
-            <div className="border-t border-border bg-background p-4">
-              <Button className="w-full" size="lg" onClick={() => setOpen(false)}>
-                Show results
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Desktop: inline sidebar. Suppressed when this instance exists only
-          to supply the sub-navbar's trigger, or it would render twice. */}
-      {!triggerOnly && (
-        <aside className="hidden lg:block" aria-label="Filters">
-          <div className="sticky top-32">{panel}</div>
-        </aside>
-      )}
-    </>
+      <DialogContent
+        side="bottom"
+        className="max-h-[85svh] rounded-t-lg p-0 lg:inset-0 lg:m-auto lg:h-fit lg:max-w-xl lg:rounded-lg"
+      >
+        <DialogTitle className="border-b border-border px-5 py-4 font-display text-lg">
+          Filter
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Narrow the pieces shown by motif and cloth
+        </DialogDescription>
+        <div className="max-h-[60svh] overflow-y-auto overscroll-contain px-5 py-5">{panel}</div>
+        <div className="border-t border-border bg-background p-4">
+          <Button className="w-full" size="lg" onClick={() => setOpen(false)}>
+            Show results
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

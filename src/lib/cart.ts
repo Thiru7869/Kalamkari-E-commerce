@@ -5,6 +5,9 @@ import { cookies } from 'next/headers';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { RateLimitedError } from '@/lib/errors';
+import { limitByIp } from '@/lib/rate-limit';
+import { GUEST_WISHLIST_COOKIE, parseGuestWishlist } from '@/lib/guest-wishlist';
 import {
   computeTotals,
   EMPTY_CART,
@@ -73,6 +76,12 @@ export async function resolveCartForWrite() {
     const cart = await prisma.cart.findUnique({ where: { guestId } });
     if (cart) return cart;
   }
+
+  // About to create a row for somebody who has not signed in. Each one is a
+  // free insert for the caller, so this is the cheapest thing on the site to
+  // abuse; it is limited separately from, and more tightly than, adding items.
+  const created = await limitByIp('guestCart');
+  if (!created.ok) throw new RateLimitedError(created.retryAfterSeconds);
 
   const newGuestId = randomUUID();
   const cart = await prisma.cart.create({ data: { guestId: newGuestId } });
@@ -193,12 +202,56 @@ export const getCartCount = cache(async (): Promise<number> => {
   return result._sum.quantity ?? 0;
 });
 
+/**
+ * Product ids saved by a visitor who has not signed in, newest first.
+ *
+ * Read-only, so it is safe during render. Ids are candidates: the cookie is
+ * whatever the browser sent, and anything that does not match a real product
+ * is simply never found by the query that turns them into cards.
+ */
+export async function readGuestWishlist(): Promise<string[]> {
+  const jar = await cookies();
+  return parseGuestWishlist(jar.get(GUEST_WISHLIST_COOKIE)?.value);
+}
+
 export const getWishlistIds = cache(async (): Promise<Set<string>> => {
   const session = await auth();
-  if (!session?.user?.id) return new Set();
+  if (!session?.user?.id) return new Set(await readGuestWishlist());
   const items = await prisma.wishlistItem.findMany({
     where: { userId: session.user.id },
     select: { productId: true },
   });
   return new Set(items.map((i) => i.productId));
 });
+
+/**
+ * Move a guest wishlist onto a user account, then drop the guest cookie.
+ *
+ * Called from the Auth.js `signIn` event, beside `mergeGuestCart` and for the
+ * same reason: a route handler is where deleting a cookie is legal.
+ *
+ * Only ids that match a real, listed product are carried over, and
+ * `skipDuplicates` makes the merge idempotent — signing in twice, or saving a
+ * piece on both sides, never creates a second row.
+ */
+export async function mergeGuestWishlist(userId: string) {
+  const jar = await cookies();
+  const raw = jar.get(GUEST_WISHLIST_COOKIE)?.value;
+  if (raw === undefined) return;
+  const ids = parseGuestWishlist(raw);
+
+  // Whatever happens below, the cookie has served its purpose.
+  jar.delete(GUEST_WISHLIST_COOKIE);
+  if (ids.length === 0) return;
+
+  const real = await prisma.product.findMany({
+    where: { id: { in: ids }, status: 'ACTIVE' },
+    select: { id: true },
+  });
+  if (real.length === 0) return;
+
+  await prisma.wishlistItem.createMany({
+    data: real.map((p) => ({ userId, productId: p.id })),
+    skipDuplicates: true,
+  });
+}

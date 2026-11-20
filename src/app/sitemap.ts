@@ -31,6 +31,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // page. It answers "what is Kalamkari and why does it matter", which is a
     // thing people search for without knowing this store exists.
     { url: absoluteUrl('/heritage'), lastModified: now, changeFrequency: 'yearly', priority: 0.8 },
+    { url: absoluteUrl('/heritage/history'), lastModified: now, changeFrequency: 'yearly', priority: 0.7 },
+    { url: absoluteUrl('/heritage/craftsmanship'), lastModified: now, changeFrequency: 'yearly', priority: 0.7 },
+    { url: absoluteUrl('/heritage/culture'), lastModified: now, changeFrequency: 'yearly', priority: 0.7 },
+    { url: absoluteUrl('/heritage/artisans'), lastModified: now, changeFrequency: 'yearly', priority: 0.7 },
+    { url: absoluteUrl('/heritage/motifs'), lastModified: now, changeFrequency: 'yearly', priority: 0.7 },
+    { url: absoluteUrl('/heritage/colours'), lastModified: now, changeFrequency: 'yearly', priority: 0.7 },
     { url: absoluteUrl('/custom'), lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: absoluteUrl('/journal'), lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: absoluteUrl('/contact'), lastModified: now, changeFrequency: 'monthly', priority: 0.7 },

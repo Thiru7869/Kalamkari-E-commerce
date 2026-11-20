@@ -46,8 +46,11 @@ export function ExploreMenu() {
       </DialogTrigger>
 
       <DialogContent
-        side="top"
-        className="max-h-[86svh] overflow-y-auto rounded-b-lg p-0 sm:max-w-3xl"
+        side="center"
+        // Centred with `inset-0` + auto margins + `h-fit`, not the variant's
+        // `-translate-*` — the open/close animation owns `transform`, and a
+        // centring translate would be replaced by it (see CLAUDE.md).
+        className="inset-0 m-auto h-fit max-h-[86svh] translate-x-0 translate-y-0 overflow-y-auto rounded-lg p-0 sm:max-w-3xl"
       >
         <DialogTitle className="border-b border-border px-5 py-4 font-display text-lg">
           Explore the store

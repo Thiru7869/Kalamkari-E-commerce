@@ -5,11 +5,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 /**
- * Sequences the loading frame, the doorway and the walk-through.
+ * Sequences the loading frame and the doorway.
  *
- *   preloader  →  welcome  →  quick tour  →  the site
+ *   preloader  →  welcome  →  the site
  *
- * All three are code-split and none is requested twice in a session, so the
+ * Both are code-split and none is requested twice in a session, so the
  * overwhelming majority of page views inside a visit pay nothing for any of
  * them.
  *
@@ -37,16 +37,12 @@ const WelcomeOverlay = dynamic(
   { ssr: false },
 );
 
-const QuickTour = dynamic(() => import('./quick-tour').then((m) => m.QuickTour), {
-  ssr: false,
-});
-
 const SEEN_KEY = 'svl_intro';
 
 /** Routes where an interruption is never acceptable. */
 const SUPPRESSED = ['/checkout', '/admin', '/account', '/signin', '/orders'];
 
-type Phase = 'idle' | 'preloader' | 'welcome' | 'tour' | 'done';
+type Phase = 'idle' | 'preloader' | 'welcome' | 'done';
 
 function seen(step: string) {
   try {
@@ -92,11 +88,6 @@ export function FirstVisit() {
       setPhase('welcome');
       return;
     }
-    if (!seen('tour')) {
-      setPhase('tour');
-      return;
-    }
-
     setPhase('done');
   }, [pathname, phase]);
 
@@ -107,17 +98,11 @@ export function FirstVisit() {
 
   const finishWelcome = useCallback(() => {
     remember('welcome');
-    setPhase(seen('tour') ? 'done' : 'tour');
-  }, []);
-
-  const finishTour = useCallback(() => {
-    remember('tour');
     setPhase('done');
   }, []);
 
   if (phase === 'preloader') return <Preloader onDone={finishPreloader} />;
   if (phase === 'welcome') return <WelcomeOverlay onClose={finishWelcome} />;
-  if (phase === 'tour') return <QuickTour onClose={finishTour} />;
 
   return null;
 }

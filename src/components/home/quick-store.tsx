@@ -84,7 +84,7 @@ export function QuickStore({
           single instruction.
         */}
         <div
-          className="-mx-5 mt-8 overflow-x-auto pb-2 [scrollbar-width:thin] sm:-mx-6 md:mt-10 lg:hidden"
+          className="-mx-5 mt-5 overflow-x-auto pb-2 [scrollbar-width:thin] sm:-mx-6 md:mt-6 lg:hidden"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           <ul className="flex w-max gap-3.5 px-5 sm:gap-4 sm:px-6">
@@ -107,7 +107,7 @@ export function QuickStore({
         </div>
 
         {/* ---- From lg: five across, twice ------------------------------- */}
-        <ul className="mt-10 hidden grid-cols-5 gap-x-5 gap-y-9 lg:grid">
+        <ul className="mt-6 hidden grid-cols-5 gap-x-4 gap-y-6 lg:grid">
           {items.map((product) => (
             <li key={product.id} className="flex">
               <ProductCard
@@ -121,7 +121,7 @@ export function QuickStore({
         </ul>
 
         <RevealOnScroll delay={0.06}>
-          <p className="mt-9 border-t border-border pt-6 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-6 border-t border-border pt-4 text-sm leading-relaxed text-muted-foreground">
             Almost everything here is one of one. There is no device anywhere in this craft
             that would make a second, so when a piece goes, its drawing goes with it — and
             the nearest thing to having it again is having a sibling drawn on purpose.{' '}

@@ -28,3 +28,19 @@ export class SoldOutError extends Error {
 export function isSoldOutError(error: unknown): error is SoldOutError {
   return error instanceof SoldOutError;
 }
+
+/**
+ * A caller went over a rate limit while something deep in the stack was about
+ * to create a row for them (a guest cart). Thrown so the creator does not have
+ * to return a half-valid value; the action at the top turns it into a message.
+ */
+export class RateLimitedError extends Error {
+  constructor(readonly retryAfterSeconds: number) {
+    super('Rate limited');
+    this.name = 'RateLimitedError';
+  }
+}
+
+export function isRateLimitedError(error: unknown): error is RateLimitedError {
+  return error instanceof RateLimitedError;
+}

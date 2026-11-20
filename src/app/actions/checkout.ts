@@ -12,6 +12,9 @@ import { isRazorpayConfigured } from '@/lib/payments';
 import { notifyOrderPlaced } from '@/lib/mail';
 import { grantOrderAccess } from '@/lib/order-access';
 import { SoldOutError, isSoldOutError } from '@/lib/errors';
+import { Prisma } from '@prisma/client';
+import { storedQuantitySchema } from '@/lib/schemas/cart';
+import { limitByIp, limitByPrivateKey, RATE_LIMITED_MESSAGE } from '@/lib/rate-limit';
 
 // CheckoutState and initialCheckoutState live in lib/form-state.ts — see the
 // note there on why a 'use server' module cannot export them.
@@ -29,6 +32,13 @@ export async function placeOrder(
   _prev: CheckoutState,
   formData: FormData,
 ): Promise<CheckoutState> {
+  // Placing an order takes a piece off sale before anybody has paid for it, so
+  // this is the most valuable thing on the site to abuse. Limited by address
+  // first (cheap, before any parsing) and by email once we have one.
+  if (!(await limitByIp('checkout')).ok) {
+    return { status: 'error', message: RATE_LIMITED_MESSAGE };
+  }
+
   const raw = Object.fromEntries(formData);
   const parsed = checkoutSchema.safeParse({
     ...raw,
@@ -45,6 +55,10 @@ export async function placeOrder(
   }
 
   const input = parsed.data;
+
+  if (!(await limitByPrivateKey('checkoutEmail', input.email)).ok) {
+    return { status: 'error', message: RATE_LIMITED_MESSAGE };
+  }
 
   if (input.paymentMethod === 'RAZORPAY' && !isRazorpayConfigured()) {
     return {
@@ -76,6 +90,23 @@ export async function placeOrder(
 
   if (items.length === 0) return { status: 'error', message: 'Your bag is empty.' };
 
+  // The cart is data in a table, not a promise. A row written before quantity
+  // was validated — or by hand — could hold zero, a negative or a figure no bag
+  // should carry; nothing downstream may be allowed to do arithmetic on it.
+  if (
+    items.some(
+      (i) =>
+        !storedQuantitySchema.safeParse(i.quantity).success ||
+        !Number.isInteger(i.product.price) ||
+        i.product.price <= 0,
+    )
+  ) {
+    return {
+      status: 'error',
+      message: 'Something in your bag is not valid. Please remove it and add it again.',
+    };
+  }
+
   const unavailable = items.filter(
     (i) => i.product.status !== 'ACTIVE' || i.product.stock < i.quantity,
   );
@@ -102,13 +133,19 @@ export async function placeOrder(
   }));
   const totals = computeTotals(lines);
 
-  const orderNumber = generateOrderNumber();
+  if (!Number.isInteger(totals.total) || totals.total <= 0) {
+    return { status: 'error', message: 'Your bag could not be priced. Please review it.' };
+  }
 
-  const order = await prisma.$transaction(async (tx) => {
+  // Locked in a fixed order, so two orders that share pieces cannot each take
+  // one lock and wait for the other's.
+  const lockOrder = [...lines].sort((a, b) => a.productId.localeCompare(b.productId));
+
+  const place = (orderNumber: string) => prisma.$transaction(async (tx) => {
     // Re-check stock inside the transaction and decrement atomically. On a
     // one-of-one catalogue this is the difference between selling a piece once
     // and selling it twice.
-    for (const line of lines) {
+    for (const line of lockOrder) {
       const updated = await tx.product.updateMany({
         where: { id: line.productId, stock: { gte: line.quantity }, status: 'ACTIVE' },
         data: { stock: { decrement: line.quantity } },
@@ -181,10 +218,15 @@ export async function placeOrder(
     }
 
     return created;
-  }).catch((error: unknown) => {
-    if (isSoldOutError(error)) return { soldOut: error.productName } as const;
-    throw error;
   });
+
+  let order: Awaited<ReturnType<typeof place>> | { soldOut: string };
+  try {
+    order = await placeWithFreshNumber(place);
+  } catch (error) {
+    if (isSoldOutError(error)) order = { soldOut: error.productName };
+    else throw error;
+  }
 
   if ('soldOut' in order) {
     return {
@@ -226,4 +268,25 @@ export async function placeOrder(
 
   // redirect() throws internally, so it must be outside the transaction.
   redirect(`/checkout/confirmation/${order.number}`);
+}
+
+/**
+ * Runs the order transaction, drawing a new number if one is already taken.
+ *
+ * Numbers are random, so a collision is possible in principle; the unique
+ * constraint turns it into an error, and the whole transaction — stock
+ * included — has rolled back by then, so trying again with a new number is safe.
+ */
+async function placeWithFreshNumber<T>(run: (orderNumber: string) => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await run(generateOrderNumber());
+    } catch (error) {
+      const collision =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002' &&
+        String(error.meta?.target ?? '').includes('number');
+      if (!collision || attempt >= 4) throw error;
+    }
+  }
 }

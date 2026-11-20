@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { orderNumberSchema } from '@/lib/schemas/order-number';
 
 /**
  * Shared schemas. These run on the server for every mutation; client-side
@@ -91,12 +92,6 @@ export const profileSchema = z.object({
   name: z.string().trim().min(2, 'Name is required').max(120),
   phone: phoneSchema.optional(),
 });
-
-const orderNumberSchema = z
-  .string()
-  .trim()
-  .toUpperCase()
-  .regex(/^SVL-[A-Z0-9]{6}$/, 'Order numbers look like SVL-2A7F4C');
 
 export const cancelOrderSchema = z.object({
   number: orderNumberSchema,

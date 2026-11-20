@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getProducts } from '@/lib/queries';
 import { primaryImage } from '@/lib/serialize';
+import { limitByIp, tooManyRequests } from '@/lib/rate-limit';
 
 /**
  * Live results for the in-page search panel.
@@ -34,41 +35,6 @@ const MAX_RESULTS = 8;
 const querySchema = z.string().trim().min(1).max(MAX_QUERY_CHARS);
 
 /* -------------------------------------------------------------------------- */
-/* Rate limiting                                                              */
-/* -------------------------------------------------------------------------- */
-
-/*
-  Same sliding window as the assistant endpoint, with a much higher ceiling:
-  this one is typed into rather than talked to, so a single visitor legitimately
-  produces a burst of requests per sentence. It exists to stop a script walking
-  the catalogue, not to ration real use.
-*/
-const WINDOW_MS = 60_000;
-const MAX_REQUESTS_PER_WINDOW = 90;
-
-const hits = new Map<string, number[]>();
-
-function rateLimited(key: string) {
-  const now = Date.now();
-  const recent = (hits.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
-  recent.push(now);
-  hits.set(key, recent);
-
-  if (hits.size > 5000) {
-    for (const [k, times] of hits) {
-      if (times.every((t) => now - t >= WINDOW_MS)) hits.delete(k);
-    }
-  }
-
-  return recent.length > MAX_REQUESTS_PER_WINDOW;
-}
-
-function clientKey(request: Request) {
-  const forwarded = request.headers.get('x-forwarded-for');
-  return forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'anonymous';
-}
-
-/* -------------------------------------------------------------------------- */
 
 /** What the panel draws. Kept in step with the client by this type alone. */
 export type SearchHit = {
@@ -83,9 +49,10 @@ export type SearchHit = {
 };
 
 export async function GET(request: Request) {
-  if (rateLimited(clientKey(request))) {
-    return NextResponse.json({ hits: [], total: 0 }, { status: 429 });
-  }
+  // Shared across instances; the ceiling is sized for a person typing, and is
+  // there to stop a script walking the catalogue.
+  const limited = await limitByIp('search');
+  if (!limited.ok) return tooManyRequests(limited, { hits: [], total: 0 });
 
   const raw = new URL(request.url).searchParams.get('q') ?? '';
   const parsed = querySchema.safeParse(raw);

@@ -56,8 +56,10 @@ export function SiteFooter() {
           <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
             {footerNav.map((group) => (
               <div key={group.title}>
-                <h2 className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-cotton-200/55">
+                <h2 className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-cotton-200/60">
+                  <span aria-hidden="true" className="mr-1.5 font-normal text-cotton-200/40">[</span>
                   {group.title}
+                  <span aria-hidden="true" className="ml-1.5 font-normal text-cotton-200/40">]</span>
                 </h2>
                 <ul className="mt-4 flex flex-col gap-0.5">
                   {group.links.map((link) => (
@@ -73,7 +75,7 @@ export function SiteFooter() {
                       */}
                       <Link
                         href={link.href}
-                        className="-mx-1 flex min-h-[2.25rem] items-center rounded-sm px-1 text-sm text-cotton-200/85 transition-colors hover:text-cotton-50"
+                        className="-mx-1 flex min-h-[2.25rem] items-center rounded-sm px-1 text-sm text-cotton-200/85 transition-colors duration-swift ease-swift hover:text-cotton-50"
                       >
                         {link.label}
                       </Link>
@@ -113,6 +115,31 @@ export function SiteFooter() {
             Srikalahasti Kalamkari holds a registered Geographical Indication. Small
             irregularities in line, colour depth and repeat are inherent to hand painting
             with natural dye — they are how the work is identified, not defects.
+          </p>
+        </div>
+
+        {/*
+          The name, set once at the width of the page.
+
+          Decorative: the real name is already in the footer as text, so this is
+          `aria-hidden` and carries no information. Sized in vw so it fits the
+          viewport rather than clipping — 18 characters of Fraunces run about
+          9.6em, and 9.4vw leaves the line at roughly 81vw. No overflow-hidden:
+          if it ever grows past the edge the layout audit should say so.
+        */}
+        <div aria-hidden="true" className="mt-14 select-none text-center">
+          <span
+            className="mx-auto block h-px w-full max-w-md"
+            style={{
+              backgroundImage:
+                'linear-gradient(to right, transparent, hsl(var(--gold) / 0.7) 30%, hsl(var(--gold) / 0.7) 70%, transparent)',
+            }}
+          />
+          <p className="mt-8 font-display text-3xl font-semibold leading-tight tracking-tight text-cotton-50/80 sm:text-4xl md:text-5xl">
+            Sri Vijaya Lakshmi
+          </p>
+          <p className="mt-3 font-inscription text-[0.6875rem] uppercase tracking-[0.36em] text-cotton-200/50 sm:text-xs">
+            Fine Kalamkari Arts
           </p>
         </div>
       </div>

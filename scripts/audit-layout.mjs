@@ -15,7 +15,7 @@
  *   node scripts/audit-layout.mjs --base=http://localhost:3000
  *   node scripts/audit-layout.mjs --widths=320,430
  *   node scripts/audit-layout.mjs --routes=/,/shop
- *   node scripts/audit-layout.mjs --intro=tour    # measure the quick tour
+ *   node scripts/audit-layout.mjs --intro=welcome # measure the welcome overlay
  *
  * Exits non-zero if anything overflows, so it can gate a build.
  */
@@ -31,11 +31,11 @@ const WIDTHS = arg('widths', '320,375,390,430').split(',').map(Number);
 /**
  * Which stage of the first-visit sequence to leave running.
  *
- * `skip` (default) dismisses all three. Naming a stage marks everything
+ * `skip` (default) dismisses both. Naming a stage marks everything
  * *before* it as already seen, so that stage appears immediately and can be
  * measured without waiting out a 14-second preloader film first.
  */
-const INTRO_STAGES = ['preloader', 'welcome', 'tour'];
+const INTRO_STAGES = ['preloader', 'welcome'];
 const INTRO = arg('intro', 'skip');
 if (INTRO !== 'skip' && !INTRO_STAGES.includes(INTRO)) {
   console.error(`--intro must be one of: skip, ${INTRO_STAGES.join(', ')}`);
@@ -271,15 +271,15 @@ for (const width of WIDTHS) {
   /*
     The first-visit sequence is audited separately, not skipped.
 
-    By default the preloader, welcome overlay and quick tour are dismissed the
+    By default the preloader and welcome overlay are dismissed the
     way a returning visitor has already dismissed them — otherwise they cover
-    the page and are the only thing measured. That default hid a real bug: the
-    quick-tour card centred itself with `-translate-x-1/2` while also animating
+    the page and are the only thing measured. That default hid a real bug: a
+    quick-tour card (since removed) centred itself with `-translate-x-1/2` while also animating
     `transform`, so it settled at `left: 50%` and ran off the right edge of
     every phone, clipping its own copy. It shipped, because the audit
     suppressed the one component that was broken.
 
-    `--intro=tour` (or `welcome`, or `preloader`) runs the same measurements
+    `--intro=welcome` (or `preloader`) runs the same measurements
     with that stage live. Anything that can cover the viewport has to be
     measured on the viewport.
   */

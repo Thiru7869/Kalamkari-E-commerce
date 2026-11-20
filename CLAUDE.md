@@ -152,7 +152,7 @@ uses for magic links.
 - `catalogue.ts` — the editorial layer over the shop: the type and collection
   pages, and the commission-first note on the narrative motifs.
 - `commission.ts` — the guided questions, the attachment limits, the timeline.
-- `welcome.ts` — the doorway and the six tour stops.
+- `welcome.ts` — the doorway (the welcome overlay's copy and version).
 - `assistant.ts` — Lakshmi's knowledge base, which also backs the offline
   answer engine. The assistant's name, launcher label and role all come from
   `assistantIdentity` in that file; nothing hardcodes them.
@@ -326,16 +326,16 @@ non-zero, so it can gate a build.
 
 **`position: fixed` overflow does not move `scrollWidth`.** A fixed box cannot
 widen the scroll area — it simply sits off-screen, unreadable, with no
-scrollbar to reveal it. The quick-tour card hung 163px off the right edge of a
+scrollbar to reveal it. A quick-tour card (since removed from the site) hung 163px off the right edge of a
 390px phone while `documentElement.scrollWidth - clientWidth` read a clean 0.
 So the audit scans for edge-crossing elements *unconditionally*, not only when
 the document already overflows.
 
 **Anything that can cover the viewport must be measured on the viewport.** The
-audit dismisses the preloader, welcome overlay and quick tour by default,
+audit dismisses the preloader and welcome overlay by default,
 because otherwise they are the only thing it measures. That default is also how
-the tour bug shipped: the audit suppressed the one component that was broken.
-`--intro=preloader|welcome|tour` marks the earlier stages as seen so the named
+the tour-card bug shipped: the audit suppressed the one component that was
+broken. `--intro=preloader|welcome` marks the earlier stages as seen so the named
 one renders and can be measured. Run it after touching any of them.
 
 ## Transform is one property, not several
@@ -343,7 +343,7 @@ one renders and can be measured. Run it after touching any of them.
 **An element positioned by `transform` may not also be animated by
 `transform`.**
 
-The quick-tour card centred itself with `left-1/2 -translate-x-1/2` and also
+The (since removed) quick-tour card centred itself with `left-1/2 -translate-x-1/2` and also
 carried `animate-rise-in`, whose keyframes end on `transform: translateY(0)`.
 That is not composited with the centring translate — it *replaces* it, and
 `animation-fill-mode: forwards` makes the replacement stick. The card settled
@@ -405,7 +405,7 @@ Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
 
 ## Interruptions
 
-The welcome overlay and the quick tour are the only two things on this site that
+The welcome overlay and the preloader are the only things on this site that
 interrupt. Both are governed by `src/components/welcome/first-visit.tsx`:
 
 - Never on `/checkout`, `/admin`, `/account`, `/signin` or `/orders`.

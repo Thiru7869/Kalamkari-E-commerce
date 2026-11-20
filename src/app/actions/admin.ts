@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { ORDER_STATUSES, statusDescription, statusLabel } from '@/lib/orders';
+import { transitionOrder } from '@/lib/order-state';
+import { orderNumberSchema } from '@/lib/schemas/order-number';
 import { notifyOrderDispatched, notifyOrderCancelled, notifyOrderStatus } from '@/lib/mail';
 
 type Result = { ok: true; message: string } | { ok: false; error: string };
@@ -30,80 +32,60 @@ export async function updateOrderStatus(
     return { ok: false, error: 'Unknown status.' };
   }
 
-  const order = await prisma.order.findUnique({
-    where: { number: orderNumber },
-    include: { items: true },
+  const parsedNumber = orderNumberSchema.safeParse(orderNumber);
+  if (!parsedNumber.success) return { ok: false, error: 'Order not found.' };
+
+  // Every status change goes through the one service: legal moves only, one
+  // winner among concurrent callers, and stock returned exactly once.
+  const result = await transitionOrder({
+    orderNumber: parsedNumber.data,
+    to: status,
+    actor: 'admin',
+    note: note?.trim() || undefined,
   });
-  if (!order) return { ok: false, error: 'Order not found.' };
 
-  const now = new Date();
-
-  await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: { id: order.id },
-      data: {
-        status,
-        // Timestamps are only ever set, never cleared, so the history of an
-        // order stays readable even if it moves backwards through statuses.
-        ...(status === 'CONFIRMED' && !order.confirmedAt ? { confirmedAt: now } : {}),
-        ...(status === 'SHIPPED' && !order.shippedAt ? { shippedAt: now } : {}),
-        ...(status === 'DELIVERED' && !order.deliveredAt ? { deliveredAt: now } : {}),
-        ...(status === 'CANCELLED' && !order.cancelledAt ? { cancelledAt: now } : {}),
-        // Cancelling an order that was actually paid for owes the customer
-        // money. Recording that here means the refund shows on the order and
-        // in the admin list, rather than living only in somebody's memory.
-        // The money itself moves in the payment provider's dashboard; this is
-        // the store's record that it should.
-        ...(status === 'CANCELLED' && order.paymentStatus === 'PAID'
-          ? { paymentStatus: 'REFUNDED' }
-          : {}),
-      },
-    });
-
-    await tx.orderEvent.create({
-      data: {
-        orderId: order.id,
-        status,
-        message: note?.trim() || statusDescription(status) || statusLabel(status),
-      },
-    });
-
-    // Cancelling returns the pieces to the catalogue — on a one-of-one
-    // catalogue, failing to do this permanently removes a saleable item.
-    if (status === 'CANCELLED' && order.status !== 'CANCELLED') {
-      for (const item of order.items) {
-        if (!item.productId) continue;
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        });
-      }
+  if (!result.ok) {
+    switch (result.reason) {
+      case 'not-found':
+        return { ok: false, error: 'Order not found.' };
+      case 'awaiting-payment':
+        return { ok: false, error: 'This order is waiting for its online payment and cannot be confirmed by hand.' };
+      case 'conflict':
+        return { ok: false, error: 'Somebody changed this order just now. Reload and look again.' };
+      default:
+        return {
+          ok: false,
+          error: `An order that is ${statusLabel(result.from ?? '').toLowerCase()} cannot be moved to ${statusLabel(status).toLowerCase()}.`,
+        };
     }
-  });
+  }
+
+  const { before } = result;
 
   // Tell the customer, for the transitions they would want to hear about.
   // A status the store moves through internally (PACKED) is not one of them —
   // an email per internal step trains people to stop reading them.
   const message = note?.trim() || statusDescription(status);
 
-  if (status === 'SHIPPED' && order.status !== 'SHIPPED') {
+  if (status === 'SHIPPED') {
     await notifyOrderDispatched(
-      { number: order.number, email: order.email, shipName: order.shipName },
-      order.courier,
-      order.trackingNumber,
+      { number: before.number, email: before.email, shipName: before.shipName },
+      before.courier,
+      before.trackingNumber,
     );
-  } else if (status === 'CANCELLED' && order.status !== 'CANCELLED') {
+  } else if (status === 'CANCELLED') {
     await notifyOrderCancelled(
-      { number: order.number, email: order.email },
-      order.paymentStatus === 'PAID',
+      { number: before.number, email: before.email },
+      result.refundPending,
     );
-  } else if ((status === 'IN_PRODUCTION' || status === 'DELIVERED') && order.status !== status) {
-    await notifyOrderStatus({ number: order.number, email: order.email }, status, message);
+  } else if (status === 'IN_PRODUCTION' || status === 'DELIVERED') {
+    await notifyOrderStatus({ number: before.number, email: before.email }, status, message);
   }
 
   revalidatePath('/admin');
   revalidatePath('/admin/orders');
-  revalidatePath(`/admin/orders/${orderNumber}`);
+  revalidatePath(`/admin/orders/${before.number}`);
+  revalidatePath('/shop');
   return { ok: true, message: `Order marked ${statusLabel(status).toLowerCase()}.` };
 }
 

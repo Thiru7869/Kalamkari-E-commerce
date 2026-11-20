@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/primitives';
+import { SupportLinks } from '@/components/heritage/support-links';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { faqGroups, faqsByGroup, resolvedFaqs } from '@/content/faq';
@@ -210,6 +211,8 @@ export default function FaqPage() {
           }),
         }}
       />
+
+      <SupportLinks />
     </>
   );
 }

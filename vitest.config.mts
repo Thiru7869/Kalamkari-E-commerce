@@ -9,14 +9,18 @@ import { defineConfig } from 'vitest/config';
  * — all of it dependency-free, all of it the kind of thing where a silent
  * regression is expensive and invisible.
  *
- * The end-to-end purchase path is already covered by scripts/smoke-purchase.mjs,
+ * Anything that needs a real Postgres — concurrency, constraints, the payment
+ * and order paths — is `*.int.test.ts` and runs under
+ * `vitest.integration.config.mts` (`npm run test:integration`).
+ *
+ * The end-to-end purchase path is also covered by scripts/smoke-purchase.mjs,
  * which drives the real server actions over HTTP against a production build.
- * Duplicating that here with mocks would only test the mocks.
  */
 export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    exclude: ['src/**/*.int.test.ts', '**/node_modules/**'],
     alias: {
       // `server-only` throws outside a React Server Component. The modules
       // under test are exercised as plain functions, where there is no client

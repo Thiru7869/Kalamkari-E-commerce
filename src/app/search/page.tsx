@@ -6,6 +6,7 @@ import { resolveSearchDestination } from '@/lib/search-routing';
 
 import { ProductGrid } from '@/components/shop/product-card';
 import { SearchForm } from '@/components/shop/search-form';
+import { PageHeader } from '@/components/layout/page-header';
 import { getProducts } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { shopCategories } from '@/content/site';
@@ -69,34 +70,40 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
 
   return (
     <div className="container section-y-sm">
-      <h1 className="text-display-lg">Search</h1>
+      <PageHeader
+        eyebrow="The store"
+        title="Search"
+        description="By name, story, cloth or motif."
+      />
 
-      <SearchForm defaultValue={query} className="mt-6 max-w-xl" />
+      <SearchForm defaultValue={query} autoFocus={!query} className="mt-6 max-w-xl" />
 
       {!query ? (
-        <div className="mt-10">
-          <p className="text-sm text-muted-foreground">Try one of these:</p>
+        <div className="mt-10 grid gap-10 md:grid-cols-2 md:gap-14">
+          <div>
+          <p className="eyebrow">Try one of these</p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {SUGGESTIONS.map((s) => (
               <li key={s}>
                 <Link
                   href={`/search?q=${encodeURIComponent(s)}`}
-                  className="inline-flex h-9 items-center rounded-sm border border-border px-3 text-sm transition-colors hover:border-foreground/40"
+                  className="inline-flex min-h-[2.75rem] items-center rounded-sm border border-border bg-card px-4 text-sm transition-colors hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {s}
                 </Link>
               </li>
             ))}
           </ul>
+          </div>
 
-          <div className="mt-12">
-            <p className="text-sm text-muted-foreground">Or browse by category:</p>
+          <div>
+            <p className="eyebrow">Or browse by category</p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {shopCategories.map((c) => (
                 <li key={c.slug}>
                   <Link
                     href={`/shop/${c.slug}`}
-                    className="inline-flex h-9 items-center rounded-sm border border-border px-3 text-sm transition-colors hover:border-foreground/40"
+                    className="inline-flex min-h-[2.75rem] items-center rounded-sm border border-border bg-card px-4 text-sm transition-colors hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {c.label}
                   </Link>
@@ -168,7 +175,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
               <li key={s}>
                 <Link
                   href={`/search?q=${encodeURIComponent(s)}`}
-                  className="inline-flex h-9 items-center rounded-sm border border-border px-3 text-sm transition-colors hover:border-foreground/40"
+                  className="inline-flex min-h-[2.75rem] items-center rounded-sm border border-border bg-card px-4 text-sm transition-colors hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {s}
                 </Link>

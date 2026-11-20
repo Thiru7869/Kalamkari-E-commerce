@@ -70,7 +70,7 @@ describe('formatPrice', () => {
 describe('generateOrderNumber', () => {
   it('matches the format the tracking form validates against', () => {
     for (let i = 0; i < 200; i += 1) {
-      expect(generateOrderNumber()).toMatch(/^SVL-[A-Z0-9]{6}$/);
+      expect(generateOrderNumber()).toMatch(/^SVL-[A-Z0-9]{8}$/);
     }
   });
 

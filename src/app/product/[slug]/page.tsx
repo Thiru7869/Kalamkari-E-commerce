@@ -6,6 +6,7 @@ import { ArrowRight, Check } from 'lucide-react';
 import { ProductGallery } from '@/components/shop/product-gallery';
 import { AddToCart } from '@/components/shop/add-to-cart';
 import { WishlistButton } from '@/components/shop/wishlist-button';
+import { StickyPurchaseBar } from '@/components/shop/sticky-purchase-bar';
 import { ProductCard, PRODUCT_GRID_GAP } from '@/components/shop/product-card';
 import { RecordView } from '@/components/shop/record-view';
 import { RecentlyViewed } from '@/components/shop/recently-viewed';
@@ -120,6 +121,24 @@ export default async function ProductPage({ params }: { params: Params }) {
                   : `Shipping ${formatPrice(site.shipping.flatRate)}.`}
               </p>
 
+              {/* Availability, stated from the stock column and nothing else:
+                  sold, the last one, or available. No count is shown. */}
+              <p
+                className={cn(
+                  'mt-3 flex items-center gap-2 text-sm font-medium',
+                  soldOut ? 'text-muted-foreground' : 'text-foreground',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'h-2 w-2 rounded-full',
+                    soldOut ? 'bg-muted-foreground/60' : 'bg-primary',
+                  )}
+                />
+                {soldOut ? 'Sold' : product.stock === 1 ? 'One of one — available' : 'Available'}
+              </p>
+
               {/*
                 Why it costs what it costs, at the point the question is asked.
                 The site argues price-through-labour on every other page and
@@ -143,13 +162,14 @@ export default async function ProductPage({ params }: { params: Params }) {
                 </p>
               )}
 
-              <div className="mt-7 flex items-start gap-3">
+              {/* `id="purchase"`: the sticky phone bar shows while this is off screen. */}
+              <div id="purchase" className="mt-6 flex items-start gap-3">
                 <AddToCart productId={product.id} stock={product.stock} className="flex-1" />
                 {!soldOut && (
                   <WishlistButton
                     productId={product.id}
                     initialWishlisted={wishlistIds.has(product.id)}
-                    className="mt-0 h-11 border border-input"
+                    className="mt-0 h-11 w-11 justify-center border border-input"
                   />
                 )}
               </div>
@@ -308,6 +328,13 @@ export default async function ProductPage({ params }: { params: Params }) {
           </div>
         </div>
       </article>
+
+      <StickyPurchaseBar
+        productId={product.id}
+        stock={product.stock}
+        priceLabel={formatPrice(product.price)}
+        compareLabel={onSale ? formatPrice(product.compareAtPrice!) : undefined}
+      />
 
       <Suspense fallback={null}>
         <ReviewSection

@@ -317,6 +317,19 @@ const config: Config = {
         // label. `.eyebrow` in globals.css sets the tracking per breakpoint.
         'eyebrow': ['0.6875rem', { lineHeight: '1.45', letterSpacing: '0.14em' }],
       },
+      /*
+        One easing curve and one duration for every hover, press and colour
+        change: ease-out-cubic at 250ms. Taken from the interaction pass on
+        roomandpillar.com, where the same curve carries every state change.
+        Reveals keep their own longer curves; this is for responses to the
+        pointer, which should all feel like the same hand.
+      */
+      transitionTimingFunction: {
+        swift: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+      },
+      transitionDuration: {
+        swift: '250ms',
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

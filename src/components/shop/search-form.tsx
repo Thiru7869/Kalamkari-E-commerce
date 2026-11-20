@@ -76,8 +76,9 @@ export function SearchForm({
           type="search"
           defaultValue={defaultValue}
           autoComplete="off"
-          // eslint-disable-next-line jsx-a11y/no-autofocus -- only on /search,
-          // where searching is the sole purpose of the page.
+          enterKeyHint="search"
+          // autoFocus is only passed on /search, where searching is the sole
+          // purpose of the page.
           autoFocus={autoFocus}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}

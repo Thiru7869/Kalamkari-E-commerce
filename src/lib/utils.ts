@@ -85,10 +85,30 @@ export function slugify(input: string) {
  */
 const REF_ALPHABET = 'ACDEFGHJKLMNPQRTUVWXYZ2346789';
 
+/** Eight characters from a 29-letter alphabet: about 5e11 numbers. */
+const ORDER_REF_LENGTH = 8;
+
+/**
+ * A uniformly random index below `limit`, from the platform CSPRNG.
+ *
+ * `Math.random` is not a security primitive and an order number is half of what
+ * unlocks an order. Rejection sampling avoids the modulo bias of `x % 29`.
+ * Web Crypto rather than `node:crypto` because this module is also bundled for
+ * the browser.
+ */
+function secureIndex(limit: number): number {
+  const ceiling = 256 - (256 % limit);
+  const byte = new Uint8Array(1);
+  for (;;) {
+    globalThis.crypto.getRandomValues(byte);
+    if (byte[0] < ceiling) return byte[0] % limit;
+  }
+}
+
 export function generateOrderNumber() {
   let ref = '';
-  for (let i = 0; i < 6; i += 1) {
-    ref += REF_ALPHABET[Math.floor(Math.random() * REF_ALPHABET.length)];
+  for (let i = 0; i < ORDER_REF_LENGTH; i += 1) {
+    ref += REF_ALPHABET[secureIndex(REF_ALPHABET.length)];
   }
   return `SVL-${ref}`;
 }

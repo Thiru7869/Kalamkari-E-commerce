@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Leaf, PenTool, Package, RotateCcw } from 'lucide-react';
-import { site } from '@/content/site';
+import { site, whatsappHref } from '@/content/site';
+import { Badge } from '@/components/ui/primitives';
 import { formatPrice } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +13,20 @@ import { cn } from '@/lib/utils';
  * worth having on a site whose entire argument is that it can be checked. A
  * row of "100% Authentic" seals would undermine the rest of the copy.
  */
-export function TrustStrip({ className }: { className?: string }) {
+export function TrustStrip({
+  className,
+  showProof = false,
+}: {
+  className?: string;
+  /**
+   * A second row under the four claims: the award and the GI registration,
+   * both already stated on the home page's family section and /our-story, and
+   * a WhatsApp link — which renders only when the store has published a
+   * number. Opt-in so other pages that reuse the strip are unchanged.
+   */
+  showProof?: boolean;
+}) {
+  const whatsapp = whatsappHref();
   const items = [
     {
       Icon: PenTool,
@@ -67,6 +81,29 @@ export function TrustStrip({ className }: { className?: string }) {
             </li>
           ))}
         </ul>
+
+        {showProof && (
+          <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-border pt-6">
+            <Badge variant="gold">National Award, 2008 · Pen Kalamkari</Badge>
+            <Badge variant="outline">Registered GI craft</Badge>
+            <Link
+              href="/our-story"
+              className="inline-flex min-h-[2.75rem] items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Meet the family
+            </Link>
+            {whatsapp && (
+              <a
+                href={whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[2.75rem] items-center text-sm font-medium text-primary underline-offset-4 hover:underline sm:ml-auto"
+              >
+                Ask us on WhatsApp
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

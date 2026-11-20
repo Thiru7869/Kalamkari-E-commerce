@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SupportLinks } from '@/components/heritage/support-links';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import Link from 'next/link';
 import { naturalDyes } from '@/content/process';
@@ -40,13 +41,13 @@ const rules = [
 export default function CarePage() {
   return (
     <>
-      <section className="border-b border-border bg-cotton-100 pb-12 pt-16 md:pb-16 md:pt-24 dark:bg-card">
+      <section className="border-b border-border bg-cotton-100 pb-8 pt-8 md:pb-12 md:pt-10 dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
-            <Breadcrumbs trail={[{ label: 'Care & washing' }]} className="mb-6" />
+            <Breadcrumbs trail={[{ label: 'Care & washing' }]} className="mb-4" />
             <p className="eyebrow">Care</p>
-            <h1 className="mt-4 text-display-xl">Looking after naturally dyed cloth</h1>
-            <p className="mt-7 text-body-lg text-muted-foreground">
+            <h1 className="mt-3 text-display-lg">Looking after naturally dyed cloth</h1>
+            <p className="mt-4 text-body-lg text-muted-foreground">
               Short version: cold water, mild soap, dry in shade. Everything below is why.
             </p>
           </div>
@@ -72,7 +73,7 @@ export default function CarePage() {
             ))}
           </ol>
 
-          <section className="mt-14 rounded-sm border border-border bg-card p-6">
+          <section className="mt-14 rounded-2xl border border-border bg-card p-6">
             <h2 className="font-display text-xl">What to expect over time</h2>
             <ul className="mt-4 flex list-disc flex-col gap-2.5 pl-5 leading-relaxed text-muted-foreground">
               <li>
@@ -112,7 +113,7 @@ export default function CarePage() {
             </ul>
           </section>
 
-          <p className="mt-12 rounded-sm border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-12 rounded-2xl border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
             Still unsure about a particular piece?{' '}
             <Link href="/contact" className="text-primary underline underline-offset-4">
               Write to the store
@@ -121,6 +122,8 @@ export default function CarePage() {
           </p>
         </div>
       </div>
+
+      <SupportLinks />
     </>
   );
 }

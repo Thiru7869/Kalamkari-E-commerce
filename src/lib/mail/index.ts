@@ -47,6 +47,15 @@ export async function notifyOrderPlaced(order: templates.OrderMailData) {
   return { customer, store };
 }
 
+/** A payment landed on a cancelled order. Money is owed back; the store must act. */
+export async function notifyLatePayment(payment: {
+  orderNumber: string;
+  razorpayPaymentId: string;
+  amount: number;
+}) {
+  return toStore(templates.storeLatePaymentNotice(payment));
+}
+
 export async function notifyOrderDispatched(
   order: { number: string; email: string; shipName: string },
   courier: string | null,

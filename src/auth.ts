@@ -3,6 +3,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import Google from 'next-auth/providers/google';
 import Nodemailer from 'next-auth/providers/nodemailer';
 import { prisma } from '@/lib/prisma';
+import { assertSignInAllowed } from '@/lib/rate-limit';
 
 declare module 'next-auth' {
   interface Session {
@@ -28,40 +29,52 @@ const hasSmtp = Boolean(process.env.EMAIL_SERVER_HOST);
  * account. This override is refused outright in production, because a silently
  * console-logged sign-in link there would be a live account-takeover vector.
  */
+const smtpServer = hasSmtp
+  ? {
+      host: process.env.EMAIL_SERVER_HOST,
+      port: Number(process.env.EMAIL_SERVER_PORT ?? 587),
+      auth: {
+        user: process.env.EMAIL_SERVER_USER,
+        pass: process.env.EMAIL_SERVER_PASSWORD,
+      },
+    }
+  : // Never dialled when sendVerificationRequest is overridden below.
+    { host: 'localhost', port: 587, auth: { user: '', pass: '' } };
+
+const smtpFrom = process.env.EMAIL_FROM ?? 'no-reply@example.com';
+
+// The provider's own sender, used when SMTP is configured.
+const defaultProvider = Nodemailer({ server: smtpServer, from: smtpFrom });
+
 const emailProvider = Nodemailer({
-  server: hasSmtp
-    ? {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: Number(process.env.EMAIL_SERVER_PORT ?? 587),
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
-      }
-    : // Never dialled when sendVerificationRequest is overridden below.
-      { host: 'localhost', port: 587, auth: { user: '', pass: '' } },
-  from: process.env.EMAIL_FROM ?? 'no-reply@example.com',
-  ...(hasSmtp
-    ? {}
-    : {
-        async sendVerificationRequest({ identifier, url }) {
-          if (process.env.NODE_ENV === 'production') {
-            throw new Error(
-              'Email sign-in is enabled but no SMTP server is configured. Set EMAIL_SERVER_HOST and related variables.',
-            );
-          }
-          console.log(
-            [
-              '',
-              '  ┌─ Sign-in link (development only — no SMTP configured) ─────────',
-              `  │  to:  ${identifier}`,
-              `  │  ${url}`,
-              '  └────────────────────────────────────────────────────────────────',
-              '',
-            ].join('\n'),
-          );
-        },
-      }),
+  server: smtpServer,
+  from: smtpFrom,
+  async sendVerificationRequest(params) {
+    // The sign-in form calls `signIn()` in process from a server action, never
+    // touching /api/auth/signin, so a middleware rule would not see it. The
+    // limit lives here, where every route to sending a link passes.
+    await assertSignInAllowed(params.identifier);
+
+    if (hasSmtp) {
+      return defaultProvider.sendVerificationRequest(params);
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'Email sign-in is enabled but no SMTP server is configured. Set EMAIL_SERVER_HOST and related variables.',
+      );
+    }
+    console.log(
+      [
+        '',
+        '  ┌─ Sign-in link (development only — no SMTP configured) ─────────',
+        `  │  to:  ${params.identifier}`,
+        `  │  ${params.url}`,
+        '  └────────────────────────────────────────────────────────────────',
+        '',
+      ].join('\n'),
+    );
+  },
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -109,6 +122,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         await mergeGuestCart(user.id);
       } catch (error) {
         console.error('[auth] guest cart merge failed:', error);
+      }
+
+      // And the pieces they saved before signing in. Separate from the bag so
+      // that one failing cannot take the other with it.
+      try {
+        const { mergeGuestWishlist } = await import('@/lib/cart');
+        await mergeGuestWishlist(user.id);
+      } catch (error) {
+        console.error('[auth] guest wishlist merge failed:', error);
       }
     },
   },

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { site } from '@/content/site';
 
@@ -122,6 +123,30 @@ export function KalamMark({ className }: { className?: string }) {
 }
 
 /**
+ * The emblem printed at the head of the store's visiting card, exactly as it is
+ * on the card: a crescent enclosing a ringed star, in the card's green.
+ *
+ * `public/images/logo.png` is the card's own impression, lifted off the paper
+ * (background and uneven lighting removed, edges cleaned) into a transparent
+ * PNG. It is deliberately not redrawn: an earlier vector redraw did not match
+ * the printed mark. The slightly irregular edge is the stamp, not a flaw.
+ *
+ * It is decorative — the name beside it is the accessible label — so `alt` is
+ * empty. Lifted a little in dark mode so the green still clears its ground.
+ */
+export function CardEmblem({ className }: { className?: string }) {
+  return (
+    <Image
+      src="/images/logo.png"
+      alt=""
+      width={96}
+      height={96}
+      className={cn('shrink-0 object-contain dark:brightness-125', className)}
+    />
+  );
+}
+
+/**
  * The company name, in full, as a nameplate.
  *
  * Used large in the doorway and in the footer. The two lines together are the
@@ -214,7 +239,7 @@ export function BrandName({
 export function Wordmark({ compact = false }: { compact?: boolean }) {
   return (
     <span className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-      <KalamMark className="h-[1.5rem] w-[1.5rem] text-foreground sm:h-7 sm:w-7 md:h-[1.875rem] md:w-[1.875rem]" />
+      <CardEmblem className="h-[1.5rem] w-[1.5rem] sm:h-7 sm:w-7 md:h-[1.875rem] md:w-[1.875rem]" />
 
       <span className="flex min-w-0 flex-col leading-none">
         {/*
@@ -225,7 +250,7 @@ export function Wordmark({ compact = false }: { compact?: boolean }) {
           setting it slightly smaller. Wrapping is also what caps the block's
           min-content at its longest word.
         */}
-        <span className="font-display text-[clamp(0.9375rem,2.6vw+0.42rem,1.125rem)] font-semibold leading-[1.12] tracking-[-0.015em] md:whitespace-nowrap md:text-[1.25rem]">
+        <span className="font-display text-[clamp(0.9375rem,2.6vw+0.42rem,1.125rem)] font-semibold leading-[1.12] tracking-[-0.015em] md:whitespace-nowrap md:text-[1.25rem] lg:whitespace-normal 2xl:whitespace-nowrap">
           {site.shortName}
         </span>
 

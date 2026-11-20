@@ -418,3 +418,15 @@ export const awards: Award[] = Array.from({ length: 10 }, (_, i) => ({
   image: '/images/placeholder-cloth.jpg',
 }));
 
+
+/**
+ * The family paragraphs on the landing page.
+ *
+ * Kept here, with the rest of the family's account, so the home page and
+ * /our-story state the same people and the same figure from one place. The
+ * figure ("roughly forty") is the one /our-story already defends.
+ */
+export const homeFamilyNote = [
+  'The store was founded by M Muni Reddy and M Rajeshwari, and takes its name from their daughter. Their three children — M Muniratnamma, P Vijaya Lakshmi and M Viswanath Reddy — all learned the craft the way it passes through Srikalahasti households: not as a course taken, but by sitting beside it from childhood.',
+  'They work alongside roughly forty other artisans in the Srikalahasti cluster. This has always been a town-scale tradition, and the survival of any one workshop is bound up with the survival of the rest.',
+] as const;

@@ -41,7 +41,9 @@ export async function SiteHeader() {
           rotates rather than scrolls under reduced motion, and closes. */}
       <AnnouncementBar />
 
-      <div className="container flex h-16 items-center gap-2 md:h-20 md:gap-3">
+      {/* `relative`: the Shop mega panel is positioned against this row, so it
+          spans the container instead of hanging off one nav item. */}
+      <div className="container relative flex h-16 items-center gap-2 md:h-20 md:gap-3">
         {/* Follows `DesktopNav`, which now appears at `lg` rather than `md` —
             see the note there. The drawer is the navigation for everything
             below that, tablets included. */}

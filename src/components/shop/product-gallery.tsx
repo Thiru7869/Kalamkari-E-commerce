@@ -158,7 +158,11 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
         </ul>
 
         {list.length > 1 && (
-          <div className="mt-3 flex justify-center gap-1.5" aria-hidden="true">
+          <div className="mt-3 flex items-center justify-center gap-3" aria-hidden="true">
+            <span className="tabular text-xs text-muted-foreground">
+              {active + 1} / {list.length}
+            </span>
+            <span className="flex gap-1.5">
             {list.map((src, i) => (
               <span
                 key={src}
@@ -168,6 +172,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
                 )}
               />
             ))}
+            </span>
           </div>
         )}
         <p className="sr-only" aria-live="polite">

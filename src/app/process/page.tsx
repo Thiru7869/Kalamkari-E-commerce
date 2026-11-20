@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { ProcessJourney } from '@/components/process/process-journey';
 import { ColourWalk } from '@/components/process/colour-walk';
 import { FamilyCollage } from '@/components/process/family-collage';
+import { HowItsMade } from '@/components/craft/how-its-made';
 import { Button } from '@/components/ui/button';
 import {
   processPhases,
@@ -185,6 +186,10 @@ export default function ProcessPage() {
           </div>
         </div>
       </section>
+
+      {/* The eight-stage viewer, moved here from the landing page. A short
+          preview of the sequence below, so it stands directly before it. */}
+      <HowItsMade />
 
       {/* The scroll-driven sequence: dye wash, framed cloth, fourteen stages,
           and all twenty-three operations inside the stages that contain them. */}

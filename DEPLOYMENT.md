@@ -166,7 +166,8 @@ them when you are ready:
 | --- | --- |
 | Google sign-in | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` |
 | Real email | `EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`, `EMAIL_FROM`, `STORE_NOTIFICATION_EMAIL` |
-| Online payment | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_WEBHOOK_SECRET` |
+| Online payment | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_WEBHOOK_SECRET` (**all four**; without the webhook secret online payment is switched off) |
+| Shared rate limiting | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, optionally `TRUSTED_PROXY_HOPS` |
 | Generative assistant | `ANTHROPIC_API_KEY` |
 
 Never add `SEED_ADMIN_EMAIL` here — seeding is a local operation, on purpose.
@@ -316,6 +317,31 @@ the very first request after a quiet night can feel a beat slow.
 API, so if long replies cut off, add `export const maxDuration = 60;` to
 `src/app/api/assistant/route.ts`. Everything else on the site answers well
 inside the default.
+
+**Rate limits that only work per instance.** Without `UPSTASH_REDIS_REST_URL`
+and `UPSTASH_REDIS_REST_TOKEN`, every serverless instance counts on its own, so
+a caller spread across instances gets several allowances. Create a free Redis
+database at console.upstash.com, copy its REST URL and token into Vercel, and
+redeploy. The log line `per-instance limiter` tells you which mode you are in.
+If Upstash is down the site falls back to the per-instance counters — it does
+not stop selling and it does not let everything through.
+
+**Every visitor sharing one rate-limit bucket.** The caller's address is read
+from `X-Forwarded-For`, counted from the right by `TRUSTED_PROXY_HOPS` (default
+1, correct for Vercel). If you put another proxy in front, such as Cloudflare,
+set it to 2; setting `0` ignores the header entirely and puts everyone in one
+bucket.
+
+**Online payment missing at checkout after upgrading.** It now requires
+`RAZORPAY_WEBHOOK_SECRET` as well as the key pair. A store that had keys but no
+webhook secret silently stops offering online payment (Cash on Delivery is
+unaffected) and logs which variable is missing.
+
+**A payment arrives for an order that was already cancelled.** The order stays
+cancelled, its payment status becomes `LATE_PAID`, and the store inbox gets a
+"Refund needed" email. Nothing refunds automatically: issue the refund in the
+Razorpay dashboard. Likewise, cancelling an order that was paid marks it
+`REFUND_PENDING`, never `REFUNDED`.
 
 **Deploying the app and the database in different regions.** Every query pays
 the round trip, on a site that makes several per page. Match them.

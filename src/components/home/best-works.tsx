@@ -164,17 +164,16 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
 
       <div className="container">
         <RevealOnScroll>
-          <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-            <div className="max-w-xl">
-              <p className={cn('eyebrow', tone.faint)}>{bestWorks.eyebrow}</p>
-              <h2
-                id="best-works-heading"
-                className={cn('mt-3 text-display-md', tone.strong)}
-              >
-                {bestWorks.heading}
-              </h2>
-            </div>
-            <p className={cn('max-w-md text-[0.875rem] leading-relaxed', tone.quiet)}>
+          <div className="max-w-2xl">
+            <p className={cn('eyebrow', tone.faint)}>{bestWorks.eyebrow}</p>
+            <h2
+              id="best-works-heading"
+              className={cn('mt-3 text-display-md', tone.strong)}
+            >
+              {bestWorks.heading}
+            </h2>
+            <span aria-hidden="true" className={cn('mt-4 block h-px w-14 border-t', tone.edge)} />
+            <p className={cn('mt-4 text-[0.9375rem] leading-relaxed', tone.quiet)}>
               {bestWorks.standfirst}
             </p>
           </div>
@@ -194,16 +193,22 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
             role="group"
             aria-roledescription="carousel"
             aria-label="Best works"
-            className="mt-7 grid gap-6 md:mt-9 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:items-center lg:gap-12"
+            className="mt-5 grid gap-5 md:mt-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:items-center lg:gap-10"
           >
             {/* ---- The plate ------------------------------------------- */}
             <div className="relative">
               <div
                 className={cn(
-                  'relative flex h-[16rem] items-center justify-center overflow-hidden rounded-sm border sm:h-[19rem] lg:h-[21rem]',
+                  'relative flex h-[18rem] items-center justify-center overflow-hidden rounded-sm border shadow-[0_30px_60px_-30px_rgb(0_0_0/0.45)] sm:h-[21rem] lg:h-[24rem]',
                   tone.edge,
+                  light ? 'bg-white/[0.06]' : 'bg-black/[0.04]',
                 )}
               >
+                {/* The inner mount line, a second frame inside the first. */}
+                <span
+                  aria-hidden="true"
+                  className={cn('pointer-events-none absolute inset-2.5 rounded-[2px] border', tone.rule)}
+                />
                 {/*
                   `key` remounts the figure, which replays the CSS entrance —
                   the same mechanism `TwoCrafts` uses to re-run an animation
@@ -259,19 +264,45 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                   <span className="sr-only">Next piece</span>
                 </button>
 
-                {/* Position, and the pot the ground came from. Two facts in the
-                    space one of them would take. */}
-                <p
-                  className={cn(
-                    'tabular ml-1 font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
-                    tone.faint,
-                  )}
-                >
-                  {index + 1} / {total}
-                  <span className="mx-2 opacity-50">·</span>
-                  {ground.note}
-                </p>
+                {/* Progress: one segment per piece, each a way straight to it. */}
+                <div className="ml-2 flex flex-1 items-center gap-1.5" role="group" aria-label="Choose a piece">
+                  {works.map((w, i) => (
+                    <button
+                      key={w.id}
+                      type="button"
+                      onClick={() => go(i)}
+                      aria-label={`Piece ${i + 1}: ${w.name}`}
+                      aria-current={i === index}
+                      className="group/seg flex h-11 flex-1 items-center focus-visible:outline-none"
+                    >
+                      <span
+                        className={cn(
+                          'block h-[3px] w-full rounded-full transition-all duration-500',
+                          i === index
+                            ? light
+                              ? 'bg-white'
+                              : 'bg-black'
+                            : light
+                              ? 'bg-white/30 group-hover/seg:bg-white/60'
+                              : 'bg-black/25 group-hover/seg:bg-black/50',
+                        )}
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Position and the pot the ground came from. */}
+              <p
+                className={cn(
+                  'tabular mt-1 font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
+                  tone.faint,
+                )}
+              >
+                {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+                <span className="mx-2 opacity-50">·</span>
+                Ground: {ground.note}
+              </p>
             </div>
 
             {/* ---- What it is -------------------------------------------- */}
@@ -304,11 +335,11 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                   parts the store has actually filled in — `artisan` is set on
                   15 of 43 pieces, so it is optional here rather than printing
                   "Painted by —". */}
-              <dl className={cn('mt-5 flex flex-wrap gap-x-8 gap-y-3 border-t pt-4', tone.rule)}>
+              <dl className={cn('mt-6 grid grid-cols-[repeat(auto-fit,minmax(7rem,1fr))] border-y', tone.rule)}>
                 {/* Nullable in the schema, and left null where the store has
                     not recorded it — the same rule `artisan` follows. */}
                 {(work.craftDays ?? 0) > 0 && (
-                  <div>
+                  <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                     <dt
                       className={cn(
                         'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
@@ -317,11 +348,11 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                     >
                       Days by hand
                     </dt>
-                    <dd className={cn('tabular mt-1 text-lg', tone.strong)}>{work.craftDays}</dd>
+                    <dd className={cn('tabular mt-1.5 text-xl', tone.strong)}>{work.craftDays}</dd>
                   </div>
                 )}
                 {work.artisan && (
-                  <div>
+                  <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                     <dt
                       className={cn(
                         'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
@@ -330,10 +361,10 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                     >
                       Drawn by
                     </dt>
-                    <dd className={cn('mt-1 text-lg', tone.strong)}>{work.artisan}</dd>
+                    <dd className={cn('mt-1.5 text-xl', tone.strong)}>{work.artisan}</dd>
                   </div>
                 )}
-                <div>
+                <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                   <dt
                     className={cn(
                       'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
@@ -342,7 +373,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                   >
                     {work.stock > 0 ? 'Price' : 'Sold for'}
                   </dt>
-                  <dd className={cn('tabular mt-1 text-lg', tone.strong)}>
+                  <dd className={cn('tabular mt-1.5 text-xl', tone.strong)}>
                     {formatPrice(work.price)}
                   </dd>
                 </div>
@@ -351,16 +382,17 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
               <Link
                 href={`/product/${work.slug}`}
                 className={cn(
-                  'mt-6 inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-sm border px-4 text-sm font-medium transition-colors',
+                  'group/cta mt-7 inline-flex min-h-[3rem] items-center gap-2 rounded-full px-6 text-sm font-medium tracking-wide transition-opacity hover:opacity-90',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent',
-                  tone.edge,
-                  tone.strong,
-                  tone.hover,
+                  light ? 'bg-white text-black' : 'bg-black text-white',
                   tone.ring,
                 )}
               >
                 {work.stock > 0 ? 'See this piece' : 'See what was made'}
-                <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                <ArrowUpRight
+                  className="h-4 w-4 transition-transform duration-300 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5"
+                  aria-hidden="true"
+                />
               </Link>
             </div>
           </div>

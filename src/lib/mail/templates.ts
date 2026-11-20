@@ -186,7 +186,7 @@ export function orderCancelled(
 
 ${
   refunded
-    ? 'The payment on this order has been marked for refund. It returns by the route it arrived on, which usually takes a few working days to appear.'
+    ? 'You had paid for this order, so a refund is due to you. The store will start it and write to you again once it has been sent — until you hear that, please do not assume it has been issued. If you have not heard within a few working days, reply to this message.'
     : 'Nothing was charged for this order.'
 }
 
@@ -353,4 +353,25 @@ ${note}
 Follow it at ${absoluteUrl('/orders/track')}.`;
 
   return compose(order.email, `Order ${order.number}: ${statusLabel(status).toLowerCase()}`, text);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Store: a payment that arrived for an order that can no longer take it      */
+/* -------------------------------------------------------------------------- */
+
+export function storeLatePaymentNotice(payment: {
+  orderNumber: string;
+  razorpayPaymentId: string;
+  amount: number;
+}): MailMessage {
+  const text = `A payment arrived for order ${payment.orderNumber}, which had already been cancelled.
+
+PAYMENT   ${payment.razorpayPaymentId}
+AMOUNT    ${formatPrice(payment.amount)}
+
+The order has NOT been restored and its stock has not been touched. The money has been taken and is owed back to the customer: refund this payment from the Razorpay dashboard, and tell them.
+
+Open the order at ${absoluteUrl(`/admin/orders/${payment.orderNumber}`)}`;
+
+  return compose('', `Refund needed: late payment on ${payment.orderNumber}`, text);
 }

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { Parallax } from '@/components/motion/parallax';
 import { WorkshopVideo } from '@/components/story/workshop-video';
-import { site } from '@/content/site';
+import { site, whatsappHref } from '@/content/site';
 
 /**
  * "Come and see it being made" — the last thing before the footer.
@@ -60,6 +60,7 @@ const whatYouSee = [
 ];
 
 export function WorkshopInvitation() {
+  const whatsapp = whatsappHref();
   return (
     <section className="bg-cotton-50 dark:bg-background" aria-labelledby="visit-heading">
       {/* ------------------------------------------------------------------ */}
@@ -173,7 +174,7 @@ export function WorkshopInvitation() {
       {/* The invitation, the film, and what is actually there                */}
       {/* ------------------------------------------------------------------ */}
       <div className="container section-y">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12">
           {/* ---- The invitation -------------------------------------------- */}
           <RevealOnScroll>
             <p className="max-w-xl text-body-lg leading-relaxed text-muted-foreground">
@@ -201,14 +202,23 @@ export function WorkshopInvitation() {
                   className="gap-2"
                 >
                   <MapPin className="h-4 w-4" aria-hidden="true" />
-                  Open in Google Maps
+                  Get directions
                 </a>
               </Button>
+              {whatsapp && (
+                <Button asChild size="lg" variant="outline">
+                  <a href={whatsapp} target="_blank" rel="noopener noreferrer">
+                    Message on WhatsApp
+                  </a>
+                </Button>
+              )}
             </div>
 
             {/* The address, plainly. Somebody planning a journey wants to read
                 it without opening a map. */}
             <address className="mt-8 border-t border-border pt-6 text-sm not-italic leading-relaxed text-muted-foreground">
+              {site.location.street}
+              <br />
               {site.location.town} · {site.location.district}
               <br />
               {site.location.state} {site.location.postalCode} · {site.location.country}

@@ -193,7 +193,11 @@ export function SearchOverlay({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={placeholder}
-                className="h-14 w-full bg-transparent pl-12 pr-24 text-base outline-none placeholder:text-muted-foreground/75"
+                enterKeyHint="search"
+                className={cn(
+                  'h-14 w-full bg-transparent pl-12 text-base outline-none placeholder:text-muted-foreground/75',
+                  query ? 'pr-36' : 'pr-24',
+                )}
               />
 
               <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
@@ -202,6 +206,21 @@ export function SearchOverlay({
                     className="mr-1 h-4 w-4 animate-spin text-muted-foreground"
                     aria-hidden="true"
                   />
+                )}
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery('');
+                      inputRef.current?.focus();
+                    }}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span aria-hidden="true" className="text-xs underline underline-offset-2">
+                      Clear
+                    </span>
+                    <span className="sr-only">Clear search</span>
+                  </button>
                 )}
                 <Dialog.Close className="inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <X className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />

@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { addressSchema, profileSchema, cancelOrderSchema, returnRequestSchema } from '@/lib/validation';
 import { notifyOrderCancelled, notifyReturnRequested } from '@/lib/mail';
+import { transitionOrder } from '@/lib/order-state';
+import { limitByKey, RATE_LIMITED_MESSAGE } from '@/lib/rate-limit';
 
 // FormState lives in lib/form-state.ts — a 'use server' module may only export
 // async functions, and one non-function export breaks every action in the graph.
@@ -195,9 +197,6 @@ export async function deleteAddress(
 /* Cancellation and returns                                                   */
 /* -------------------------------------------------------------------------- */
 
-/** Statuses a customer may still cancel from themselves. */
-const CANCELLABLE = new Set(['PENDING', 'CONFIRMED']);
-
 /**
  * Customer-initiated cancellation.
  *
@@ -223,16 +222,37 @@ export async function cancelOrder(_prev: FormState, formData: FormData): Promise
     };
   }
 
-  const order = await prisma.order.findFirst({
+  const owned = await prisma.order.findFirst({
     where: { number: parsed.data.number, userId },
-    include: { items: true },
+    select: { number: true, status: true },
   });
-  if (!order) return { status: 'error', message: 'That order is not on your account.' };
+  if (!owned) return { status: 'error', message: 'That order is not on your account.' };
 
-  if (order.status === 'CANCELLED') {
+  if (owned.status === 'CANCELLED') {
     return { status: 'error', message: 'That order is already cancelled.' };
   }
-  if (!CANCELLABLE.has(order.status)) {
+
+  // The state service decides whether a customer may cancel from where the
+  // order is *now*, and lets exactly one of any concurrent attempts through.
+  const result = await transitionOrder({
+    orderNumber: owned.number,
+    to: 'CANCELLED',
+    actor: 'customer',
+    note: parsed.data.reason
+      ? `Cancelled at the customer's request — ${parsed.data.reason}`
+      : "Cancelled at the customer's request.",
+  });
+
+  if (!result.ok) {
+    if (result.reason === 'conflict') {
+      return { status: 'error', message: 'This order just changed. Please reload and try again.' };
+    }
+    if (result.reason === 'not-found') {
+      return { status: 'error', message: 'That order is not on your account.' };
+    }
+    if (result.from === 'CANCELLED') {
+      return { status: 'error', message: 'That order is already cancelled.' };
+    }
     return {
       status: 'error',
       message:
@@ -240,40 +260,8 @@ export async function cancelOrder(_prev: FormState, formData: FormData): Promise
     };
   }
 
-  const wasPaid = order.paymentStatus === 'PAID';
-
-  await prisma.$transaction(async (tx) => {
-    // Conditional, so two tabs cannot both cancel and return stock twice.
-    const claimed = await tx.order.updateMany({
-      where: { id: order.id, status: { in: [...CANCELLABLE] } },
-      data: {
-        status: 'CANCELLED',
-        cancelledAt: new Date(),
-        ...(wasPaid ? { paymentStatus: 'REFUNDED' } : {}),
-      },
-    });
-    if (claimed.count === 0) return;
-
-    for (const item of order.items) {
-      if (!item.productId) continue;
-      await tx.product.update({
-        where: { id: item.productId },
-        data: { stock: { increment: item.quantity } },
-      });
-    }
-
-    await tx.orderEvent.create({
-      data: {
-        orderId: order.id,
-        status: 'CANCELLED',
-        message: parsed.data.reason
-          ? `Cancelled at the customer's request — ${parsed.data.reason}`
-          : "Cancelled at the customer's request.",
-      },
-    });
-  });
-
-  await notifyOrderCancelled({ number: order.number, email: order.email }, wasPaid);
+  const wasPaid = result.refundPending;
+  await notifyOrderCancelled({ number: result.before.number, email: result.before.email }, wasPaid);
 
   revalidatePath('/account');
   revalidatePath('/admin/orders');
@@ -281,7 +269,7 @@ export async function cancelOrder(_prev: FormState, formData: FormData): Promise
   return {
     status: 'success',
     message: wasPaid
-      ? 'Cancelled. The payment has been marked for refund and returns by the route it arrived on.'
+      ? 'Cancelled. You had paid for this order, so a refund is due. The store will start it and email you once it has been sent.'
       : 'Cancelled. Nothing was charged.',
   };
 }
@@ -297,6 +285,10 @@ export async function cancelOrder(_prev: FormState, formData: FormData): Promise
 export async function requestReturn(_prev: FormState, formData: FormData): Promise<FormState> {
   const userId = await requireUser();
   if (!userId) return { status: 'error', message: 'Please sign in.' };
+
+  if (!(await limitByKey('returnRequest', userId)).ok) {
+    return { status: 'error', message: RATE_LIMITED_MESSAGE };
+  }
 
   const parsed = returnRequestSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

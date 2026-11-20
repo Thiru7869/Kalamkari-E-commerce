@@ -10,9 +10,9 @@ import { ThemeProvider as NextThemeProvider } from 'next-themes';
  * vat", with madder lifted in value so it still reads against a dark ground.
  * Both are sampled from the same dyes.
  *
- * `system` is the default because a visitor who has told their operating system
- * how they want to read has already answered this question. The toggle exists
- * for the ones who want to override it on this site specifically.
+ * `light` is the default, regardless of the operating system's preference: the
+ * store is first met in daylight cotton. The toggle lets a visitor opt into
+ * dark, and that choice is remembered.
  *
  * `disableTransitionOnChange` stops every colour-carrying element on the page
  * animating at once when the theme flips — with the transitions this site uses
@@ -22,8 +22,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <NextThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      enableSystem={false}
       disableTransitionOnChange
     >
       {children}

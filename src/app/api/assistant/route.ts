@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { buildSystemPrompt } from '@/lib/assistant/system-prompt';
 import { answerLocally } from '@/lib/assistant/local';
+import { limitByIp, tooManyRequests } from '@/lib/rate-limit';
 
 /**
  * The assistant endpoint.
@@ -17,9 +18,11 @@ import { answerLocally } from '@/lib/assistant/local';
  *     sends the transcript back (this endpoint holds no session state), so it
  *     is treated as untrusted input: capped in turns and characters, roles
  *     forced to alternate, everything else rejected.
- *  3. **It is rate-limited per IP.** A public, unauthenticated endpoint that
- *     spends money per call needs a ceiling, and the ceiling is generous
- *     enough that no real conversation ever meets it.
+ *  3. **It is rate-limited per IP, in Redis.** A public, unauthenticated
+ *     endpoint that spends money per call needs a ceiling, and the ceiling is
+ *     generous enough that no real conversation ever meets it. The counter is
+ *     shared across serverless instances (see lib/rate-limit-core.ts); the old
+ *     per-process Map was reset by every cold start.
  */
 
 export const runtime = 'nodejs';
@@ -41,42 +44,6 @@ const bodySchema = z.object({
     .min(1)
     .max(MAX_HISTORY_TURNS),
 });
-
-/* -------------------------------------------------------------------------- */
-/* Rate limiting                                                              */
-/* -------------------------------------------------------------------------- */
-
-const WINDOW_MS = 60_000;
-const MAX_REQUESTS_PER_WINDOW = 12;
-
-/**
- * In-memory sliding window. Correct for a single instance; on a multi-instance
- * deployment the effective limit multiplies by instance count, which is an
- * acceptable ceiling for a shop assistant. Swap for Redis if that stops being
- * true — the shape of the call site does not change.
- */
-const hits = new Map<string, number[]>();
-
-function rateLimited(key: string) {
-  const now = Date.now();
-  const recent = (hits.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
-  recent.push(now);
-  hits.set(key, recent);
-
-  // Opportunistic sweep so the map cannot grow without bound.
-  if (hits.size > 5000) {
-    for (const [k, times] of hits) {
-      if (times.every((t) => now - t >= WINDOW_MS)) hits.delete(k);
-    }
-  }
-
-  return recent.length > MAX_REQUESTS_PER_WINDOW;
-}
-
-function clientKey(request: Request) {
-  const forwarded = request.headers.get('x-forwarded-for');
-  return forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'anonymous';
-}
 
 /* -------------------------------------------------------------------------- */
 /* SSE helpers                                                                */
@@ -117,18 +84,19 @@ function streamText(text: string, link?: { label: string; href: string }) {
 /* -------------------------------------------------------------------------- */
 
 export async function POST(request: Request) {
+  // Before the body is read: a flood should cost as little as possible.
+  const limited = await limitByIp('assistant');
+  if (!limited.ok) {
+    return tooManyRequests(limited, {
+      error: 'That is a lot of questions at once. Give me a minute to catch up.',
+    });
+  }
+
   let parsed: z.infer<typeof bodySchema>;
   try {
     parsed = bodySchema.parse(await request.json());
   } catch {
     return NextResponse.json({ error: 'Malformed request.' }, { status: 400 });
-  }
-
-  if (rateLimited(clientKey(request))) {
-    return NextResponse.json(
-      { error: 'That is a lot of questions at once. Give me a minute to catch up.' },
-      { status: 429 },
-    );
   }
 
   // Force strict alternation and drop any leading assistant turn — the API

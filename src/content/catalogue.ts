@@ -373,3 +373,29 @@ export const FAMILY_NOTES: Record<string, string> = {
   blended: 'Cotton’s handling with some of silk’s depth. A practical middle.',
   sheer: 'Kota, organza, Chanderi. Hardest to paint on, lightest to wear.',
 };
+
+/** The two named collections and the commission door shown on the landing page. */
+export const homeCollectionCards = [
+  {
+    title: 'Featured Sarees',
+    blurb:
+      'What the family would put in your hands first this week — chosen for the drawing, not the margin.',
+    href: '/collections/featured-sarees',
+    image: '/images/products/hero-sarees.jpg',
+  },
+  {
+    title: 'Premium',
+    blurb:
+      'Signed and exhibition-grade work. Narrative pallus, dense jaal, the hardest drawing this workshop does.',
+    href: '/collections/premium',
+    image: '/images/products/hero-paintings.jpg',
+  },
+  {
+    title: 'Custom Items',
+    blurb:
+      'Tell us the subject, the cloth and the occasion. Nothing here is printed, so nothing has to be chosen from a catalogue.',
+    href: '/custom',
+    image: '/images/products/hero-dupattas.jpg',
+    accent: true,
+  },
+];

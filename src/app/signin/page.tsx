@@ -2,10 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth, signIn, authProviders } from '@/auth';
-import { Button } from '@/components/ui/button';
+import { SigninSubmit } from '@/components/auth/signin-submit';
+import { AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Wordmark } from '@/components/layout/wordmark';
+import { safeCallbackPath } from '@/lib/safe-redirect';
 import { site } from '@/content/site';
 
 export const metadata: Metadata = {
@@ -26,9 +28,12 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
   const session = await auth();
   const { callbackUrl, error } = await searchParams;
 
-  if (session?.user) redirect(callbackUrl || '/account');
+  // The query string is attacker-controlled. Only a path on this site is ever
+  // followed, whether the visitor is already signed in or is about to be.
+  const destination = safeCallbackPath(callbackUrl);
+  if (session?.user) redirect(destination);
 
-  const target = callbackUrl || '/account';
+  const target = destination;
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-cotton-100 px-5 py-16 dark:bg-background">
@@ -37,15 +42,20 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
       </Link>
 
       <div className="w-full max-w-sm rounded-sm border border-border bg-background p-6 md:p-8">
-        <h1 className="text-display-sm">Sign in</h1>
+        <p className="eyebrow">Your account</p>
+        <h1 className="mt-3 text-display-sm">Sign in</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           To see your orders, save pieces, and keep your address for next time.
         </p>
 
         {error && (
-          <p role="alert" className="mt-5 rounded-sm border border-destructive/40 bg-destructive/5 p-3 text-sm">
-            {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.Default}
-          </p>
+          <div
+            role="alert"
+            className="mt-5 flex gap-2.5 rounded-sm border border-destructive/40 bg-destructive/5 p-3 text-sm"
+          >
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
+            <p>{ERROR_MESSAGES[error] ?? ERROR_MESSAGES.Default}</p>
+          </div>
         )}
 
         {authProviders.google && (
@@ -57,7 +67,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
                 await signIn('google', { redirectTo: target });
               }}
             >
-              <Button type="submit" variant="outline" size="lg" className="w-full">
+              <SigninSubmit variant="outline" pendingLabel="Opening Google…">
                 {/* Google's mark, inline so no external request is made. */}
                 <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.57c2.08-1.92 3.28-4.74 3.28-8.09Z" />
@@ -66,7 +76,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38Z" />
                 </svg>
                 Continue with Google
-              </Button>
+              </SigninSubmit>
             </form>
 
             <div className="my-6 flex items-center gap-4">
@@ -97,13 +107,16 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
             inputMode="email"
             placeholder="you@example.com"
             className="mt-1.5"
+            aria-describedby="signin-email-hint"
           />
-          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          <p id="signin-email-hint" className="mt-2 text-xs leading-relaxed text-muted-foreground">
             We send a sign-in link. There is no password to remember or lose.
           </p>
-          <Button type="submit" size="lg" className="mt-4 w-full">
+          <div className="mt-4">
+          <SigninSubmit pendingLabel="Sending link…">
             Email me a link
-          </Button>
+          </SigninSubmit>
+          </div>
         </form>
 
         {!authProviders.smtp && process.env.NODE_ENV !== 'production' && (

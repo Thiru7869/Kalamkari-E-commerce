@@ -433,6 +433,42 @@ export const getCategories = cache(async () => {
   return prisma.category.findMany({ orderBy: { position: 'asc' } });
 });
 
+/**
+ * Per-category figures for the home page plates: how many pieces are
+ * available now and the lowest price among them. Read from the catalogue, so a
+ * category with nothing in stock has no entry and its plate states nothing.
+ * Prices are paise.
+ */
+export async function getCategoryStats(): Promise<Map<string, { count: number; from: number }>> {
+  const rows = await prisma.product.groupBy({
+    by: ['categoryId'],
+    where: { status: 'ACTIVE', stock: { gt: 0 } },
+    _count: { _all: true },
+    _min: { price: true },
+  });
+  const stats = new Map<string, { count: number; from: number }>();
+  for (const row of rows) {
+    if (row._min.price == null) continue;
+    stats.set(row.categoryId, { count: row._count._all, from: row._min.price });
+  }
+  return stats;
+}
+
+/**
+ * The most recent pieces that have gone, newest first. A one-of-one piece that
+ * sold keeps its page and is marked sold by the card, so this is read straight
+ * from stock rather than from orders: a cancelled order returns its piece to
+ * the catalogue, which makes stock the only honest signal.
+ */
+export async function getRecentlySold(take = 4) {
+  return prisma.product.findMany({
+    where: { status: 'ACTIVE', stock: { lte: 0 } },
+    select: productCardSelect,
+    orderBy: { updatedAt: 'desc' },
+    take,
+  });
+}
+
 /** Cached: `generateMetadata` and the shop page each resolve the same slug. */
 export const getCategoryBySlug = cache(async (slug: string) => {
   return prisma.category.findUnique({ where: { slug } });
@@ -555,6 +591,7 @@ export const getTypeVarieties = cache(async (categorySlug: string) => {
     where: { products: { some: scope } },
     orderBy: { position: 'asc' },
     select: {
+      id: true,
       slug: true,
       name: true,
       family: true,
@@ -602,6 +639,28 @@ export const getTypeDyes = cache(async (categorySlug: string) => {
       _count: { select: { products: { where: { product: scope } } } },
     },
   });
+});
+
+/**
+ * The lowest price among pieces available now, per cloth, in one category.
+ * Keyed by fabric id; a cloth with nothing in stock has no entry. Paise.
+ */
+export const getTypeFabricFromPrices = cache(async (categorySlug: string) => {
+  const rows = await prisma.product.groupBy({
+    by: ['fabricId'],
+    where: {
+      status: 'ACTIVE',
+      stock: { gt: 0 },
+      category: { slug: categorySlug },
+      fabricId: { not: null },
+    },
+    _min: { price: true },
+  });
+  const map = new Map<string, number>();
+  for (const row of rows) {
+    if (row.fabricId && row._min.price != null) map.set(row.fabricId, row._min.price);
+  }
+  return map;
 });
 
 /** Motifs present in one category, with counts. Drives the "drawn here" rail. */

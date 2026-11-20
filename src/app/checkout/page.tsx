@@ -67,6 +67,7 @@ export default async function CheckoutPage() {
               }
               isSignedIn={Boolean(session?.user)}
               razorpayAvailable={isRazorpayConfigured()}
+              totalLabel={formatPrice(cart.total)}
             />
           </div>
 

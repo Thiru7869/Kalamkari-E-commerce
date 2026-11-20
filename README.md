@@ -517,13 +517,7 @@ fact that changes how the rest of the site reads. It traps focus, locks scroll,
 closes on Escape, and never appears on checkout, account or admin — or for
 somebody who has already scrolled past the doorway.
 
-Closing it starts a six-stop quick tour. Deliberately not a spotlight overlay:
-those dim the page, trap the pointer, and need positioning arithmetic that
-breaks at 360px. It is a small card plus a ring drawn on whatever it is
-describing, so the page stays fully usable. Steps whose target is absent on the
-current viewport are skipped rather than shown pointing at nothing.
-
-All three are code-split and none is requested twice in a session. Persistence
+Both are code-split and none is requested twice in a session. Persistence
 is **sessionStorage**, not localStorage: the store wanted the welcome to return
 on a new visit, and a localStorage flag written during development is invisible
 and permanent — which is exactly why the welcome appeared to have stopped

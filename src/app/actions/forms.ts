@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { notifyEnquiry, notifyCommission } from '@/lib/mail';
 import { REFERENCE_LIMITS } from '@/content/commission';
+import { limitByIp, limitByKey, RATE_LIMITED_MESSAGE } from '@/lib/rate-limit';
 import {
   commissionSchema,
   enquirySchema,
@@ -29,6 +30,12 @@ function fieldErrors(error: import('zod').ZodError): Record<string, string> {
 /* -------------------------------------------------------------------------- */
 
 export async function submitEnquiry(_prev: FormState, formData: FormData): Promise<FormState> {
+  // Every accepted enquiry emails the store and the sender, so an open form is
+  // an open mail relay. Checked before anything is parsed or stored.
+  if (!(await limitByIp('enquiry')).ok) {
+    return { status: 'error', message: RATE_LIMITED_MESSAGE };
+  }
+
   const parsed = enquirySchema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
@@ -117,6 +124,12 @@ async function readReferences(formData: FormData) {
 }
 
 export async function submitCommission(_prev: FormState, formData: FormData): Promise<FormState> {
+  // A commission can carry several megabytes into the database and sends two
+  // emails, so it is the tightest of the public forms.
+  if (!(await limitByIp('commission')).ok) {
+    return { status: 'error', message: RATE_LIMITED_MESSAGE };
+  }
+
   const raw = Object.fromEntries(formData);
   // Empty budget inputs arrive as '' and must not be coerced to 0.
   const parsed = commissionSchema.safeParse({
@@ -196,6 +209,10 @@ export async function subscribeNewsletter(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
+  if (!(await limitByIp('newsletter')).ok) {
+    return { status: 'error', message: RATE_LIMITED_MESSAGE };
+  }
+
   const parsed = newsletterSchema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
@@ -219,6 +236,10 @@ export async function submitReview(_prev: FormState, formData: FormData): Promis
   const session = await auth();
   if (!session?.user?.id) {
     return { status: 'error', message: 'Please sign in to leave a review.' };
+  }
+
+  if (!(await limitByKey('review', session.user.id)).ok) {
+    return { status: 'error', message: RATE_LIMITED_MESSAGE };
   }
 
   const parsed = reviewSchema.safeParse(Object.fromEntries(formData));

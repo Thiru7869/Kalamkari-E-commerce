@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { toggleWishlist } from '@/app/actions/cart';
@@ -21,6 +21,7 @@ export function WishlistButton({
   const [wishlisted, setWishlisted] = useState(initialWishlisted);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const pathname = usePathname();
 
   const onClick = () => {
     // Optimistic — the heart must respond instantly, even on a slow connection.
@@ -38,7 +39,11 @@ export function WishlistButton({
         });
         return;
       }
-      setWishlisted(result.wishlisted ?? next);
+      const saved = result.wishlisted ?? next;
+      setWishlisted(saved);
+      toast.success(saved ? 'Saved to your wishlist' : 'Removed from your wishlist');
+      // On the wishlist page itself a removed piece should leave the grid.
+      if (!saved && pathname === '/wishlist') router.refresh();
     });
   };
 
@@ -61,6 +66,7 @@ export function WishlistButton({
       <Heart
         className={cn(
           'h-[1.1rem] w-[1.1rem] transition-all duration-200',
+          'motion-reduce:transition-none',
           wishlisted ? 'scale-110 fill-primary text-primary' : 'text-foreground/70',
         )}
         aria-hidden="true"

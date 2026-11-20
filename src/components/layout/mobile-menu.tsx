@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Menu, MapPin, Phone } from 'lucide-react';
+import { Menu, MapPin, Phone, User } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,23 @@ export function MobileMenu({ isSignedIn }: { isSignedIn: boolean }) {
         </DialogDescription>
 
         <nav className="flex-1 overflow-y-auto overscroll-contain px-2 py-3" aria-label="Mobile">
+          {/* The account is not in the bottom tab bar, so it leads the drawer
+              rather than sitting at the end of a long list. */}
+          <Link
+            href={isSignedIn ? '/account' : '/signin'}
+            className={cn(
+              'mb-3 flex min-h-[3rem] items-center gap-3 rounded-sm border border-border px-3 transition-colors',
+              pathname.startsWith('/account')
+                ? 'border-primary/50 bg-primary/[0.07] text-primary'
+                : 'hover:bg-foreground/5',
+            )}
+          >
+            <User className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+            <span className="font-display text-lg leading-snug">
+              {isSignedIn ? 'Your account' : 'Sign in'}
+            </span>
+          </Link>
+
           <ul className="flex flex-col">
             {mainNav.map((item) => {
               const isActive =
@@ -94,7 +111,6 @@ export function MobileMenu({ isSignedIn }: { isSignedIn: boolean }) {
             {[
               { href: '/wishlist', label: 'Wishlist' },
               { href: '/orders/track', label: 'Track an order' },
-              { href: isSignedIn ? '/account' : '/signin', label: isSignedIn ? 'Your account' : 'Sign in' },
               { href: '/care', label: 'Care & washing' },
             ].map((l) => (
               <li key={l.href}>

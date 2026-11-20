@@ -3,28 +3,29 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { whatIsKalamkari } from '@/content/kalamkari';
+import { site } from '@/content/site';
 
 /**
- * "What is Kalamkari?" — the doorway question, answered near the top.
+ * "What is Kalamkari?" — the short version, on the landing page.
  *
- * This is the first thing on the page that is not either a greeting or a
- * picture, and it is placed there because of who arrives here. A visitor who
- * has just left a marketplace listing selling printed polyester as "Kalamkari"
- * does not yet know there is a distinction to be drawn, and every section
- * further down this page — the pots, the eight stages, the price of a saree —
- * is unreadable until they do.
+ * A visitor who has just left a marketplace listing selling printed polyester
+ * as "Kalamkari" does not yet know there is a distinction to be drawn, so the
+ * home page still answers the question — the word, the three things that make
+ * this cloth what it is, and one test they can apply to somebody else's cloth.
  *
- * So: the word, the pen, the town, the pots, and one test they can apply to
- * somebody else's cloth. Then a door out to the full sequence.
+ * It no longer argues the point. Each facet's full paragraph, and the two
+ * further paragraphs of `kalamkariInFull`, live at `/process#what-is-kalamkari`
+ * where the same `whatIsKalamkari` object is rendered in full; the long
+ * "two crafts, one name" section that used to follow this one is on /heritage.
+ * Both read from `src/content`, so the short version here and the long version
+ * there cannot disagree.
  *
- * It is a server component. There is no state here, nothing to hydrate, and
- * the section sits high enough on the page to matter to LCP — the only client
- * code in it is the reveal wrapper, which every section already carries.
+ * Server component: no state, nothing to hydrate beyond the reveal wrapper.
  */
 export function WhatIsKalamkari() {
   return (
     <section
-      className="relative isolate overflow-hidden border-b border-border section-y"
+      className="relative isolate overflow-hidden border-y border-border bg-cotton-100 section-y dark:bg-card"
       aria-labelledby="what-is-kalamkari-heading"
     >
       {/*
@@ -46,7 +47,7 @@ export function WhatIsKalamkari() {
       />
 
       <div className="container">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
           {/* ---- The claim -------------------------------------------------- */}
           <RevealOnScroll>
             <p className="eyebrow">{whatIsKalamkari.eyebrow}</p>
@@ -112,7 +113,7 @@ export function WhatIsKalamkari() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/shop">See what is in the store</Link>
+                <Link href="/process">Follow the {site.craft.steps} steps</Link>
               </Button>
             </div>
           </RevealOnScroll>
@@ -148,10 +149,11 @@ export function WhatIsKalamkari() {
                       />
                     </div>
 
-                    <h3 className="mt-3 font-display text-display-sm leading-snug">
+                    {/* Heading only. The paragraph under each is on
+                        /process#what-is-kalamkari. */}
+                    <h3 className="mt-3 font-display text-lg leading-snug md:text-xl">
                       {facet.heading}
                     </h3>
-                    <p className="mt-3 leading-relaxed text-muted-foreground">{facet.body}</p>
                   </div>
                 </RevealOnScroll>
               </li>

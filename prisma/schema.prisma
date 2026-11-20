@@ -343,6 +343,7 @@ model Order {
   @@index([status])
   @@index([placedAt])
   @@index([email])
+  @@index([razorpayOrderId])
 }
 
 model OrderItem {
@@ -466,4 +467,25 @@ model NewsletterSubscriber {
   email     String   @unique
   confirmed Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+/// One row per payment-provider webhook delivery, written *before* the event is
+/// processed. The unique key is what makes redelivery safe to ignore: a second
+/// delivery of the same event id cannot insert, so it cannot be processed as if
+/// it were new. `processedAt` stays null until handling finishes, so an event
+/// that failed halfway is retried rather than silently dropped.
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String    @default("razorpay")
+  /// The provider's own event id (`x-razorpay-event-id`).
+  eventId     String
+  type        String
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+  attempts    Int       @default(1)
+  /// Short, secret-free description of the last failure.
+  lastError   String?
+
+  @@unique([provider, eventId])
+  @@index([receivedAt])
 }

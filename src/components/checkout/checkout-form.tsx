@@ -1,8 +1,8 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Banknote, CreditCard, Lock } from 'lucide-react';
+import { AlertCircle, Banknote, CreditCard, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,12 +32,27 @@ const INDIAN_STATES = [
   'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
 ];
 
+/** A small numeral in a ring, so the page reads as three short steps. */
+function StepNumber({ n }: { n: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="tabular inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-primary/50 text-sm text-primary"
+    >
+      {n}
+    </span>
+  );
+}
+
 function SubmitButton({ method }: { method: string }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="lg" disabled={pending} className="w-full">
+    <Button type="submit" size="lg" disabled={pending} aria-busy={pending} className="w-full">
       {pending ? (
-        'Placing order…'
+        <>
+          <Loader2 className="animate-spin" aria-hidden="true" />
+          Placing order…
+        </>
       ) : (
         <>
           <Lock aria-hidden="true" />
@@ -53,14 +68,30 @@ export function CheckoutForm({
   savedAddress,
   isSignedIn,
   razorpayAvailable,
+  totalLabel,
 }: {
   defaultEmail: string;
   savedAddress: SavedAddress | null;
   isSignedIn: boolean;
   razorpayAvailable: boolean;
+  /** The order total as text, repeated beside the button so it is in view when paying. */
+  totalLabel?: string;
 }) {
   const [state, formAction] = useActionState(placeOrder, initialCheckoutState);
   const [method, setMethod] = useState<'COD' | 'RAZORPAY'>('COD');
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  // A rejected submission leaves the reader at the button, with the reason
+  // above the fold of the form. Bring it into view and let a screen reader
+  // land on it.
+  useEffect(() => {
+    if (state.status === 'error') {
+      errorRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      errorRef.current?.focus({ preventScroll: true });
+    }
+  }, [state]);
+
+  const fieldErrorCount = state.errors ? Object.values(state.errors).filter(Boolean).length : 0;
 
   return (
     <form action={formAction} noValidate>
@@ -69,15 +100,30 @@ export function CheckoutForm({
 
       {state.status === 'error' && (
         <div
+          ref={errorRef}
           role="alert"
-          className="mb-6 rounded-sm border border-destructive/40 bg-destructive/5 p-4 text-sm"
+          tabIndex={-1}
+          className="mb-6 flex gap-3 rounded-sm border border-destructive/40 bg-destructive/5 p-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {state.message}
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
+          <div>
+            <p className="font-medium">{state.message}</p>
+            {fieldErrorCount > 0 && (
+              <p className="mt-1 text-muted-foreground">
+                {fieldErrorCount === 1
+                  ? 'One field needs attention — it is marked below.'
+                  : `${fieldErrorCount} fields need attention — they are marked below.`}
+              </p>
+            )}
+          </div>
         </div>
       )}
 
       <section className="rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="font-display text-xl">Contact</h2>
+        <h2 className="flex items-center gap-3 font-display text-xl">
+          <StepNumber n={1} />
+          Contact
+        </h2>
 
         <div className="mt-5">
           <Label htmlFor="co-email" required>Email</Label>
@@ -101,7 +147,10 @@ export function CheckoutForm({
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="font-display text-xl">Where it should go</h2>
+        <h2 className="flex items-center gap-3 font-display text-xl">
+          <StepNumber n={2} />
+          Where it should go
+        </h2>
 
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -206,8 +255,12 @@ export function CheckoutForm({
               name="state"
               required
               defaultValue={savedAddress?.state ?? ''}
-              className="mt-1.5 h-11 w-full rounded-sm border border-input bg-card px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className={cn(
+                'mt-1.5 h-11 w-full rounded-sm border bg-card px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                state.errors?.state ? 'border-destructive' : 'border-input',
+              )}
               aria-invalid={Boolean(state.errors?.state)}
+              aria-describedby={state.errors?.state ? 'co-state-error' : undefined}
             >
               <option value="" disabled>Select a state</option>
               {INDIAN_STATES.map((s) => (
@@ -227,7 +280,10 @@ export function CheckoutForm({
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="font-display text-xl">Payment</h2>
+        <h2 className="flex items-center gap-3 font-display text-xl">
+          <StepNumber n={3} />
+          Payment
+        </h2>
 
         <RadioGroup
           value={method}
@@ -237,7 +293,7 @@ export function CheckoutForm({
         >
           <label
             className={cn(
-              'flex cursor-pointer items-start gap-3 rounded-sm border p-4 transition-colors',
+              'flex min-h-[3.5rem] cursor-pointer items-start gap-3 rounded-sm border p-4 transition-colors',
               method === 'COD' ? 'border-primary bg-primary/[0.04]' : 'border-border',
             )}
           >
@@ -290,6 +346,12 @@ export function CheckoutForm({
       </section>
 
       <div className="mt-7">
+        {totalLabel && (
+          <p className="mb-3 flex items-baseline justify-between border-t border-border pt-4 text-sm">
+            <span className="text-muted-foreground">Total to pay</span>
+            <span className="tabular font-display text-xl">{totalLabel}</span>
+          </p>
+        )}
         <SubmitButton method={method} />
         <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
           By placing this order you agree to our{' '}

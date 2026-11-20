@@ -4,11 +4,11 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useId } from 'react';
 
 const SORTS = [
-  { value: 'featured', label: 'The store’s order' },
-  { value: 'craft', label: 'Most hand-work first' },
-  { value: 'newest', label: 'Most recently finished' },
-  { value: 'price-asc', label: 'Price: low to high' },
-  { value: 'price-desc', label: 'Price: high to low' },
+  { value: 'featured', label: 'Featured' },
+  { value: 'newest', label: 'Newest first' },
+  { value: 'price-asc', label: 'Price: Low to High' },
+  { value: 'price-desc', label: 'Price: High to Low' },
+  { value: 'craft', label: 'Most days of hand-work' },
 ];
 
 /**
