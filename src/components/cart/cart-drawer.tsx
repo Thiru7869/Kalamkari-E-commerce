@@ -87,7 +87,7 @@ export function CartDrawer({ cart }: { cart: CartSummary }) {
               {waiting ? 'Updating your bag…' : 'Have a look at what is in the store now.'}
             </p>
             <Button asChild className="mt-6">
-              <Link href="/shop">Browse the store</Link>
+              <Link href="/">Browse the store</Link>
             </Button>
           </div>
         ) : (

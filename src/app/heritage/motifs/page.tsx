@@ -73,7 +73,7 @@ export default async function MotifsPage() {
                         {motif.story}
                       </p>
                       <Link
-                        href={`/shop?motif=${motif.slug}`}
+                        href={`/?motif=${motif.slug}`}
                         className="mt-4 inline-flex min-h-[2.75rem] items-center gap-1.5 self-start text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         See {motif.name} pieces
@@ -93,7 +93,7 @@ export default async function MotifsPage() {
         shop={[
           { label: 'Sarees', href: '/types/sarees' },
           { label: 'Paintings', href: '/types/paintings' },
-          { label: 'Shop all', href: '/shop' },
+          { label: 'Shop all', href: '/' },
         ]}
       />
     </>

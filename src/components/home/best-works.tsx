@@ -120,7 +120,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
           <h2 className="mt-3 text-display-md">{bestWorks.heading}</h2>
           <p className="mt-4 leading-relaxed text-muted-foreground">{bestWorks.empty}</p>
           <Link
-            href="/shop"
+            href="/"
             className="mt-6 inline-flex min-h-[2.75rem] items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             Everything in the store

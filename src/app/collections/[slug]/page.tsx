@@ -8,7 +8,8 @@ import { ProductGrid } from '@/components/shop/product-card';
 import { NarrativeNote } from '@/components/shop/narrative-note';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { Button } from '@/components/ui/button';
-import { getCollectionProducts } from '@/lib/queries';
+import { BestWorks } from '@/components/home/best-works';
+import { getBestWorks, getCollectionProducts } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { collectionDefs, findCollection } from '@/content/catalogue';
 import { formatPrice } from '@/lib/utils';
@@ -47,9 +48,12 @@ export default async function CollectionPage({ params }: { params: Params }) {
   const collection = findCollection(slug);
   if (!collection) notFound();
 
-  const [{ items, total }, wishlistIds] = await Promise.all([
+  const [{ items, total }, wishlistIds, bestWorksItems] = await Promise.all([
     getCollectionProducts(collection.kind, collection.category, 24),
     getWishlistIds(),
+    // Best works lives on the premium collection: the hardest drawing the
+    // workshop does, which is what that collection is selected on.
+    collection.kind === 'premium' ? getBestWorks(6) : Promise.resolve([]),
   ]);
 
   const available = items.filter((p) => p.stock > 0);
@@ -121,8 +125,8 @@ export default async function CollectionPage({ params }: { params: Params }) {
                   <Link
                     href={
                       collection.kind === 'new'
-                        ? '/shop?sort=newest'
-                        : `/shop?collection=${collection.kind}`
+                        ? '/?sort=newest'
+                        : `/?collection=${collection.kind}`
                     }
                   >
                     See all {total} in the shop
@@ -141,7 +145,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
             </p>
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
               <Button asChild size="lg" variant="outline">
-                <Link href="/shop">See everything in the store</Link>
+                <Link href="/">See everything in the store</Link>
               </Button>
               <Button asChild size="lg">
                 <Link href="/custom">Have a piece painted</Link>
@@ -150,6 +154,11 @@ export default async function CollectionPage({ params }: { params: Params }) {
           </div>
         )}
 
+      </div>
+
+      {bestWorksItems.length > 0 && <BestWorks works={bestWorksItems} />}
+
+      <div className="container section-y-sm">
         <RevealOnScroll className="mt-16">
           <NarrativeNote />
         </RevealOnScroll>

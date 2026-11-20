@@ -22,6 +22,10 @@ const nextConfig = {
       // The page moved from /commission to /custom when the nav label changed.
       // Permanent, because the old URL was live and is linked from elsewhere.
       { source: '/commission', destination: '/custom', permanent: true },
+      // The shop is the home page. Permanent (308), and Next carries the query
+      // string across, so /shop?motif=… and /shop?sort=… keep working.
+      // /shop/<category> is a separate route and is unaffected.
+      { source: '/shop', destination: '/', permanent: true },
     ];
   },
 

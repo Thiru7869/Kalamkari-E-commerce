@@ -111,7 +111,7 @@ export default async function AccountPage() {
           <div className="mt-6 rounded-sm border border-border bg-card p-8 text-center">
             <p className="text-muted-foreground">You have not ordered anything yet.</p>
             <Button asChild className="mt-5">
-              <Link href="/shop">See what is in the store</Link>
+              <Link href="/">See what is in the store</Link>
             </Button>
           </div>
         ) : (

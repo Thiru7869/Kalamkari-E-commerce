@@ -85,7 +85,7 @@ export async function updateOrderStatus(
   revalidatePath('/admin');
   revalidatePath('/admin/orders');
   revalidatePath(`/admin/orders/${before.number}`);
-  revalidatePath('/shop');
+  revalidatePath('/');
   return { ok: true, message: `Order marked ${statusLabel(status).toLowerCase()}.` };
 }
 
@@ -152,7 +152,7 @@ export async function setProductStatus(id: string, status: string): Promise<Resu
 
   await prisma.product.update({ where: { id }, data: { status } });
   revalidatePath('/admin/products');
-  revalidatePath('/shop');
+  revalidatePath('/');
   return { ok: true, message: 'Updated.' };
 }
 
@@ -169,6 +169,6 @@ export async function setProductStock(id: string, stock: number): Promise<Result
 
   await prisma.product.update({ where: { id }, data: { stock } });
   revalidatePath('/admin/products');
-  revalidatePath('/shop');
+  revalidatePath('/');
   return { ok: true, message: 'Stock updated.' };
 }

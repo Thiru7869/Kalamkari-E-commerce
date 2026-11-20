@@ -79,7 +79,7 @@ export default function CulturePage() {
               {narrativeMotifs.map((slug) => (
                 <li key={slug}>
                   <Link
-                    href={`/shop?motif=${slug}`}
+                    href={`/?motif=${slug}`}
                     className="inline-flex min-h-[2.5rem] items-center rounded-full border border-border bg-background px-4 text-sm transition-colors duration-swift ease-swift hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {narrativeMotifNames[slug]}
@@ -103,7 +103,7 @@ export default function CulturePage() {
         shop={[
           { label: 'Sarees', href: '/types/sarees' },
           { label: 'Paintings', href: '/types/paintings' },
-          { label: 'Shop all', href: '/shop' },
+          { label: 'Shop all', href: '/' },
         ]}
       />
     </>

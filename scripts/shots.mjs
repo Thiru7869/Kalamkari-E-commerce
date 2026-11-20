@@ -2,7 +2,7 @@
  * Capture full-page screenshots of routes at chosen widths, for looking at
  * rather than measuring. Companion to audit-layout.mjs.
  *
- *   node scripts/shots.mjs --width=390 --routes=/,/shop --out=.shots
+ *   node scripts/shots.mjs --width=390 --routes=/,/archive --out=.shots
  */
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
@@ -16,7 +16,7 @@ const BASE = arg('base', 'http://localhost:3000').replace(/\/$/, '');
 const WIDTH = Number(arg('width', '390'));
 const OUT = arg('out', '.shots');
 const FULL = arg('full', 'true') === 'true';
-const ROUTES = arg('routes', '/,/shop,/process,/our-story').split(',');
+const ROUTES = arg('routes', '/,/archive,/process,/our-story').split(',');
 
 await mkdir(OUT, { recursive: true });
 

@@ -223,7 +223,7 @@ export default async function TypePage({
       <header className="border-b border-border bg-cotton-100 pb-10 pt-10 md:pb-14 md:pt-14 dark:bg-card">
         <div className="container">
           <Breadcrumbs
-            trail={[{ label: 'Shop', href: '/shop' }, { label }]}
+            trail={[{ label: 'Shop', href: '/' }, { label }]}
             className="mb-6"
           />
 
@@ -537,7 +537,7 @@ export default async function TypePage({
               ))}
             <li>
               <Link
-                href="/shop"
+                href="/"
                 className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-sm border border-primary bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-chay-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Everything together

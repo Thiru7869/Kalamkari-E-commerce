@@ -471,14 +471,16 @@ request, deliberately with no SMTP host and no payment keys — the degraded
 configuration is the one most worth exercising.
 
 First-load JS: 103 kB shared, 162–174 kB on the heaviest content routes and
-207 kB on the home page, with three.js in a lazy chunk.
+about 181 kB on the home page (the shop). No 3D library is loaded on any route.
 
 ---
 
 ## Browsing
 
-`/shop` is the working grid — everything, filterable, paginated, three across on
-a phone. It filters on **story & motif, colour, cloth and price**, all in the
+The shop is the home page: `/` (and `/shop/<category>`) is the working grid —
+what can be bought now, filterable, paginated, two across on a phone. `/shop`
+redirects to `/` with its query string. Sold pieces are kept apart in the
+sold archive at `/archive`; Best Works is on `/collections/premium`. It filters on **story & motif, colour, cloth and price**, all in the
 URL. Colour is backed by a real `Dye` relation rather than a text match (see
 `CLAUDE.md`), and price is offered as four bands struck against the catalogue's
 actual spread rather than as a two-handle slider — bands that cannot return

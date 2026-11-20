@@ -86,8 +86,8 @@ function destinations(): Map<string, string> {
   add('saree', '/types/sarees');
   add('sari', '/types/sarees');
   add('saris', '/types/sarees');
-  add('shop', '/shop');
-  add('everything', '/shop');
+  add('shop', '/');
+  add('everything', '/');
 
   return map;
 }

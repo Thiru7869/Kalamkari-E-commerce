@@ -14,7 +14,7 @@
  *   node scripts/audit-layout.mjs                 # against localhost:3000
  *   node scripts/audit-layout.mjs --base=http://localhost:3000
  *   node scripts/audit-layout.mjs --widths=320,430
- *   node scripts/audit-layout.mjs --routes=/,/shop
+ *   node scripts/audit-layout.mjs --routes=/,/archive
  *
  * Exits non-zero if anything overflows, so it can gate a build.
  */
@@ -55,8 +55,9 @@ const ROUTES = arg(
   'routes',
   [
     '/',
-    '/shop',
+    '/?fabric=cotton',
     '/shop/sarees',
+    '/archive',
     '/product/tree-of-life-tussar-silk-saree',
     '/types/sarees',
     // The cloth filter applied in place. A different render of the same route

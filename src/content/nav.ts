@@ -15,7 +15,7 @@ import { heritageModules } from './heritage-modules';
 export const mainNav: NavItem[] = [
   {
     label: 'Shop',
-    href: '/shop',
+    href: '/',
     hint: 'Everything currently in the store',
     mega: { feature: { href: '/collections/premium', image: '/images/products/hero-paintings.jpg' } },
     children: [

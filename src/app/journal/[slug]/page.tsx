@@ -142,7 +142,7 @@ export default async function JournalPostPage({ params }: { params: Params }) {
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
-                  href="/shop"
+                  href="/"
                   className="inline-flex h-11 items-center rounded-sm bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-chay-700"
                 >
                   See the work

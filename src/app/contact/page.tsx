@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { MapPin, Clock, Mail, Phone, MessageCircle } from 'lucide-react';
 import { ContactForm } from '@/components/forms/contact-form';
+import { WorkshopInvitation } from '@/components/home/workshop-invitation';
 import { site, contactEmail, contactPhone, whatsappHref } from '@/content/site';
 import { absoluteUrl } from '@/lib/utils';
 
@@ -181,6 +182,9 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* Come and see it being made: the offer that sets the store apart. */}
+      <WorkshopInvitation />
 
       <script
         type="application/ld+json"

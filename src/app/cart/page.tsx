@@ -28,7 +28,7 @@ export default async function CartPage() {
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link href="/shop">
+              <Link href="/">
                 Browse the store
                 <ArrowRight aria-hidden="true" />
               </Link>
@@ -165,7 +165,7 @@ export default async function CartPage() {
             </p>
 
             <Link
-              href="/shop"
+              href="/"
               className="mt-5 inline-block text-sm text-primary underline-offset-4 hover:underline"
             >
               Keep looking

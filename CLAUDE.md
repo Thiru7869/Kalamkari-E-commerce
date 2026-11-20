@@ -76,7 +76,7 @@ Hence the split in `src/lib/cart.ts`:
 | `recordRecentlyViewed()` | Yes | Server actions only |
 
 `src/lib/recently-viewed.ts` follows the same split for the same reason. The
-rail is rendered during `/shop` and every product page, so the read path must
+rail is rendered on the shop (`/`, `/shop/<category>`) and every product page, so the read path must
 never write; the write happens in `recordProductView` (`src/app/actions/`),
 called from an effect after paint.
 
@@ -145,7 +145,7 @@ uses for magic links.
   `src/content`, and it must carry the page where it is defended. No "since
   1952", no units sold. Where a count exists in code — the step count is
   `totalSteps` — import it rather than writing it down twice.
-- `best-works.ts` — the six grounds the Best Works rail is mounted on, each
+- `best-works.ts` — the six grounds the Best Works rail on `/collections/premium` is mounted on, each
   sampled off a dye ramp and each stating its own `ink`. `npm run audit:ink`
   checks them against the same contrast ladder as the flooded dye colours; a
   ground that cannot carry text fails the check rather than shipping.
@@ -173,7 +173,7 @@ follows the workshop. Two entries are deliberately not what a dye manual says:
 These were corrected by the store on 2026-08-12. `naturalDyes`, the `Dye` seed
 `source` strings and the eight-stage summary in `saree-stages.tsx` were all
 brought into line at the same time — if you change one, change all four, or the
-product page, the shop filter and the home page will describe the same pot
+product page, the shop filter and the shop page will describe the same pot
 differently.
 
 `openPalette` is deliberately **not** a member of `colourStories`. That array
@@ -390,6 +390,11 @@ Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
 
 ## The 3D
 
+**No scene is mounted at the moment.** The hero scene was removed and nothing
+imports `three`, `@react-three/fiber` or `@react-three/drei` any more; the
+packages are still in `package.json` and are candidates for removal. If a scene
+is reintroduced, these rules apply:
+
 - three.js is code-split behind `next/dynamic` and requested only after client
   capability detection resolves. It must never delay LCP.
 - **No information exists only inside a canvas.** Every scene has a meaningful
@@ -400,6 +405,26 @@ Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
   triggers a re-render.
 - Lenis and GSAP share **one** rAF loop (GSAP's ticker drives Lenis). Lenis is
   not mounted at all under reduced motion, and touch scrolling is left native.
+
+## The shop is the home page
+
+`/` renders the shop: `ShopView` (`src/components/shop/shop-view.tsx`), shared
+with `/shop/<category>`. `/shop` itself is a permanent (308) redirect to `/` in
+`next.config.mjs`, and Next carries the query string across, so old
+`/shop?motif=…` links still work. Internal links point at `/` directly.
+
+- **The grid lists only what can be bought.** `ShopView` always passes
+  `inStockOnly: true`. Sold pieces live at `/archive` (`getSoldProducts`), keep
+  their product pages, and are never in the grid beside available work.
+- **"Similar" never recommends a sold piece.** `getRelatedProducts` filters on
+  stock. `src/lib/shop-visibility.int.test.ts` pins both rules.
+- **Best works** is on `/collections/premium`; the shop header links to it.
+- **Story cards** in the grid (`GridStory`) and the two bands below it read
+  `heritageModules`. Nothing is written in the component, so it cannot say what
+  the destination page does not.
+- **The header** is `src/content/nav.ts` (it lives outside `site.ts` because it
+  reads `heritageModules`, which reads `site` — one file would be an import
+  cycle).
 
 ## Interruptions
 

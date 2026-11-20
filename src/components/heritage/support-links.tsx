@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 
 const LINKS = [
-  { label: 'Shop the work', href: '/shop', hint: 'Sarees, dupattas, paintings and more' },
+  { label: 'Shop the work', href: '/', hint: 'Sarees, dupattas, paintings and more' },
   { label: 'Heritage & craft', href: '/heritage', hint: 'How and why it is made this way' },
   { label: 'Visit or write to us', href: '/contact', hint: 'We reply to every message' },
 ] as const;

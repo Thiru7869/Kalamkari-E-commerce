@@ -279,7 +279,7 @@ export default function ProcessPage() {
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Button asChild size="lg">
-                <Link href="/shop">
+                <Link href="/">
                   See the finished work
                   <ArrowRight aria-hidden="true" />
                 </Link>

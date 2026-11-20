@@ -48,7 +48,7 @@ export default function HeritagePage() {
           <Link href="/process">See how it is made</Link>
         </Button>
         <Button asChild size="lg" variant="outline" className="rounded-full">
-          <Link href="/shop">Shop the work</Link>
+          <Link href="/">Shop the work</Link>
         </Button>
       </PageHero>
 

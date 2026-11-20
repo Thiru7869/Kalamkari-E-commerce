@@ -138,7 +138,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
                   Commission one
                 </Link>
                 <Link
-                  href="/shop"
+                  href="/"
                   className="inline-flex h-11 items-center justify-center rounded-sm border border-foreground/25 px-5 text-sm font-medium transition-colors hover:bg-foreground/5"
                 >
                   See everything
@@ -185,7 +185,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
 
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href="/shop"
+              href="/"
               className="inline-flex h-11 items-center justify-center rounded-sm border border-foreground/25 px-5 text-sm font-medium transition-colors hover:bg-foreground/5"
             >
               See everything

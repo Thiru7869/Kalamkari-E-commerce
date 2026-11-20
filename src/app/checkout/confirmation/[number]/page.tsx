@@ -70,7 +70,7 @@ export default async function ConfirmationPage({ params }: { params: Params }) {
 
       <div className="mt-14 flex flex-col justify-center gap-3 sm:flex-row">
         <Button asChild size="lg" variant="outline">
-          <Link href="/shop">Keep looking</Link>
+          <Link href="/">Keep looking</Link>
         </Button>
         <Button asChild size="lg" variant="outline">
           <Link href={`/orders/track?number=${order.number}`}>Track this order</Link>

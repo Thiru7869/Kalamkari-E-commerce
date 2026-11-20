@@ -177,7 +177,7 @@ export const exploreSections = [
   {
     title: 'The work',
     items: [
-      { label: 'Everything in the store', href: '/shop', hint: 'The full grid, filterable by cloth, story and price' },
+      { label: 'Everything in the store', href: '/', hint: 'The full grid, filterable by cloth, story and price' },
       { label: 'Sarees', href: '/types/sarees', hint: 'Nine yards, drawn end to end — and which cloth to choose' },
       { label: 'Paintings', href: '/types/paintings', hint: 'Narrative panels, the tradition the craft grew out of' },
       { label: 'New arrivals', href: '/collections/new-arrivals', hint: 'The most recent work to finish its twentieth washing' },
@@ -252,15 +252,14 @@ export const shopCategories = [
 ] as const;
 
 /**
- * The phone tab bar: the five things done most often while shopping.
+ * The phone tab bar: the four things done most often while shopping.
  *
  * Search opens the search panel rather than navigating, so it has no `href`.
  * Story, Process, Custom, Journal, Visit and Account live in the menu drawer.
  * (`MobileTabBar` holds its own copy of this list with the icon components.)
  */
 export const mobileTabs = [
-  { label: 'Home', href: '/', icon: 'home' },
-  { label: 'Shop', href: '/shop', icon: 'grid' },
+  { label: 'Shop', href: '/', icon: 'grid' },
   { label: 'Search', href: null, icon: 'search' },
   { label: 'Wishlist', href: '/wishlist', icon: 'heart' },
   { label: 'Bag', href: '/cart', icon: 'bag' },
@@ -275,7 +274,7 @@ export const footerNav = [
       { label: 'Paintings', href: '/types/paintings' },
       { label: 'Home Decor', href: '/types/home-decor' },
       { label: 'Blouse Pieces', href: '/types/blouse-pieces' },
-      { label: 'Everything', href: '/shop' },
+      { label: 'Everything', href: '/' },
     ],
   },
   {
@@ -284,6 +283,7 @@ export const footerNav = [
       { label: 'Featured Sarees', href: '/collections/featured-sarees' },
       { label: 'Premium', href: '/collections/premium' },
       { label: 'New Arrivals', href: '/collections/new-arrivals' },
+      { label: 'Sold Archive', href: '/archive' },
       { label: 'Commission a Piece', href: '/custom' },
     ],
   },

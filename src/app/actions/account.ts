@@ -265,7 +265,7 @@ export async function cancelOrder(_prev: FormState, formData: FormData): Promise
 
   revalidatePath('/account');
   revalidatePath('/admin/orders');
-  revalidatePath('/shop');
+  revalidatePath('/');
   return {
     status: 'success',
     message: wasPaid

@@ -138,7 +138,7 @@ export const knowledge: KnowledgeEntry[] = [
     ],
     answer:
       'Price follows hand-hours and cloth, not brand. A stole or a small panel starts low; a fully painted silk saree with a narrative pallu is weeks of one person\'s work and is priced as such. Nothing here is discounted seasonally — the cost is what the making cost. Tell me a budget and the kind of piece you want, and I can point you to what fits.',
-    link: { label: 'Browse everything', href: '/shop' },
+    link: { label: 'Browse everything', href: '/' },
   },
   {
     id: 'one-of-one',

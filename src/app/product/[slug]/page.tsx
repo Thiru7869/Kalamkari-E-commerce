@@ -76,7 +76,7 @@ export default async function ProductPage({ params }: { params: Params }) {
       <div className="container pt-6 md:pt-8">
         <Breadcrumbs
           trail={[
-            { label: 'Shop', href: '/shop' },
+            { label: 'Shop', href: '/' },
             { label: product.category.name, href: `/shop/${product.category.slug}` },
             { label: product.name },
           ]}
@@ -250,7 +250,7 @@ export default async function ProductPage({ params }: { params: Params }) {
                             <h3 className="font-medium text-foreground">{motif.name}</h3>
                             <p className="mt-1">{motif.story}</p>
                             <Link
-                              href={`/shop?motif=${motif.slug}`}
+                              href={`/?motif=${motif.slug}`}
                               className="mt-2 inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
                             >
                               See other {motif.name} pieces
@@ -350,7 +350,19 @@ export default async function ProductPage({ params }: { params: Params }) {
       {related.length > 0 && (
         <section className="border-t border-border section-y">
           <div className="container">
-            <h2 className="text-display-sm">Painted in the same tradition</h2>
+            <h2 className="text-display-sm">
+              {soldOut ? 'Similar pieces still available' : 'Painted in the same tradition'}
+            </h2>
+            {soldOut && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                This piece has found a home. These are close to it in motif or kind, and can be
+                bought now.{' '}
+                <Link href="/archive" className="text-primary underline underline-offset-4">
+                  See the sold archive
+                </Link>
+                .
+              </p>
+            )}
             <ul className={cn('mt-7 grid grid-cols-2 md:grid-cols-4', PRODUCT_GRID_GAP)}>
               {related.map((p) => (
                 <li key={p.id} className="flex">

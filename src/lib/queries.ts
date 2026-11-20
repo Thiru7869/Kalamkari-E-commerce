@@ -230,12 +230,18 @@ export const getProductBySlug = cache(async (slug: string) => {
   });
 });
 
-/** Pieces to show under a product: same motif first, then same category. */
+/**
+ * Pieces to show under a product: same motif first, then same category.
+ *
+ * Only pieces still in stock. Recommending a sold piece beside the one you are
+ * looking at sends you to a dead end; the sold ones live in the archive.
+ */
 export async function getRelatedProducts(productId: string, categoryId: string, motifIds: string[]) {
   const byMotif = motifIds.length
     ? await prisma.product.findMany({
         where: {
           status: 'ACTIVE',
+          stock: { gt: 0 },
           id: { not: productId },
           motifs: { some: { motifId: { in: motifIds } } },
         },
@@ -249,6 +255,7 @@ export async function getRelatedProducts(productId: string, categoryId: string, 
   const fill = await prisma.product.findMany({
     where: {
       status: 'ACTIVE',
+      stock: { gt: 0 },
       categoryId,
       id: { not: productId, notIn: byMotif.map((p) => p.id) },
     },
@@ -467,6 +474,29 @@ export async function getRecentlySold(take = 4) {
     orderBy: { updatedAt: 'desc' },
     take,
   });
+}
+
+/**
+ * The sold archive, newest sale first, paged like the shop.
+ *
+ * Kept apart from the shop grid on purpose: the grid is what can be bought, and
+ * a sold piece in it is a card that cannot be acted on. Each of these keeps its
+ * own page, which marks it sold and recommends pieces still available.
+ */
+export async function getSoldProducts(page = 1) {
+  const current = Math.max(1, page);
+  const where = { status: 'ACTIVE', stock: { lte: 0 } } satisfies Prisma.ProductWhereInput;
+  const [items, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      select: productCardSelect,
+      orderBy: { updatedAt: 'desc' },
+      skip: (current - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.product.count({ where }),
+  ]);
+  return { items, total, page: current, pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 
 /** Cached: `generateMetadata` and the shop page each resolve the same slug. */

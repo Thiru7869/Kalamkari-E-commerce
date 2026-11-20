@@ -73,7 +73,7 @@ export default function ColoursPage() {
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.source}</p>
                     <p className="mt-3 text-sm leading-relaxed">{c.note}</p>
                     <Link
-                      href={`/shop?dye=${DYE_SLUG[c.id] ?? ''}`}
+                      href={`/?dye=${DYE_SLUG[c.id] ?? ''}`}
                       className="mt-auto inline-flex min-h-[2.75rem] items-center gap-1 pt-3 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Shop this colour
@@ -107,7 +107,7 @@ export default function ColoursPage() {
         shop={[
           { label: 'Sarees', href: '/types/sarees' },
           { label: 'Dupattas', href: '/types/dupattas' },
-          { label: 'Shop all', href: '/shop' },
+          { label: 'Shop all', href: '/' },
         ]}
       />
     </>
