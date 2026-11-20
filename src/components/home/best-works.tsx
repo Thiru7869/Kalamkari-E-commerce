@@ -342,7 +342,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                   <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                     <dt
                       className={cn(
-                        'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
+                        'font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
                         tone.faint,
                       )}
                     >
@@ -355,7 +355,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                   <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                     <dt
                       className={cn(
-                        'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
+                        'font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
                         tone.faint,
                       )}
                     >
@@ -367,7 +367,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                 <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                   <dt
                     className={cn(
-                      'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
+                      'font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
                       tone.faint,
                     )}
                   >

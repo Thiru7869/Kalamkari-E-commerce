@@ -20,7 +20,7 @@ export function SupportLinks({ exclude }: { exclude?: string }) {
           <li key={l.href}>
             <Link
               href={l.href}
-              className="group flex h-full items-start justify-between gap-3 rounded-2xl border border-border bg-card p-5 transition-colors duration-swift ease-swift hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group flex h-full items-start justify-between gap-3 rounded-sm border border-border bg-card p-5 transition-colors duration-swift ease-swift hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span>
                 <span className="block font-display text-base">{l.label}</span>

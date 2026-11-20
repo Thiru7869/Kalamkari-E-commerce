@@ -166,7 +166,7 @@ export function WorkshopVideo({
       >
         <p
           className={cn(
-            'font-inscription text-[0.5625rem] uppercase tracking-[0.18em]',
+            'font-inscription text-[0.625rem] uppercase tracking-[0.18em]',
             light ? 'text-muted-foreground' : 'text-cotton-200/60',
           )}
         >

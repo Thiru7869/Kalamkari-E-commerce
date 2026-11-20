@@ -42,7 +42,7 @@ export default function ArtisansPage() {
           {family.map((m, i) => (
             <li key={m.id}>
               <RevealOnScroll delay={(i % 3) * 0.05} className="h-full">
-                <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40">
+                <article className="flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <Image
                       src={m.image}
@@ -74,7 +74,7 @@ export default function ArtisansPage() {
       </section>
 
       <section className="container" aria-labelledby="the-award">
-        <div className="grid gap-6 rounded-3xl bg-kasim-900 p-6 text-cotton-100 sm:p-9 md:grid-cols-[auto_1fr] md:items-center md:gap-10">
+        <div className="grid gap-6 rounded-sm bg-kasim-900 p-6 text-cotton-100 sm:p-9 md:grid-cols-[auto_1fr] md:items-center md:gap-10">
           <p className="font-display text-5xl leading-none text-cotton-50 tabular md:text-6xl">
             {principalAward.year}
           </p>

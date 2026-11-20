@@ -54,7 +54,7 @@ export default function CulturePage() {
           {storyMethod.map((m, i) => (
             <li
               key={m.id}
-              className="rounded-2xl border border-border bg-card p-6 transition-colors duration-swift ease-swift hover:border-primary/40"
+              className="rounded-sm border border-border bg-card p-6 transition-colors duration-swift ease-swift hover:border-primary/40"
             >
               <span
                 aria-hidden="true"
@@ -70,7 +70,7 @@ export default function CulturePage() {
       </section>
 
       <section className="container section-y" aria-labelledby="the-stories">
-        <div className="flex flex-col gap-5 rounded-3xl border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-5 rounded-sm border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 id="the-stories" className="font-display text-xl md:text-2xl">
               The stories on the cloth

@@ -52,7 +52,7 @@ export default async function MotifsPage() {
             return (
               <li key={motif.slug}>
                 <RevealOnScroll>
-                  <article className="grid overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40 sm:grid-cols-[minmax(0,14rem)_1fr]">
+                  <article className="grid overflow-hidden rounded-sm border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40 sm:grid-cols-[minmax(0,14rem)_1fr]">
                     <div className="relative aspect-[16/9] bg-muted sm:aspect-auto sm:min-h-[11rem]">
                       {src && (
                         <Image

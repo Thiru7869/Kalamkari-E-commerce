@@ -53,7 +53,7 @@ export default function ColoursPage() {
           {colourStories.map((c, i) => (
             <li key={c.id}>
               <RevealOnScroll delay={(i % 4) * 0.05} className="h-full">
-                <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40">
+                <article className="flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40">
                   <div
                     className={cn(
                       'flex h-28 items-end p-4',
@@ -88,7 +88,7 @@ export default function ColoursPage() {
       </section>
 
       <section className="container pb-4" aria-labelledby="not-used">
-        <div className="rounded-3xl border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9">
+        <div className="rounded-sm border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9">
           <h2 id="not-used" className="font-display text-xl md:text-2xl">
             What we do not use
           </h2>

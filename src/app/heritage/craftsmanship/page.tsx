@@ -48,7 +48,7 @@ export default function CraftsmanshipPage() {
                     i % 2 === 1 && 'md:[&>*:first-child]:order-2',
                   )}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-sm border border-border">
                     {img && (
                       <Image
                         src={img.src}
@@ -74,7 +74,7 @@ export default function CraftsmanshipPage() {
       {/* The test, as one pulled line. */}
       <section className="container" aria-label="How to tell">
         <RevealOnScroll>
-          <p className="mx-auto max-w-3xl rounded-3xl bg-kasim-900 p-7 text-center font-display text-lg leading-snug text-cotton-50 sm:p-10 md:text-2xl">
+          <p className="mx-auto max-w-3xl rounded-sm bg-kasim-900 p-7 text-center font-display text-lg leading-snug text-cotton-50 sm:p-10 md:text-2xl">
             {whatIsKalamkari.test}
           </p>
         </RevealOnScroll>
@@ -88,7 +88,7 @@ export default function CraftsmanshipPage() {
           {workshopNotes.map((note, i) => (
             <li
               key={note.id}
-              className="rounded-2xl border border-border bg-card p-6 transition-colors duration-swift ease-swift hover:border-primary/40"
+              className="rounded-sm border border-border bg-card p-6 transition-colors duration-swift ease-swift hover:border-primary/40"
             >
               <p className="tabular font-inscription text-[0.6875rem] tracking-[0.14em] text-primary/70">
                 {String(i + 1).padStart(2, '0')}

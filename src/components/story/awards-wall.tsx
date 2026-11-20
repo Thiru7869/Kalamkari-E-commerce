@@ -179,7 +179,7 @@ export function AwardsWall() {
                       certificate looks like part of the certificate. */}
                   <figcaption
                     aria-hidden="true"
-                    className="tabular mt-1.5 font-inscription text-[0.5625rem] uppercase tracking-[0.14em] text-muted-foreground/70 md:text-[0.625rem]"
+                    className="tabular mt-1.5 font-inscription text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/70 md:text-[0.625rem]"
                   >
                     {award.label}
                   </figcaption>

@@ -374,7 +374,7 @@ export function ShopFilters({
       */}
       <DialogContent
         side="bottom"
-        className="max-h-[85svh] rounded-t-lg p-0 lg:inset-0 lg:m-auto lg:h-fit lg:max-w-xl lg:rounded-lg"
+        className="max-h-[85svh] rounded-t-sm p-0 lg:inset-0 lg:m-auto lg:h-fit lg:max-w-xl lg:rounded-sm"
       >
         <DialogTitle className="border-b border-border px-5 py-4 font-display text-lg">
           Filter

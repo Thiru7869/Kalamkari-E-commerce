@@ -68,7 +68,7 @@ export default function HeritagePage() {
       </section>
 
       <section className="container pb-16 md:pb-20" aria-labelledby="authentic-heading">
-        <div className="flex flex-col gap-5 rounded-3xl border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-5 rounded-sm border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
           <div className="max-w-xl">
             <h2 id="authentic-heading" className="font-display text-xl md:text-2xl">
               Is it really hand-painted?

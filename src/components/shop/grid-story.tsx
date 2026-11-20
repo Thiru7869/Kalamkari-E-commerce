@@ -28,7 +28,7 @@ export function GridStory({ page }: { page: number }) {
     <aside aria-label="From the heritage of the craft" className="my-6 md:my-9">
       <Link
         href={entry.href}
-        className="group grid overflow-hidden rounded-2xl border border-border bg-cotton-100 transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] dark:bg-card"
+        className="group grid overflow-hidden rounded-sm border border-border bg-cotton-100 transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] dark:bg-card"
       >
         <div className="flex flex-col justify-center p-5 sm:p-7">
           <p className="eyebrow text-primary">From the craft</p>

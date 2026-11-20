@@ -312,7 +312,7 @@ So there are two failures to look for, not one, and
 npm run audit:layout          # dev server or `npm start` must be running
 ```
 
-checks every important route at 320/375/390/430px for **five** failures:
+checks every important route at 320/375/390/430/768/1024px for **five** failures:
 documents that scroll sideways, elements that clip their own text, visible
 elements hanging past the viewport edge, pages that rendered no `<h1>` at
 all, and tap targets under 24px (WCAG 2.2 AA 2.5.8 — links inside a sentence and

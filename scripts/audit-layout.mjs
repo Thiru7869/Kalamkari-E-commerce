@@ -26,7 +26,7 @@ const arg = (name, fallback) => {
 };
 
 const BASE = arg('base', 'http://localhost:3000').replace(/\/$/, '');
-const WIDTHS = arg('widths', '320,375,390,430').split(',').map(Number);
+const WIDTHS = arg('widths', '320,375,390,430,768,1024').split(',').map(Number);
 
 
 /**
@@ -81,6 +81,11 @@ const ROUTES = arg(
     '/heritage',
     '/heritage/motifs',
     '/heritage/motifs/ramayana',
+    '/heritage/artisans',
+    '/heritage/colours',
+    '/heritage/craftsmanship',
+    '/heritage/culture',
+    '/heritage/history',
     '/shipping',
     '/privacy',
     '/terms',

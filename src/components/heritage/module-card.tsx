@@ -25,7 +25,7 @@ export function ModuleCard({
     <Link
       href={module.href}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[border-color,box-shadow] duration-swift ease-swift hover:border-primary/40 hover:shadow-[0_18px_40px_-28px_rgb(0_0_0/0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'group flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card transition-[border-color,box-shadow] duration-swift ease-swift hover:border-primary/40 hover:shadow-[0_18px_40px_-28px_rgb(0_0_0/0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         className,
       )}
     >
