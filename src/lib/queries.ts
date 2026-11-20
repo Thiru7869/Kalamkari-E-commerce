@@ -221,6 +221,8 @@ export const getProductBySlug = cache(async (slug: string) => {
       category: true,
       fabric: true,
       motifs: { include: { motif: true } },
+      // The indexed dyes behind `naturalDyes`, for "where the colours come from".
+      dyes: { include: { dye: true }, orderBy: { dye: { position: 'asc' } } },
       reviews: {
         orderBy: { createdAt: 'desc' },
         take: 12,

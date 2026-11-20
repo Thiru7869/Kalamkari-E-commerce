@@ -121,6 +121,15 @@ export default async function ProductPage({ params }: { params: Params }) {
                   : `Shipping ${formatPrice(site.shipping.flatRate)}.`}
               </p>
 
+              {/* Where it ships from and how long it takes, from the same
+                  shipping settings as the Shipping & returns section below. */}
+              {!soldOut && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Dispatched from Srikalahasti. Delivery in {site.shipping.domesticDays} across
+                  India.
+                </p>
+              )}
+
               {/* Availability, stated from the stock column and nothing else:
                   sold, the last one, or available. No count is shown. */}
               <p
@@ -203,7 +212,14 @@ export default async function ProductPage({ params }: { params: Params }) {
                     <dt className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
                       Painted by
                     </dt>
-                    <dd className="mt-1">{product.artisan}</dd>
+                    <dd className="mt-1">
+                      <Link
+                        href="/heritage/artisans"
+                        className="underline-offset-4 hover:text-primary hover:underline"
+                      >
+                        {product.artisan}
+                      </Link>
+                    </dd>
                   </div>
                 )}
               </dl>
@@ -259,6 +275,36 @@ export default async function ProductPage({ params }: { params: Params }) {
                           </li>
                         ))}
                       </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+
+                {product.dyes.length > 0 && (
+                  <AccordionItem value="colours">
+                    <AccordionTrigger>Where the colours come from</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="flex flex-col gap-4">
+                        {product.dyes.map(({ dye }) => (
+                          <li key={dye.id}>
+                            <h3 className="font-medium text-foreground">{dye.name}</h3>
+                            <p className="mt-1">{dye.source}</p>
+                            <Link
+                              href={`/?dye=${dye.slug}`}
+                              className="mt-2 inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+                            >
+                              See other pieces in this colour
+                              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                      <Link
+                        href="/heritage/colours"
+                        className="mt-4 inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+                      >
+                        All eight colours and their sources
+                        <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Link>
                     </AccordionContent>
                   </AccordionItem>
                 )}
