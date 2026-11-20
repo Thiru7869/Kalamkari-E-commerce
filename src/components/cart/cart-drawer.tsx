@@ -66,7 +66,22 @@ export function CartDrawer({ cart }: { cart: CartSummary }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent side="right" className="flex flex-col gap-0 p-0" closeLabel="Close bag">
+      <DialogContent
+        side="right"
+        className="flex flex-col gap-0 p-0"
+        closeLabel="Close bag"
+        onCloseAutoFocus={(event) => {
+          // The Add button is disabled while the add is in flight, so the
+          // browser has already dropped focus to <body> by the time the panel
+          // opens and there is nothing for Radix to return to. Put it back on
+          // the button that opened the panel.
+          const add = document.querySelector<HTMLElement>('[data-cart-add]');
+          if (add && (!document.activeElement || document.activeElement === document.body)) {
+            event.preventDefault();
+            add.focus();
+          }
+        }}
+      >
         <DialogTitle className="border-b border-border px-5 py-4 pr-14 font-display text-lg">
           Your bag
           {cart.itemCount > 0 && (
@@ -114,7 +129,7 @@ export function CartDrawer({ cart }: { cart: CartSummary }) {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-3">
                         <p className="font-display text-base leading-snug">
-                          <Link href={`/product/${line.slug}`} className="hover:text-primary">
+                          <Link href={`/product/${line.slug}`} className="-my-2 inline-flex min-h-[2.75rem] items-center hover:text-primary">
                             {line.name}
                           </Link>
                         </p>

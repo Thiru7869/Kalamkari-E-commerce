@@ -85,7 +85,7 @@ export default async function AdminOverviewPage() {
           </h2>
           <Link
             href="/admin/orders"
-            className="text-sm text-primary underline-offset-4 hover:underline"
+            className="inline-flex min-h-[2.75rem] items-center text-sm text-primary underline-offset-4 hover:underline"
           >
             All orders
           </Link>
@@ -96,7 +96,7 @@ export default async function AdminOverviewPage() {
             No orders yet.
           </p>
         ) : (
-          <div className="mt-6 overflow-x-auto rounded-sm border border-border bg-background">
+          <div className="relative mt-6 overflow-x-auto rounded-sm border border-border bg-background">
             <table className="w-full min-w-[40rem] text-sm">
               <thead>
                 <tr className="border-b border-border text-left">
@@ -113,7 +113,7 @@ export default async function AdminOverviewPage() {
                     <td className="px-4 py-3">
                       <Link
                         href={`/admin/orders/${order.number}`}
-                        className="tabular font-medium text-primary underline-offset-4 hover:underline"
+                        className="tabular -my-3 inline-flex min-h-[2.75rem] items-center font-medium text-primary underline-offset-4 hover:underline"
                       >
                         {order.number}
                       </Link>

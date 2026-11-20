@@ -26,6 +26,7 @@ const arg = (name, fallback) => {
 };
 
 const BASE = arg('base', 'http://localhost:3000').replace(/\/$/, '');
+const SESSION = arg('session', '');
 const WIDTHS = arg('widths', '320,375,390,430,768,1024').split(',').map(Number);
 
 
@@ -269,6 +270,13 @@ const PROBE = () => {
           p &&
           [...p.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 12);
         if (inSentence) continue;
+        // WCAG 2.5.8 "equivalent": a radio or checkbox whose own <label> is a
+        // 24px+ target can be operated through that label.
+        const lab = el.closest('label') ?? (el.id ? document.querySelector(`label[for="${el.id}"]`) : null);
+        if (lab) {
+          const lr = lab.getBoundingClientRect();
+          if (lr.width >= 23.5 && lr.height >= 23.5) continue;
+        }
         // Half a pixel of slack: a 24px box laid out at 23.99 is not a finding.
         if (Math.min(r.width, r.height) >= 23.5) continue;
         found.push({
@@ -297,6 +305,12 @@ for (const width of WIDTHS) {
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 ' +
       '(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
   });
+
+  // Signed-in routes (/admin, /account) need a session. Create one in a local
+  // database and pass it here: --session=<authjs.session-token value>.
+  if (SESSION) {
+    await context.addCookies([{ name: 'authjs.session-token', value: SESSION, url: BASE }]);
+  }
 
   /*
     Nothing on this site opens over the page any more (the preloader, welcome
