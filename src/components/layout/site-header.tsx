@@ -3,7 +3,6 @@ import { Suspense } from 'react';
 import { Heart, Search, ShoppingBag } from 'lucide-react';
 import { getCartCount } from '@/lib/cart';
 import { auth } from '@/auth';
-import { site } from '@/content/site';
 import { mainNav } from '@/content/nav';
 import { MobileMenu } from './mobile-menu';
 import { DesktopNav } from './desktop-nav';
@@ -67,9 +66,11 @@ export async function SiteHeader() {
           // own tightened padding at the same breakpoint, so the row is no
           // wider than it was.
           className="flex min-w-0 items-center rounded-sm focus-visible:ring-2 focus-visible:ring-ring md:mr-2 lg:mr-5"
-          aria-label={`${site.shortName} Fine Kalamkari Arts, home`}
         >
           <Wordmark />
+          {/* No aria-label: the visible wordmark names the link, so the spoken name
+              contains the visible text (WCAG 2.5.3). "home" is added after it. */}
+          <span className="sr-only">, home</span>
         </Link>
 
         <DesktopNav items={mainNav} />

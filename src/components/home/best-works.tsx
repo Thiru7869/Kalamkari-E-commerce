@@ -273,7 +273,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                       onClick={() => go(i)}
                       aria-label={`Piece ${i + 1}: ${w.name}`}
                       aria-current={i === index}
-                      className="group/seg flex h-11 flex-1 items-center focus-visible:outline-none"
+                      className="group/seg flex h-11 min-w-6 flex-1 items-center focus-visible:outline-none"
                     >
                       <span
                         className={cn(

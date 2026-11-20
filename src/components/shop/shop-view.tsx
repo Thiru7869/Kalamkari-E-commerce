@@ -303,7 +303,7 @@ export async function ShopView({
               <p className="mt-6 text-sm text-muted-foreground">
                 <Link
                   href="/archive"
-                  className="inline-flex items-center gap-1.5 text-primary underline underline-offset-4"
+                  className="inline-flex items-center gap-1.5 py-3 -my-3 text-primary underline underline-offset-4"
                 >
                   See pieces that have already found a home
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

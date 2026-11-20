@@ -145,7 +145,7 @@ export default function ContactPage() {
                         */}
                         <a
                           href={`mailto:${email}`}
-                          className="underline underline-offset-4 [overflow-wrap:anywhere] hover:text-foreground"
+                          className="inline-block py-2 -my-2 underline underline-offset-4 [overflow-wrap:anywhere] hover:text-foreground"
                         >
                           {email}
                         </a>

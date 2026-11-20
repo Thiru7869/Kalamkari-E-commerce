@@ -239,6 +239,43 @@ const PROBE = () => {
       the exact failure mode this script exists to prevent.
     */
     h1Count: document.querySelectorAll('h1').length,
+    /*
+      WCAG 2.2 AA 2.5.8: a pointer target is at least 24 x 24 CSS px, with two
+      exemptions that matter here: a link inside a sentence, and a stretched
+      link whose real hit area is an ::after overlay across its card. Anything
+      else under 24px is a finding. The project aims for 44px; 24px is the floor
+      this audit enforces, because a 36px filter chip is a decision and a 15px
+      footer link is a bug.
+    */
+    smallTargets: (() => {
+      const found = [];
+      const sel = 'a[href],button,input:not([type=hidden]),select,textarea,[role=button],[role=tab],summary';
+      for (const el of document.querySelectorAll(sel)) {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0 || cs.visibility === 'hidden') continue;
+        if (el.closest('.sr-only, [aria-hidden="true"]') || el.classList.contains('skip-link')) continue;
+        const after = getComputedStyle(el, '::after');
+        if (after.position === 'absolute' && after.content !== 'none') continue;
+        const p = el.parentElement;
+        const inSentence =
+          el.tagName === 'A' &&
+          /^inline/.test(cs.display) &&
+          p &&
+          [...p.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 12);
+        if (inSentence) continue;
+        // Half a pixel of slack: a 24px box laid out at 23.99 is not a finding.
+        if (Math.min(r.width, r.height) >= 23.5) continue;
+        found.push({
+          tag: el.tagName.toLowerCase(),
+          href: el.getAttribute('href') ?? '',
+          text: (el.getAttribute('aria-label') || el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 30),
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+        });
+      }
+      return found.slice(0, 6);
+    })(),
   };
 };
 
@@ -314,7 +351,8 @@ for (const width of WIDTHS) {
     // No heading means the route did not render its page — see the note in
     // PROBE. A clean measurement of the error boundary is not a pass.
     const empty = result.h1Count === 0;
-    const bad = scrolls || clips || hangs || empty;
+    const small = result.smallTargets.length > 0;
+    const bad = scrolls || clips || hangs || empty || small;
     if (bad) failures++;
     const mark = empty
       ? 'NO <H1>'
@@ -324,7 +362,9 @@ for (const width of WIDTHS) {
           ? 'OFF-EDGE'
           : clips
             ? 'CLIPPED'
-            : 'ok';
+            : small
+              ? 'TINY TAP'
+              : 'ok';
     console.log(
       `${String(width).padStart(4)}px  ${String(route).padEnd(38)} ` +
         `${mark.padEnd(9)} ${scrolls ? `+${result.overflowPx}px (scrollWidth ${result.scrollWidth} vs ${result.limit})` : ''}`,
@@ -333,6 +373,11 @@ for (const width of WIDTHS) {
       console.log(
         `            └ <${o.tag}${o.id ? '#' + o.id : ''}> [${o.position}] w=${o.width} ` +
           `right=${o.right} (+${o.over} past edge) depth=${o.depth}\n              class="${o.cls}"`,
+      );
+    }
+    for (const t of result.smallTargets) {
+      console.log(
+        `            ◦ <${t.tag}${t.href ? ' href=' + t.href : ''}> "${t.text}" is ${t.w}x${t.h}px — under the 24px target minimum`,
       );
     }
     for (const c of result.clipped) {
@@ -350,7 +395,7 @@ await browser.close();
 
 console.log(
   failures === 0
-    ? '\nNo horizontal overflow, and nothing clipping its own text, at any width.'
+    ? '\nNo horizontal overflow, nothing clipping its own text, and no tap target under 24px, at any width.'
     : `\n${failures} route/width combination(s) overflow or clip content.`,
 );
 process.exit(failures === 0 ? 0 : 1);

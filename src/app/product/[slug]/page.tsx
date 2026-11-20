@@ -12,7 +12,8 @@ import { RecordView } from '@/components/shop/record-view';
 import { RecentlyViewed } from '@/components/shop/recently-viewed';
 import { ReviewSection } from '@/components/shop/review-section';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
-import { Badge, Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/primitives';
 import { getProductBySlug, getRelatedProducts, getReviewEligibility } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { prisma } from '@/lib/prisma';
@@ -215,7 +216,7 @@ export default async function ProductPage({ params }: { params: Params }) {
                     <dd className="mt-1">
                       <Link
                         href="/heritage/artisans"
-                        className="underline-offset-4 hover:text-primary hover:underline"
+                        className="inline-flex items-center py-3 -my-3 underline-offset-4 hover:text-primary hover:underline"
                       >
                         {product.artisan}
                       </Link>

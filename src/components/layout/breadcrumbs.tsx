@@ -64,7 +64,7 @@ export function Breadcrumbs({
       />
       <ol className="flex flex-wrap items-center gap-1.5">
         <li>
-          <Link href="/" className="hover:text-foreground">
+          <Link href="/" className="inline-flex items-center py-3 -my-3 hover:text-foreground">
             Home
           </Link>
         </li>
@@ -75,7 +75,7 @@ export function Breadcrumbs({
             <li key={`${crumb.label}-${i}`} className="flex items-center gap-1.5">
               <span aria-hidden="true">/</span>
               {crumb.href && !isLast ? (
-                <Link href={crumb.href} className="hover:text-foreground">
+                <Link href={crumb.href} className="inline-flex items-center py-3 -my-3 hover:text-foreground">
                   {crumb.label}
                 </Link>
               ) : (

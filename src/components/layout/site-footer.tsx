@@ -94,17 +94,17 @@ export function SiteFooter() {
             </p>
             <ul className="flex flex-wrap gap-x-5 gap-y-2">
               <li>
-                <Link href="/privacy" className="transition-colors hover:text-cotton-50">
+                <Link href="/privacy" className="inline-flex items-center py-3 -my-3 transition-colors hover:text-cotton-50">
                   Privacy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="transition-colors hover:text-cotton-50">
+                <Link href="/terms" className="inline-flex items-center py-3 -my-3 transition-colors hover:text-cotton-50">
                   Terms
                 </Link>
               </li>
               <li>
-                <Link href="/shipping" className="transition-colors hover:text-cotton-50">
+                <Link href="/shipping" className="inline-flex items-center py-3 -my-3 transition-colors hover:text-cotton-50">
                   Shipping &amp; Returns
                 </Link>
               </li>
