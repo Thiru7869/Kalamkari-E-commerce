@@ -29,7 +29,6 @@ const context = await browser.newContext({
 });
 await context.addInitScript(() => {
   try {
-    for (const s of ['preloader', 'welcome', 'tour']) sessionStorage.setItem(`svl_intro_${s}`, '1');
     localStorage.setItem('svl_announce', '1');
   } catch {}
 });

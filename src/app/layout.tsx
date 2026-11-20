@@ -11,7 +11,6 @@ import { MobileTabBar } from '@/components/layout/mobile-tab-bar';
 import { BagCount } from '@/components/layout/tab-bar-bag-count';
 import { CartDrawerSlot } from '@/components/cart/cart-drawer-slot';
 import { FloatingDock } from '@/components/layout/floating-dock';
-import { FirstVisit } from '@/components/welcome/first-visit';
 import { PageTransition } from '@/components/motion/page-transition';
 import { site } from '@/content/site';
 import { absoluteUrl } from '@/lib/utils';
@@ -197,9 +196,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <CartDrawerSlot />
             </Suspense>
             <FloatingDock />
-            {/* The doorway, then the walk-through. Both code-split and never
-                requested for a returning visitor. */}
-            <FirstVisit />
           </SmoothScrollProvider>
 
           <Toaster

@@ -504,24 +504,11 @@ store is what exists.
 
 ## First visit
 
-A five-second loading sequence opens the site: Ganesha set out in line by a
-bamboo pen, and the colours arriving afterwards out of separate pots — the
-actual order of the twenty-three steps, and the figure a Srikalahasti artist
-begins a new cloth with. It is inline SVG in the same visual language as the
-saree canvas, driven by one rAF loop so the drawing, the dye and the wordmark
-cannot drift apart. Under reduced motion the finished frame is shown complete
-and held.
-
-Then a welcome overlay, shown once, carrying the one
-fact that changes how the rest of the site reads. It traps focus, locks scroll,
-closes on Escape, and never appears on checkout, account or admin — or for
-somebody who has already scrolled past the doorway.
-
-Both are code-split and none is requested twice in a session. Persistence
-is **sessionStorage**, not localStorage: the store wanted the welcome to return
-on a new visit, and a localStorage flag written during development is invisible
-and permanent — which is exactly why the welcome appeared to have stopped
-working.
+Nothing interrupts a first visit. There is no preloader, welcome overlay or
+guided tour: the home page is the shop, and the first thing a visitor sees is
+the work. The announcement bar is the only strip above the header; it is
+server-rendered and hidden before paint by an inline script in the root layout
+for anybody who has closed it.
 
 ---
 

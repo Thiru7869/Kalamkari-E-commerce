@@ -3,7 +3,8 @@ import { Suspense } from 'react';
 import { Heart, Search, ShoppingBag } from 'lucide-react';
 import { getCartCount } from '@/lib/cart';
 import { auth } from '@/auth';
-import { mainNav, site } from '@/content/site';
+import { site } from '@/content/site';
+import { mainNav } from '@/content/nav';
 import { MobileMenu } from './mobile-menu';
 import { DesktopNav } from './desktop-nav';
 import { Wordmark } from './wordmark';
@@ -102,7 +103,7 @@ export async function SiteHeader() {
             overlay, so nothing is lost between 1024px and 1279px except a
             visible input.
           */}
-          <div data-tour="search" className="hidden xl:block">
+          <div className="hidden xl:block">
             <HeaderSearch className="mx-1" />
           </div>
 
@@ -116,7 +117,7 @@ export async function SiteHeader() {
             </button>
           </SearchOverlay>
 
-          <ThemeToggle className="hidden sm:inline-flex" data-tour="theme" />
+          <ThemeToggle className="hidden sm:inline-flex" />
 
           <Link
             href="/wishlist"

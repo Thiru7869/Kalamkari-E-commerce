@@ -88,9 +88,6 @@ export function HowItsMade() {
     <section
       className="relative overflow-hidden border-y border-border bg-cotton-100 section-y dark:bg-card"
       aria-labelledby="how-its-made-heading"
-      // The quick tour's second stop travels here while the ring stays on the
-      // "The Process" link in the header. See src/content/welcome.ts.
-      data-tour-section="process"
     >
       <div className="container">
         <div className="max-w-2xl">

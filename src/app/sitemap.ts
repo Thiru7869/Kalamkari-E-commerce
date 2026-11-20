@@ -21,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: absoluteUrl('/'), lastModified: now, changeFrequency: 'weekly', priority: 1 },
     { url: absoluteUrl('/shop'), lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: absoluteUrl('/collections'), lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     // The process page is the store's strongest claim to authority and the
     // most linkable thing on the site.
     { url: absoluteUrl('/process'), lastModified: now, changeFrequency: 'monthly', priority: 0.9 },

@@ -439,7 +439,6 @@ export function StoreAssistant() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={panelId}
-        data-tour="assistant"
         className={cn(
           /*
             A circle on a phone, a labelled pill from `sm` up.

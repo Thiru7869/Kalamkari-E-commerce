@@ -36,7 +36,6 @@ export function ExploreMenu() {
       <DialogTrigger asChild>
         <button
           type="button"
-          data-tour="explore"
           className="inline-flex h-11 items-center gap-1.5 rounded-sm px-2.5 text-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3"
         >
           <Compass className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />

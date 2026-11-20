@@ -62,7 +62,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
       <header className="border-b border-border bg-cotton-100 pb-12 pt-12 md:pb-16 md:pt-16 dark:bg-card">
         <div className="container">
           <Breadcrumbs
-            trail={[{ label: 'Collections', href: '/shop' }, { label: collection.label }]}
+            trail={[{ label: 'Collections', href: '/collections' }, { label: collection.label }]}
             className="mb-6"
           />
 

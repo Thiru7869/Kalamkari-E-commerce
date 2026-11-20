@@ -103,9 +103,6 @@ export function MobileTabBar({ bagCount }: { bagCount?: React.ReactNode }) {
             <li key={label}>
               <Link
                 href={href}
-                // The quick tour's "Shop" stop. Process and Custom no longer
-                // have a tab; the tour finds those through the header nav.
-                data-tour={href === '/shop' ? 'shop' : undefined}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(cell, isActive ? 'text-primary' : 'text-muted-foreground')}
               >

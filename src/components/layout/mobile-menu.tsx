@@ -11,7 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/primitives';
-import { mainNav, site, contactPhone } from '@/content/site';
+import { site, contactPhone } from '@/content/site';
+import { mainNav } from '@/content/nav';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 

@@ -152,7 +152,6 @@ uses for magic links.
 - `catalogue.ts` — the editorial layer over the shop: the type and collection
   pages, and the commission-first note on the narrative motifs.
 - `commission.ts` — the guided questions, the attachment limits, the timeline.
-- `welcome.ts` — the doorway (the welcome overlay's copy and version).
 - `assistant.ts` — Lakshmi's knowledge base, which also backs the offline
   answer engine. The assistant's name, launcher label and role all come from
   `assistantIdentity` in that file; nothing hardcodes them.
@@ -332,11 +331,10 @@ So the audit scans for edge-crossing elements *unconditionally*, not only when
 the document already overflows.
 
 **Anything that can cover the viewport must be measured on the viewport.** The
-audit dismisses the preloader and welcome overlay by default,
-because otherwise they are the only thing it measures. That default is also how
-the tour-card bug shipped: the audit suppressed the one component that was
-broken. `--intro=preloader|welcome` marks the earlier stages as seen so the named
-one renders and can be measured. Run it after touching any of them.
+audit measures every route as rendered. The preloader, welcome overlay and
+tour were removed; if an interruption is ever added back it needs its own
+audit stage, because the one that shipped a bug (a tour card) did so while the
+audit suppressed it.
 
 ## Transform is one property, not several
 
@@ -405,19 +403,12 @@ Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
 
 ## Interruptions
 
-The welcome overlay and the preloader are the only things on this site that
-interrupt. Both are governed by `src/components/welcome/first-visit.tsx`:
-
-- Never on `/checkout`, `/admin`, `/account`, `/signin` or `/orders`.
-- Never for somebody who has already scrolled past 200px — that is a reader, not
-  an arrival.
-- Never twice. Dismissal is stored under a version, so changing the copy is what
-  brings it back, not a cleared cache.
-
-The announcement bar is server-rendered and hidden *before paint* by an inline
-script in the root layout, not in an effect. Deciding it in an effect either
-shifts the page down 36px on every first load or flashes the bar at everybody
-who has closed it.
+**There are none, and one must not be added casually.** The preloader, welcome
+overlay and quick tour were removed when the shop became the home page: a
+first-time buyer should land on product, not on a film. The announcement bar is
+server-rendered and hidden *before paint* by an inline script in the root
+layout, not in an effect. Deciding it in an effect either shifts the page down
+36px on every first load or flashes the bar at everybody who has closed it.
 
 ## Errors
 

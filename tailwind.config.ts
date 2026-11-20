@@ -169,8 +169,7 @@ const config: Config = {
          *
          * It is deliberately not in the 60-30-10 body of the page. Madder does
          * the 10%; gold sits outside the scheme entirely and is spent only on
-         * things that single something out for the visitor right now: the quick
-         * tour's ring, the rule under the name in the opening, the active mark
+         * things that single something out for the visitor right now: the rule under the name in the opening, the active mark
          * in a sub-navigation. Using it anywhere decorative would cost it the
          * only property that makes it useful.
          */
@@ -371,22 +370,6 @@ const config: Config = {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         },
-        // The quick tour's ring, breathing. Slow enough to read as attention
-        // rather than as an alarm. Struck in gold rather than madder: madder is
-        // the site's primary and is already on every heading and price, so a
-        // madder ring reads as part of the page instead of as a pointer at it.
-        'tour-pulse': {
-          '0%, 100%': { outlineColor: 'hsl(var(--gold) / 0.95)' },
-          '50%': { outlineColor: 'hsl(var(--gold) / 0.4)' },
-        },
-        // The preloader's name, arriving out of a slow cinematic push-in. The
-        // scale is small on purpose: a big zoom is a title sequence, a small one
-        // is a camera settling.
-        'name-arrive': {
-          from: { opacity: '0', transform: 'scale(1.12)', filter: 'blur(6px)' },
-          '60%': { opacity: '1' },
-          to: { opacity: '1', transform: 'scale(1)', filter: 'blur(0px)' },
-        },
         // The rule under the name, drawn outward from the centre.
         'rule-draw': {
           from: { transform: 'scaleX(0)' },
@@ -577,8 +560,6 @@ const config: Config = {
         */
         'enter-rise': 'rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
         shimmer: 'shimmer 1.8s infinite',
-        'tour-pulse': 'tour-pulse 2.4s ease-in-out infinite',
-        'name-arrive': 'name-arrive 1.5s cubic-bezier(0.16, 1, 0.3, 1) both',
         'rule-draw': 'rule-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both',
         'kalam-trail': 'kalam-trail 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite',
         marquee: 'marquee var(--marquee-duration, 42s) linear infinite',

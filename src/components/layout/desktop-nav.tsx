@@ -297,15 +297,6 @@ export function DesktopNav({ items }: { items: NavItem[] }) {
               ) : (
                 <Link
                   href={item.href}
-              data-tour={
-                item.href === '/shop'
-                  ? 'shop'
-                  : item.href === '/process'
-                    ? 'process'
-                    : item.href === '/custom'
-                      ? 'custom'
-                      : undefined
-              }
                   className={cn(
                     // Two-word labels ("The Process", "Our Story", "Visit Us")
                     // wrap onto a second line as soon as the row is tight,
