@@ -70,7 +70,7 @@ export default function CommissionPage() {
                 {stages.map((stage) => (
                   <li key={stage.n} className="flex gap-5">
                     <span
-                      className="tabular font-display text-2xl leading-none text-primary/60"
+                      className="tabular font-display text-2xl leading-none text-primary"
                       aria-hidden="true"
                     >
                       {stage.n}
@@ -144,11 +144,11 @@ export default function CommissionPage() {
                     <span className="tabular font-display text-2xl leading-none text-primary/70">
                       {stage.n}
                     </span>
-                    <h3 className="mt-3 font-display text-base leading-snug">{stage.title}</h3>
+                    <h3 className="mt-3 font-display text-lg leading-snug">{stage.title}</h3>
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
                       {stage.body}
                     </p>
-                    <p className="mt-3 text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground/70">
+                    <p className="mt-3 text-label uppercase tracking-[0.12em] text-muted-foreground/70">
                       {stage.when}
                     </p>
                   </div>
