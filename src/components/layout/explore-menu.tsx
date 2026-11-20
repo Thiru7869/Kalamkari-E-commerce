@@ -79,10 +79,10 @@ export function ExploreMenu() {
                             : 'border-border hover:border-primary/40 hover:bg-foreground/[0.03]',
                         )}
                       >
-                        <span className="font-display text-[0.9375rem] leading-tight">
+                        <span className="font-display text-base leading-tight">
                           {item.label}
                         </span>
-                        <span className="mt-0.5 text-[0.75rem] leading-snug text-muted-foreground">
+                        <span className="mt-0.5 text-xs leading-snug text-muted-foreground">
                           {item.hint}
                         </span>
                       </Link>

@@ -78,7 +78,7 @@ export function MobileTabBar({ bagCount }: { bagCount?: React.ReactNode }) {
                 />
                 {label === 'Bag' && bagCount}
               </span>
-              <span className="text-[0.625rem] font-medium leading-none">{label}</span>
+              <span className="text-label font-medium leading-none">{label}</span>
             </>
           );
 

@@ -29,6 +29,7 @@ describe('cn', () => {
     'text-body-lg',
     'text-body-base',
     'text-eyebrow',
+    'text-label',
   ];
 
   it.each(sizes)('keeps %s when a text colour is merged alongside it', (size) => {

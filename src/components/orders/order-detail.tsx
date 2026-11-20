@@ -58,7 +58,7 @@ export function OrderDetail({ order }: { order: OrderView }) {
       <div>
         {/* Timeline */}
         <section aria-labelledby="progress-heading">
-          <h2 id="progress-heading" className="font-display text-xl">
+          <h2 id="progress-heading" className="font-display text-display-sm">
             Progress
           </h2>
 
@@ -149,7 +149,7 @@ export function OrderDetail({ order }: { order: OrderView }) {
         {/* Event log */}
         {order.events.length > 0 && (
           <section aria-labelledby="history-heading" className="mt-10">
-            <h2 id="history-heading" className="font-display text-xl">
+            <h2 id="history-heading" className="font-display text-display-sm">
               History
             </h2>
             <ul className="mt-4 flex flex-col gap-4 border-l border-border pl-5">
@@ -167,7 +167,7 @@ export function OrderDetail({ order }: { order: OrderView }) {
 
         {/* Items */}
         <section aria-labelledby="items-heading" className="mt-10">
-          <h2 id="items-heading" className="font-display text-xl">
+          <h2 id="items-heading" className="font-display text-display-sm">
             {order.items.length} {order.items.length === 1 ? 'piece' : 'pieces'}
           </h2>
           <ul className="mt-5 divide-y divide-border border-y border-border">

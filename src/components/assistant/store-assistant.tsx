@@ -100,7 +100,7 @@ function newId() {
 function BookingActions() {
   return (
     <div className="pt-1">
-      <p className="font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="font-inscription text-label uppercase tracking-[0.16em] text-muted-foreground">
         To start one
       </p>
       <ul className="mt-2 flex flex-col gap-2">
@@ -111,10 +111,10 @@ function BookingActions() {
               className="group flex min-h-[2.75rem] items-center gap-3 rounded-sm border border-primary/35 bg-primary/[0.06] px-3 py-2 text-left transition-colors hover:border-primary/60 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <span className="min-w-0 flex-1">
-                <span className="block text-[0.8125rem] font-medium leading-snug text-foreground">
+                <span className="block text-sm font-medium leading-snug text-foreground">
                   {action.label}
                 </span>
-                <span className="mt-0.5 block text-[0.6875rem] leading-snug text-muted-foreground">
+                <span className="mt-0.5 block text-label leading-snug text-muted-foreground">
                   {action.hint}
                 </span>
               </span>
@@ -195,7 +195,7 @@ function Suggestions({
               type="button"
               onClick={() => onAsk(prompt)}
               className={cn(
-                'w-full rounded-sm border border-border bg-background px-3 py-2 text-left text-[0.8125rem] leading-snug',
+                'w-full rounded-sm border border-border bg-background px-3 py-2 text-left text-sm leading-snug',
                 'transition-colors hover:border-primary/40 hover:bg-primary/5',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               )}
@@ -466,7 +466,7 @@ export function StoreAssistant() {
         ) : (
           <MessageCircle className="h-[1.15rem] w-[1.15rem] shrink-0" aria-hidden="true" />
         )}
-        <span className="sr-only font-inscription text-[0.8125rem] tracking-[0.06em] sm:not-sr-only">
+        <span className="sr-only font-inscription text-sm tracking-[0.06em] sm:not-sr-only">
           {open ? 'Close' : assistantIdentity.label}
         </span>
       </button>
@@ -566,7 +566,7 @@ export function StoreAssistant() {
               */}
               <div className="min-w-0">
                 <p className="font-display text-lg leading-none">{assistantIdentity.label}</p>
-                <p className="mt-1 font-inscription text-[0.625rem] uppercase leading-snug tracking-[0.12em] text-cotton-200/70">
+                <p className="mt-1 font-inscription text-label uppercase leading-snug tracking-[0.12em] text-cotton-200/70">
                   {site.name}
                 </p>
               </div>
@@ -593,7 +593,7 @@ export function StoreAssistant() {
               // Lenis must not swallow this element's scroll.
               data-lenis-prevent
             >
-              <p className="rounded-sm border border-border bg-muted/50 px-3 py-2 text-[0.75rem] leading-relaxed text-muted-foreground">
+              <p className="rounded-sm border border-border bg-muted/50 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
                 {assistantIdentity.disclosure}
               </p>
 
@@ -652,7 +652,7 @@ export function StoreAssistant() {
                   {message.link && (
                     <Link
                       href={message.link.href}
-                      className="mt-2.5 inline-flex text-[0.8125rem] font-medium text-primary underline underline-offset-4"
+                      className="mt-2.5 inline-flex text-sm font-medium text-primary underline underline-offset-4"
                     >
                       {message.link.label} →
                     </Link>
@@ -661,7 +661,7 @@ export function StoreAssistant() {
               ))}
 
               {error && (
-                <p className="rounded-sm border border-destructive/40 bg-destructive/5 px-3 py-2 text-[0.8125rem] text-destructive">
+                <p className="rounded-sm border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
                   {error}
                 </p>
               )}

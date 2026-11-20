@@ -109,7 +109,7 @@ export function ProductCard({
       </div>
 
       <div className="flex flex-1 flex-col pt-2.5">
-        <h3 className="font-display text-[1.0625rem] leading-snug">
+        <h3 className="font-display text-lg leading-snug">
           <Link
             href={`/product/${product.slug}`}
             className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -138,7 +138,7 @@ export function ProductCard({
           in the same tracked capitals the site uses for every label.
         */}
         {product.craftDays != null && !soldOut && (
-          <p className="tabular mt-1.5 font-inscription text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
+          <p className="tabular mt-1.5 font-inscription text-label uppercase tracking-[0.12em] text-muted-foreground">
             {product.craftDays} days by hand
           </p>
         )}
@@ -294,7 +294,7 @@ export function ProductGrid({
             */}
             <div className="flex items-center gap-4 py-7 md:py-9" aria-hidden="true">
               <span className="h-px flex-1 bg-border" />
-              <span className="tabular font-inscription text-[0.6875rem] uppercase tracking-[0.2em] text-muted-foreground/70">
+              <span className="tabular font-inscription text-label uppercase tracking-[0.2em] text-muted-foreground/70">
                 {gi + 1}
               </span>
               <span className="h-px flex-1 bg-border" />

@@ -69,7 +69,7 @@ export function TrustStrip({
             <li key={title} className="flex gap-3.5">
               <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
               <div className="min-w-0">
-                <h3 className="font-display text-[1.0625rem] leading-snug">{title}</h3>
+                <h3 className="font-display text-lg leading-snug">{title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
                 <Link
                   href={href}

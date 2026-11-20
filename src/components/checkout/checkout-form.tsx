@@ -120,7 +120,7 @@ export function CheckoutForm({
       )}
 
       <section className="rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="flex items-center gap-3 font-display text-xl">
+        <h2 className="flex items-center gap-3 font-display text-display-sm">
           <StepNumber n={1} />
           Contact
         </h2>
@@ -147,7 +147,7 @@ export function CheckoutForm({
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="flex items-center gap-3 font-display text-xl">
+        <h2 className="flex items-center gap-3 font-display text-display-sm">
           <StepNumber n={2} />
           Where it should go
         </h2>
@@ -280,7 +280,7 @@ export function CheckoutForm({
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="flex items-center gap-3 font-display text-xl">
+        <h2 className="flex items-center gap-3 font-display text-display-sm">
           <StepNumber n={3} />
           Payment
         </h2>

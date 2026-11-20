@@ -99,7 +99,7 @@ export default async function ArchivePage({ searchParams }: { searchParams: Sear
           </>
         ) : (
           <div className="py-16 text-center">
-            <h2 className="font-display text-2xl">Nothing has gone yet</h2>
+            <h2 className="font-display text-display-sm">Nothing has gone yet</h2>
             <p className="mx-auto mt-3 max-w-md text-muted-foreground">
               Every piece in the shop is still available.
             </p>

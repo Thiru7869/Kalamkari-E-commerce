@@ -340,7 +340,7 @@ export default async function TypePage({
               <dl className="mt-5 flex flex-col divide-y divide-border border-y border-border">
                 {type.facts.map((fact) => (
                   <div key={fact.label} className="flex flex-wrap gap-x-4 py-3 text-sm">
-                    <dt className="w-32 shrink-0 text-[0.6875rem] uppercase tracking-[0.1em] text-muted-foreground">
+                    <dt className="w-32 shrink-0 text-label uppercase tracking-[0.1em] text-muted-foreground">
                       {fact.label}
                     </dt>
                     <dd className="flex-1">{fact.value}</dd>
@@ -383,7 +383,7 @@ export default async function TypePage({
                       {motif._count.products}
                     </span>
                     {isNarrativeMotif(motif.slug) && (
-                      <span className="rounded-sm border border-primary/30 bg-primary/[0.06] px-1.5 py-0.5 text-[0.625rem] uppercase tracking-[0.1em] text-primary">
+                      <span className="rounded-sm border border-primary/30 bg-primary/[0.06] px-1.5 py-0.5 text-label uppercase tracking-[0.1em] text-primary">
                         Commission first
                       </span>
                     )}
@@ -458,7 +458,7 @@ export default async function TypePage({
             {commissionTimeline.map((step) => (
               <li key={step.n} className="border-t border-border pt-4">
                 <span className="tabular font-inscription text-sm text-primary/80">{step.n}</span>
-                <h3 className="mt-1.5 font-display text-base leading-snug">{step.title}</h3>
+                <h3 className="mt-1.5 font-display text-lg leading-snug">{step.title}</h3>
                 <p className="mt-1.5 text-xs uppercase tracking-[0.1em] text-muted-foreground">
                   {step.when}
                 </p>

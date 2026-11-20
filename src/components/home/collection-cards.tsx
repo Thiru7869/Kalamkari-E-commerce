@@ -116,7 +116,7 @@ function TiltCard({ card, index }: { card: CollectionCard; index: number }) {
             look for it.
           */}
           <span
-            className="tabular absolute left-3 top-3 rounded-sm bg-kasim-950/55 px-2 py-1 font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-cotton-100 backdrop-blur-sm"
+            className="tabular absolute left-3 top-3 rounded-sm bg-kasim-950/55 px-2 py-1 font-inscription text-label uppercase tracking-[0.16em] text-cotton-100 backdrop-blur-sm"
             aria-hidden="true"
           >
             {String(index + 1).padStart(2, '0')}
@@ -124,16 +124,16 @@ function TiltCard({ card, index }: { card: CollectionCard; index: number }) {
         </div>
 
         <div className="flex flex-1 flex-col p-2.5 md:p-5">
-          <h3 className="font-display text-[0.9375rem] leading-tight sm:text-lg md:text-2xl">
+          <h3 className="font-display text-base sm:text-lg">
             {card.title}
           </h3>
           {/* The row of three is kept at every width, so at phone widths each
               cell is ~100px. A paragraph there is not reading, it is decoration
               — the label, title and arrow carry the card instead. */}
-          <p className="mt-2 hidden flex-1 text-[0.8125rem] leading-relaxed text-muted-foreground sm:block md:text-sm">
+          <p className="mt-2 hidden flex-1 text-sm leading-relaxed text-muted-foreground sm:block md:text-sm">
             {card.blurb}
           </p>
-          <span className="mt-2 inline-flex items-center gap-1 text-[0.6875rem] font-medium text-primary sm:mt-3.5 sm:gap-1.5 sm:text-[0.8125rem] md:mt-4 md:text-sm">
+          <span className="mt-2 inline-flex items-center gap-1 text-label font-medium text-primary sm:mt-3.5 sm:gap-1.5 sm:text-sm md:mt-4 md:text-sm">
             <span className="truncate">{card.accent ? 'Start a design' : 'See the pieces'}</span>
             <ArrowRight
               className="h-3 w-3 shrink-0 transition-transform duration-300 motion-safe:group-hover:translate-x-1 sm:h-3.5 sm:w-3.5"

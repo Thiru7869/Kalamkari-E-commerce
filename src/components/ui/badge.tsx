@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 /* -------------------------------------------------------------------------- */
 
 const badgeVariants = cva(
-  'inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[0.6875rem] font-medium uppercase tracking-[0.08em]',
+  'inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-label font-medium uppercase tracking-[0.08em]',
   {
     variants: {
       variant: {

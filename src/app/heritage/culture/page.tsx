@@ -72,7 +72,7 @@ export default function CulturePage() {
       <section className="container section-y" aria-labelledby="the-stories">
         <div className="flex flex-col gap-5 rounded-sm border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 id="the-stories" className="font-display text-xl md:text-2xl">
+            <h2 id="the-stories" className="font-display text-display-sm">
               The stories on the cloth
             </h2>
             <ul className="mt-4 flex flex-wrap gap-2">

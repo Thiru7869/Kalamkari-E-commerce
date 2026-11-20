@@ -242,7 +242,7 @@ export async function ShopView({
             </>
           ) : (
             <div className="py-20 text-center">
-              <h2 className="font-display text-2xl">Nothing matches that combination</h2>
+              <h2 className="font-display text-display-sm">Nothing matches that combination</h2>
               <p className="mx-auto mt-3 max-w-md text-muted-foreground">
                 The store holds a small number of pieces at any time, because each one takes weeks.
                 Try widening the filters &mdash; look in the{' '}

@@ -168,7 +168,7 @@ export default function ProcessPage() {
                     >
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span className="font-inscription text-[0.6875rem] uppercase tracking-[0.18em] text-muted-foreground">
+                    <span className="font-inscription text-label uppercase tracking-[0.18em] text-muted-foreground">
                       {facet.label}
                     </span>
                     <span

@@ -139,7 +139,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
           </>
         ) : (
           <div className="py-16 text-center">
-            <h2 className="font-display text-2xl">Nothing in this collection right now</h2>
+            <h2 className="font-display text-display-sm">Nothing in this collection right now</h2>
             <p className="mx-auto mt-3 max-w-md leading-relaxed text-muted-foreground">
               The store holds a small number of pieces at any time, because each one is
               weeks of hand-work. This selection refills as work comes off the line.
@@ -189,7 +189,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
                     className="group flex h-full flex-col rounded-sm border border-border bg-card p-5 transition-colors hover:border-foreground/25"
                   >
                     <p className="eyebrow">{other.eyebrow}</p>
-                    <h3 className="mt-2 font-display text-xl">{other.title}</h3>
+                    <h3 className="mt-2 font-display text-display-sm">{other.title}</h3>
                     <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                       {other.blurb}
                     </p>

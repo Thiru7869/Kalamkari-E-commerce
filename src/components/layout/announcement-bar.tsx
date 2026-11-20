@@ -81,7 +81,7 @@ export function AnnouncementBar() {
     >
       {reduced ? (
         <p
-          className="flex-1 px-12 text-center text-[0.6875rem] uppercase tracking-[0.14em]"
+          className="flex-1 px-12 text-center text-label uppercase tracking-[0.14em]"
           aria-live="off"
         >
           {announcements[rotating]}
@@ -106,7 +106,7 @@ export function AnnouncementBar() {
               {announcements.map((message) => (
                 <li
                   key={message}
-                  className="flex items-center gap-10 text-[0.6875rem] uppercase tracking-[0.14em]"
+                  className="flex items-center gap-10 text-label uppercase tracking-[0.14em]"
                 >
                   {message}
                   <span className="text-myrobalan-400/60" aria-hidden="true">

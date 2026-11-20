@@ -40,7 +40,7 @@ export function ModuleCard({
       </div>
       <div className={cn('flex flex-1 flex-col', compact ? 'p-4' : 'p-5')}>
         {index !== undefined && (
-          <p className="tabular font-inscription text-[0.6875rem] tracking-[0.14em] text-primary/70">
+          <p className="tabular font-inscription text-label tracking-[0.14em] text-primary/70">
             {String(index + 1).padStart(2, '0')}
           </p>
         )}

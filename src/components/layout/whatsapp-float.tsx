@@ -27,7 +27,7 @@ export function WhatsAppFloat() {
       className="group pointer-events-auto relative flex h-12 items-center gap-2.5 rounded-full border border-primary/25 bg-primary pl-3.5 pr-4 text-primary-foreground shadow-[0_8px_24px_-10px_hsl(var(--primary)/0.7)] transition-transform duration-300 ease-out hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <MessageCircle className="h-[1.15rem] w-[1.15rem]" aria-hidden="true" />
-      <span className="font-inscription text-[0.8125rem] tracking-[0.06em]">WhatsApp</span>
+      <span className="font-inscription text-sm tracking-[0.06em]">WhatsApp</span>
       <span className="sr-only">
         — message the store in {site.location.town} on WhatsApp
       </span>

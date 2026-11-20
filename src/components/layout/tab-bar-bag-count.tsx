@@ -16,7 +16,7 @@ export async function BagCount() {
   if (count === 0) return null;
 
   return (
-    <span className="tabular absolute -right-2.5 -top-1.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[0.625rem] font-semibold leading-none text-primary-foreground">
+    <span className="tabular absolute -right-2.5 -top-1.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-label font-semibold leading-none text-primary-foreground">
       <span aria-hidden="true">{count > 9 ? '9+' : count}</span>
       <span className="sr-only">{count === 1 ? '1 item in bag' : `${count} items in bag`}</span>
     </span>

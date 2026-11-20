@@ -250,7 +250,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
             className="absolute bottom-3 right-3 z-10 inline-flex h-11 items-center gap-2 rounded-sm border border-cotton-100/30 bg-kasim-950/55 px-3 text-cotton-50 backdrop-blur-sm transition-colors hover:bg-kasim-950/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cotton-100/70"
           >
             <ZoomIn className="h-4 w-4" aria-hidden="true" />
-            <span className="font-inscription text-[0.6875rem] uppercase tracking-[0.14em]">
+            <span className="font-inscription text-label uppercase tracking-[0.14em]">
               Full screen
             </span>
           </button>

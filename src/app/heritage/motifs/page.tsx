@@ -65,10 +65,10 @@ export default async function MotifsPage() {
                       )}
                     </div>
                     <div className="flex flex-col justify-center p-5 sm:p-7">
-                      <p className="tabular font-inscription text-[0.6875rem] tracking-[0.14em] text-primary/70">
+                      <p className="tabular font-inscription text-label tracking-[0.14em] text-primary/70">
                         {String(i + 1).padStart(2, '0')}
                       </p>
-                      <h2 className="mt-1 font-display text-xl leading-snug">{motif.name}</h2>
+                      <h2 className="mt-1 font-display text-display-sm">{motif.name}</h2>
                       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                         {motif.story}
                       </p>

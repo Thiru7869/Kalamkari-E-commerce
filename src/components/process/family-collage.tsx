@@ -52,7 +52,7 @@ export function FamilyCollage({ className }: { className?: string }) {
       )}
     >
       <figcaption className="px-0.5 pb-3.5">
-        <p className="eyebrow text-[0.625rem]">The hands</p>
+        <p className="eyebrow text-label">The hands</p>
         <p className="mt-1.5 font-display text-base leading-snug md:text-lg">
           One household in {site.location.town}
         </p>
@@ -71,9 +71,9 @@ export function FamilyCollage({ className }: { className?: string }) {
                 className="object-cover"
               />
             </div>
-            <p className="mt-2 text-center text-[0.6875rem] font-medium leading-tight md:text-xs">
+            <p className="mt-2 text-center text-label font-medium leading-tight md:text-xs">
               {givenName(member.name)}
-              <span className="mt-0.5 block font-normal text-[0.625rem] uppercase tracking-[0.12em] text-muted-foreground">
+              <span className="mt-0.5 block font-normal text-label uppercase tracking-[0.12em] text-muted-foreground">
                 {member.role}
               </span>
             </p>
@@ -94,7 +94,7 @@ export function FamilyCollage({ className }: { className?: string }) {
                 className="object-cover"
               />
             </div>
-            <p className="mt-2 text-center text-[0.6875rem] font-medium leading-tight md:text-xs">
+            <p className="mt-2 text-center text-label font-medium leading-tight md:text-xs">
               {givenName(member.name)}
             </p>
           </div>
@@ -103,7 +103,7 @@ export function FamilyCollage({ className }: { className?: string }) {
 
       <Link
         href="/our-story"
-        className="mt-3 inline-flex min-h-[2.25rem] items-center gap-1.5 px-0.5 text-[0.8125rem] font-medium text-primary underline-offset-4 hover:underline"
+        className="mt-3 inline-flex min-h-[2.25rem] items-center gap-1.5 px-0.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
       >
         Meet them
         <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

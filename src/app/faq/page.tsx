@@ -138,7 +138,7 @@ export default function FaqPage() {
                       </AccordionTrigger>
 
                       <AccordionContent className="pb-6 pr-4 md:pr-8">
-                        <p className="border-l-2 border-primary/40 pl-5 text-[0.9375rem] leading-relaxed">
+                        <p className="border-l-2 border-primary/40 pl-5 text-base leading-relaxed">
                           {answer}
                         </p>
 

@@ -138,7 +138,7 @@ export function HowItsMade() {
                       tabIndex={active ? 0 : -1}
                       onClick={() => go(i)}
                       className={cn(
-                        'tabular flex h-8 w-8 items-center justify-center rounded-full border text-[0.75rem] font-medium',
+                        'tabular flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium',
                         'transition-all duration-300 ease-out md:h-11 md:w-11 md:text-sm',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-cotton-100',
                         active
@@ -163,7 +163,7 @@ export function HowItsMade() {
               <li
                 key={s.n}
                 className={cn(
-                  'w-11 text-center text-[0.625rem] uppercase tracking-[0.1em] transition-colors duration-300',
+                  'w-11 text-center text-label uppercase tracking-[0.1em] transition-colors duration-300',
                   i === stage ? 'text-primary' : 'text-muted-foreground/70',
                 )}
               >
@@ -198,7 +198,7 @@ export function HowItsMade() {
             <SareeCanvas stage={stage} layers={current.layers} />
 
             <span
-              className="tabular absolute left-2 top-2 rounded-sm bg-kasim-950/60 px-2 py-1 font-inscription text-[0.625rem] uppercase tracking-[0.14em] text-cotton-100 backdrop-blur-sm md:left-3 md:top-3"
+              className="tabular absolute left-2 top-2 rounded-sm bg-kasim-950/60 px-2 py-1 font-inscription text-label uppercase tracking-[0.14em] text-cotton-100 backdrop-blur-sm md:left-3 md:top-3"
               aria-hidden="true"
             >
               {current.steps}
@@ -208,7 +208,7 @@ export function HowItsMade() {
           <div ref={copyRef}>
             <p
               data-animate
-              className="tabular font-inscription text-[0.6875rem] uppercase tracking-[0.2em] text-primary"
+              className="tabular font-inscription text-label uppercase tracking-[0.2em] text-primary"
             >
               Stage {current.n} of {STAGE_COUNT}
             </p>
@@ -237,14 +237,14 @@ export function HowItsMade() {
               <span lang="te" className="font-telugu text-sm text-primary/90 md:text-base">
                 [{current.telugu.script}]
               </span>
-              <span className="font-inscription text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/75">
+              <span className="font-inscription text-label uppercase tracking-[0.14em] text-muted-foreground/75">
                 {current.telugu.roman}
               </span>
             </p>
 
             <p
               data-animate
-              className="mt-2.5 text-[0.8125rem] leading-relaxed text-muted-foreground md:mt-5 md:text-base"
+              className="mt-2.5 text-sm leading-relaxed text-muted-foreground md:mt-5 md:text-base"
             >
               {current.body}
             </p>
@@ -270,12 +270,12 @@ export function HowItsMade() {
               {current.terms.map((term) => (
                 <p
                   key={term.roman}
-                  className="flex flex-wrap items-baseline gap-x-2 text-[0.75rem] leading-snug md:text-[0.8125rem]"
+                  className="flex flex-wrap items-baseline gap-x-2 text-xs leading-snug md:text-sm"
                 >
                   <span lang="te" className="font-telugu text-primary/90">
                     [{term.script}]
                   </span>
-                  <span className="font-inscription text-[0.625rem] uppercase tracking-[0.12em] text-muted-foreground/80">
+                  <span className="font-inscription text-label uppercase tracking-[0.12em] text-muted-foreground/80">
                     {term.roman}
                   </span>
                   <span className="text-muted-foreground/90">— {term.gloss}</span>
@@ -321,7 +321,7 @@ export function HowItsMade() {
           worth following rather than a label saying "learn more".
         */}
         <div className="mt-10 flex flex-col gap-5 border-t border-border pt-7 md:mt-14 md:flex-row md:items-center md:justify-between md:gap-10">
-          <p className="max-w-xl text-[0.9375rem] leading-relaxed text-muted-foreground">
+          <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
             The reds are never painted on as red. They go down as a clear solution of
             alum, and the colour arrives days later in a boiling bath of madder root —
             binding only where the alum went.

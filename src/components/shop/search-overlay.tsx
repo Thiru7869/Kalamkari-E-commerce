@@ -272,7 +272,7 @@ export function SearchOverlay({
                         </span>
 
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate font-display text-[1.0625rem] leading-snug">
+                          <span className="block truncate font-display text-lg leading-snug">
                             {hit.name}
                           </span>
                           <span className="mt-0.5 block text-xs text-muted-foreground">
@@ -285,7 +285,7 @@ export function SearchOverlay({
                             {formatPrice(hit.price)}
                           </span>
                           {hit.soldOut && (
-                            <span className="mt-0.5 block text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
+                            <span className="mt-0.5 block text-label uppercase tracking-[0.12em] text-muted-foreground">
                               Sold
                             </span>
                           )}
@@ -350,7 +350,7 @@ const SUGGESTIONS = [
 function Suggestions({ onPick }: { onPick: (value: string) => void }) {
   return (
     <div className="px-4 py-5">
-      <p className="eyebrow text-[0.625rem]">Try one of these</p>
+      <p className="eyebrow text-label">Try one of these</p>
       <ul className="mt-3 flex flex-wrap gap-2">
         {SUGGESTIONS.map((suggestion) => (
           <li key={suggestion}>

@@ -112,7 +112,7 @@ function Lightbox({
       className="fixed inset-0 z-[80] flex flex-col bg-kasim-950/94 backdrop-blur-sm motion-safe:animate-rise-in"
     >
       <div className="flex items-center justify-between gap-3 px-4 py-3">
-        <p className="tabular font-inscription text-[0.6875rem] uppercase tracking-[0.18em] text-cotton-200/70">
+        <p className="tabular font-inscription text-label uppercase tracking-[0.18em] text-cotton-200/70">
           {index + 1} of {items.length}
         </p>
         <button

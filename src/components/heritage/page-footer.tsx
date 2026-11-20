@@ -40,7 +40,7 @@ export function HeritagePageFooter({
       <section className="container pb-16 md:pb-20" aria-labelledby="see-the-cloth">
         <div className="flex flex-col gap-5 rounded-sm bg-kasim-900 p-6 text-cotton-100 sm:p-9 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 id="see-the-cloth" className="font-display text-xl text-cotton-50 md:text-2xl">
+            <h2 id="see-the-cloth" className="font-display text-display-sm text-cotton-50">
               See it on the cloth
             </h2>
             <p className="mt-1.5 text-sm text-cotton-200/80">

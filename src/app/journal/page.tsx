@@ -38,7 +38,7 @@ export default async function JournalPage() {
       <div className="container section-y">
         {posts.length === 0 ? (
           <div className="py-20 text-center">
-            <h2 className="font-display text-2xl">Nothing written here yet</h2>
+            <h2 className="font-display text-display-sm">Nothing written here yet</h2>
             <p className="mx-auto mt-3 max-w-md leading-relaxed text-muted-foreground">
               The journal is written between dye baths rather than to a schedule, so it
               fills up slowly. In the meantime, the twenty-three steps are documented in
@@ -137,7 +137,7 @@ export default async function JournalPage() {
                           />
                         </div>
 
-                        <div className="mt-3 flex flex-wrap gap-2 text-[0.625rem] uppercase tracking-[0.12em] text-muted-foreground md:text-xs">
+                        <div className="mt-3 flex flex-wrap gap-2 text-label uppercase tracking-[0.12em] text-muted-foreground md:text-xs">
                           {toList(post.tags).slice(0, wide ? 2 : 1).map((tag) => (
                             <span key={tag}>{tag}</span>
                           ))}
@@ -145,7 +145,7 @@ export default async function JournalPage() {
 
                         <h2
                           className={`mt-1.5 font-display leading-snug ${
-                            wide ? 'text-lg md:text-2xl' : 'text-[0.9375rem] md:text-xl'
+                            wide ? 'text-lg md:text-2xl' : 'text-base md:text-xl'
                           }`}
                         >
                           <Link
@@ -167,7 +167,7 @@ export default async function JournalPage() {
                           {post.excerpt}
                         </p>
 
-                        <p className="mt-auto pt-2.5 text-[0.6875rem] text-muted-foreground md:text-xs">
+                        <p className="mt-auto pt-2.5 text-label text-muted-foreground md:text-xs">
                           <time dateTime={post.publishedAt.toISOString()}>
                             {formatDate(post.publishedAt)}
                           </time>

@@ -66,7 +66,7 @@ export default function CarePage() {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
-                  <h2 className="font-display text-xl leading-snug">{rule.title}</h2>
+                  <h2 className="font-display text-display-sm">{rule.title}</h2>
                   <p className="mt-2 leading-relaxed text-muted-foreground">{rule.body}</p>
                 </div>
               </li>
@@ -74,7 +74,7 @@ export default function CarePage() {
           </ol>
 
           <section className="mt-14 rounded-sm border border-border bg-card p-6">
-            <h2 className="font-display text-xl">What to expect over time</h2>
+            <h2 className="font-display text-display-sm">What to expect over time</h2>
             <ul className="mt-4 flex list-disc flex-col gap-2.5 pl-5 leading-relaxed text-muted-foreground">
               <li>
                 Cotton will soften with every wash and keep getting better in the hand for

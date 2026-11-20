@@ -90,7 +90,7 @@ export default function CraftsmanshipPage() {
               key={note.id}
               className="rounded-sm border border-border bg-card p-6 transition-colors duration-swift ease-swift hover:border-primary/40"
             >
-              <p className="tabular font-inscription text-[0.6875rem] tracking-[0.14em] text-primary/70">
+              <p className="tabular font-inscription text-label tracking-[0.14em] text-primary/70">
                 {String(i + 1).padStart(2, '0')}
               </p>
               <h3 className="mt-1 font-display text-lg leading-snug">{note.title}</h3>

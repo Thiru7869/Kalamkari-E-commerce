@@ -19,7 +19,7 @@ async function CartBadge() {
   if (count === 0) return null;
   return (
     <span
-      className="tabular absolute -right-0.5 -top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[0.625rem] font-semibold text-primary-foreground"
+      className="tabular absolute -right-0.5 -top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-label font-semibold text-primary-foreground"
       aria-hidden="true"
     >
       {count > 9 ? '9+' : count}

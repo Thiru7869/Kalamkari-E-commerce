@@ -79,7 +79,7 @@ export default function ArtisansPage() {
             {principalAward.year}
           </p>
           <div>
-            <h2 id="the-award" className="font-display text-xl text-cotton-50 md:text-2xl">
+            <h2 id="the-award" className="font-display text-display-sm text-cotton-50">
               {principalAward.name}, {principalAward.discipline}
             </h2>
             <p className="mt-1 text-sm text-cotton-200/80">{principalAward.recipient}</p>

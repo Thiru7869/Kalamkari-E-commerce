@@ -276,8 +276,8 @@ export function ShopFilters({
                       that distinguishes it is worse than a label on two lines.
                     */}
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[0.8125rem] leading-tight">{dye.name}</span>
-                      <span className="tabular mt-0.5 block text-[0.6875rem] leading-tight text-muted-foreground">
+                      <span className="block text-sm leading-tight">{dye.name}</span>
+                      <span className="tabular mt-0.5 block text-label leading-tight text-muted-foreground">
                         {dye._count.products}
                       </span>
                     </span>

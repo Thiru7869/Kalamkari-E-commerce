@@ -48,7 +48,7 @@ export default function CollectionsPage() {
                     className="group flex h-full flex-col rounded-sm border border-border bg-card p-6 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <p className="eyebrow text-primary">{c.eyebrow}</p>
-                    <h2 className="mt-2 font-display text-2xl leading-tight">{c.title}</h2>
+                    <h2 className="mt-2 font-display text-display-sm">{c.title}</h2>
                     <p className="mt-3 text-sm text-muted-foreground">{c.blurb}</p>
                     <p className="mt-4 text-xs text-muted-foreground">{c.criterion}</p>
                     <span className="mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-medium text-primary">

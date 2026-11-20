@@ -320,7 +320,7 @@ export default async function OurStoryPage() {
                         label="Read more"
                         closeLabel="Show less"
                         lead={
-                          <p className="mt-4 text-[0.9375rem] leading-relaxed text-muted-foreground">
+                          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
                             {member.body[0]}
                           </p>
                         }
@@ -329,7 +329,7 @@ export default async function OurStoryPage() {
                         {[...member.body.slice(1), ...(member.more ?? [])].map((para, j) => (
                           <p
                             key={j}
-                            className="text-[0.9375rem] leading-relaxed text-muted-foreground"
+                            className="text-base leading-relaxed text-muted-foreground"
                           >
                             {para}
                           </p>

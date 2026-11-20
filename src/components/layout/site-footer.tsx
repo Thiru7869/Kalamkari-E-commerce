@@ -24,7 +24,7 @@ export function SiteFooter() {
             <BrandName
               as="p"
               align="left"
-              className="brand-sheen text-[1.75rem] text-cotton-50 motion-safe:animate-name-sheen"
+              className="brand-sheen text-3xl text-cotton-50 motion-safe:animate-name-sheen"
             />
             <p className="mt-3 text-sm leading-relaxed text-cotton-200/80">
               {site.description}
@@ -56,7 +56,7 @@ export function SiteFooter() {
           <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
             {footerNav.map((group) => (
               <div key={group.title}>
-                <h2 className="font-sans text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-cotton-200/60">
+                <h2 className="font-sans text-label font-semibold uppercase tracking-[0.16em] text-cotton-200/60">
                   <span aria-hidden="true" className="mr-1.5 font-normal text-cotton-200/40">[</span>
                   {group.title}
                   <span aria-hidden="true" className="ml-1.5 font-normal text-cotton-200/40">]</span>
@@ -138,7 +138,7 @@ export function SiteFooter() {
           <p className="mt-8 font-display text-3xl font-semibold leading-tight tracking-tight text-cotton-50/80 sm:text-4xl md:text-5xl">
             Sri Vijaya Lakshmi
           </p>
-          <p className="mt-3 font-inscription text-[0.6875rem] uppercase tracking-[0.36em] text-cotton-200/50 sm:text-xs">
+          <p className="mt-3 font-inscription text-label uppercase tracking-[0.36em] text-cotton-200/50 sm:text-xs">
             Fine Kalamkari Arts
           </p>
         </div>

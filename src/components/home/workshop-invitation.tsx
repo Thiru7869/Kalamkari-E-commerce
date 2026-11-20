@@ -254,14 +254,14 @@ export function WorkshopInvitation() {
                         className="ml-auto block h-px w-0 bg-primary/50 transition-[width] duration-700 ease-out motion-safe:group-hover:w-10"
                       />
                     </div>
-                    <p className="mt-2.5 pl-[2.1rem] text-[0.9375rem] leading-relaxed text-muted-foreground">
+                    <p className="mt-2.5 pl-[2.1rem] text-base leading-relaxed text-muted-foreground">
                       {item.body}
                     </p>
                   </li>
                 ))}
               </ol>
 
-              <p className="mt-6 border-t border-border pt-5 text-[0.8125rem] leading-relaxed text-muted-foreground">
+              <p className="mt-6 border-t border-border pt-5 text-sm leading-relaxed text-muted-foreground">
                 One honest warning, the same one on the commission page: in the monsoon
                 there is drawing but very little colour, because nothing can be dried. If
                 you are travelling to watch the dyeing, send a message first and the family

@@ -35,6 +35,7 @@ const twMerge = extendTailwindMerge({
             'body-lg',
             'body-base',
             'eyebrow',
+            'label',
           ],
         },
       ],

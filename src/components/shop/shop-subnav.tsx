@@ -76,7 +76,7 @@ export function ShopSubnav({
                     href={href}
                     aria-current={active ? 'page' : undefined}
                     className={cn(
-                      'inline-flex h-9 items-center whitespace-nowrap rounded-sm border px-3 text-[0.8125rem] transition-colors',
+                      'inline-flex h-9 items-center whitespace-nowrap rounded-sm border px-3 text-sm transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       active
                         ? 'border-primary bg-primary text-primary-foreground'
@@ -137,7 +137,7 @@ export function FilterTrigger({
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex h-9 items-center gap-2 rounded-sm border px-3 text-[0.8125rem] font-medium transition-colors',
+        'inline-flex h-9 items-center gap-2 rounded-sm border px-3 text-sm font-medium transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         active
           ? 'border-primary bg-primary/[0.08] text-primary'
@@ -148,7 +148,7 @@ export function FilterTrigger({
       <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
       Filter
       {active && (
-        <span className="tabular flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[0.6875rem] font-semibold text-primary-foreground">
+        <span className="tabular flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-label font-semibold text-primary-foreground">
           {count}
         </span>
       )}

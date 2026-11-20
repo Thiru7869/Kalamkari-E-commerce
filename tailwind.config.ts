@@ -315,6 +315,9 @@ const config: Config = {
         // to two lines on every phone, which is a caption pretending to be a
         // label. `.eyebrow` in globals.css sets the tracking per breakpoint.
         'eyebrow': ['0.6875rem', { lineHeight: '1.45', letterSpacing: '0.14em' }],
+        // The smallest size the site prints: tracked caps on badges, tick labels and
+        // captions. One step, so the many 10/11/13px one-offs have somewhere to go.
+        'label': ['0.6875rem', { lineHeight: '1.45' }],
       },
       /*
         One easing curve and one duration for every hover, press and colour

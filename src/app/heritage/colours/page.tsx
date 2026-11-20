@@ -89,7 +89,7 @@ export default function ColoursPage() {
 
       <section className="container pb-4" aria-labelledby="not-used">
         <div className="rounded-sm border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9">
-          <h2 id="not-used" className="font-display text-xl md:text-2xl">
+          <h2 id="not-used" className="font-display text-display-sm">
             What we do not use
           </h2>
           <ul className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">

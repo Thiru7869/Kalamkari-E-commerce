@@ -153,7 +153,7 @@ export function ColourWalk({ colours }: { colours: ColourStory[] }) {
               <li
                 key={colour.id}
                 className={cn(
-                  'w-11 text-center text-[0.625rem] uppercase tracking-[0.1em] transition-colors duration-300',
+                  'w-11 text-center text-label uppercase tracking-[0.1em] transition-colors duration-300',
                   i === index ? 'text-primary' : 'text-muted-foreground/70',
                 )}
               >
@@ -193,7 +193,7 @@ export function ColourWalk({ colours }: { colours: ColourStory[] }) {
             <div className="relative flex h-full flex-col justify-end p-5 md:p-7">
               <p
                 className={cn(
-                  'font-inscription text-[0.625rem] uppercase tracking-[0.2em]',
+                  'font-inscription text-label uppercase tracking-[0.2em]',
                   light ? 'text-white/70' : 'text-black/60',
                 )}
               >
@@ -224,7 +224,7 @@ export function ColourWalk({ colours }: { colours: ColourStory[] }) {
           <div ref={copyRef} className="flex flex-col justify-center">
             <p
               data-animate
-              className="tabular font-inscription text-[0.6875rem] uppercase tracking-[0.2em] text-primary"
+              className="tabular font-inscription text-label uppercase tracking-[0.2em] text-primary"
             >
               Colour {index + 1} of {count}
             </p>
@@ -246,7 +246,7 @@ export function ColourWalk({ colours }: { colours: ColourStory[] }) {
 
             <p
               data-animate
-              className="mt-5 text-[0.9375rem] leading-relaxed text-muted-foreground md:text-base"
+              className="mt-5 text-base leading-relaxed text-muted-foreground md:text-base"
             >
               {current.body}
             </p>
