@@ -2,9 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // three.js and its ecosystem ship untranspiled ESM; let Next handle it.
-  transpilePackages: ['three'],
-
   images: {
     formats: ['image/avif', 'image/webp'],
     // Studio photography is portrait-heavy (sarees on the loom, hanging panels),
@@ -14,7 +11,7 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: ['lucide-react', '@react-three/drei'],
+    optimizePackageImports: ['lucide-react'],
   },
 
   async redirects() {
@@ -55,7 +52,8 @@ const nextConfig = {
             //   through middleware, which is the natural next step once the
             //   report stream is quiet.
             //
-            //   'unsafe-eval' — three.js compiles shader programs at runtime.
+            //   'unsafe-eval' — three.js compiled shader programs at runtime; three is gone,
+            //   so this can be dropped once the report stream shows nothing else needs it.
             //
             // Everything else is closed: no plugins, no framing, no form posts
             // to another origin, and connect/img/frame limited to what the site

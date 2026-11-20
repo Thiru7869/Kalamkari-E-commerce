@@ -257,7 +257,7 @@ deployment.
 
 Anything read more than once in a single render is wrapped in `React.cache`:
 `resolveCart`, `getCart`, `getCartCount`, `getWishlistIds`, `getProductBySlug`,
-`getCategoryBySlug`, `getCategories`, `getBlogPost`, `getReviewEligibility`.
+`getCategoryBySlug`, `getBlogPost`, `getReviewEligibility`.
 Prisma calls are not deduplicated the way `fetch` is. `generateMetadata` and the
 page body both run, so an uncached query on a product page costs two.
 
@@ -388,17 +388,16 @@ Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
 - Media queries are subscribed, not sampled (`useMediaQuery`). A preference read
   once on mount is wrong as soon as the visitor changes it.
 
-## The 3D
+## Smooth scrolling and any future 3D
 
-**No scene is mounted at the moment.** The hero scene was removed and nothing
-imports `three`, `@react-three/fiber` or `@react-three/drei` any more; the
-packages are still in `package.json` and are candidates for removal. If a scene
-is reintroduced, these rules apply:
+**No 3D scene is mounted and `three` is not a dependency.** The hero scene was
+removed and the packages were dropped. If a scene is reintroduced, add the
+packages back and follow these rules:
 
 - three.js is code-split behind `next/dynamic` and requested only after client
   capability detection resolves. It must never delay LCP.
 - **No information exists only inside a canvas.** Every scene has a meaningful
-  static fallback; turn off WebGL and `/process` is still the complete article.
+  static fallback.
 - Canvases are `aria-hidden`; phase changes are announced through a separate
   live region.
 - Scroll progress is written into refs, not React state, so scrolling never

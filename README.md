@@ -128,10 +128,10 @@ scripts/
 src/
   auth.ts                Auth.js config (Google + email magic link)
   app/
-    page.tsx             Home
+    page.tsx             Home (the shop)
     shop/[[...category]] Shop index and the five category routes
     product/[slug]       Product detail
-    process/             The 23 steps, scroll-driven 3D
+    process/             The 23 steps, scroll-driven
     our-story/           The family
     custom/              Commission enquiry (/commission redirects here)
     journal/             Journal index and posts
@@ -190,24 +190,14 @@ the worst place to keep a canvas alive on a phone.
 
 ---
 
-## The 3D
+## Motion and 3D
 
-The home hero, built on a custom shader (`components/three/cloth-material.ts`) that makes a plane read as dyed cotton rather than a coloured polygon: a woven warp/weft grid, dye that bleeds along the weave instead of stopping at a hard edge, and ink whose density varies as a real pen running dry.
-
-- **Home hero** — cloth hanging in the store, madder red striking across it as you scroll. It illustrates the single most counter-intuitive fact about the craft: colour arrives in a boiling bath, days after it was painted on as a clear liquid.
-Its non-WebGL rendering is the same dye sequence as a five-stop gradient, slid
-by scroll, so the colour front travels rather than the surface simply darkening.
-
-**Constraints the 3D is held to:**
-
-- three.js is code-split behind `next/dynamic` and requested only after client capability detection resolves. It never delays LCP — `/process` is 161 kB first load, not 390 kB.
-- Every scene has a meaningful static fallback. **No information exists only inside a canvas.** Turn off WebGL and `/process` is still the complete article.
-- Canvases are `aria-hidden`. Phase changes are announced through a separate live region.
-- Scroll progress is written into refs, not React state, so scrolling never triggers a re-render.
-- `prefers-reduced-motion` renders a single still frame rather than an animation loop.
-- DPR is capped at 2 (1.5 on low-power devices), and segment counts drop on phones.
-
-Lenis and GSAP share **one** rAF loop (GSAP's ticker drives Lenis), and Lenis is not mounted at all under reduced motion. Touch scrolling is left native — hijacking momentum scroll on a phone is the fastest way to make a site feel broken.
+There is no 3D scene and `three` is not a dependency (the home-hero scene was
+removed). Motion is GSAP and CSS: Lenis and GSAP share **one** rAF loop (GSAP's
+ticker drives Lenis), Lenis is not mounted at all under reduced motion, and
+touch scrolling is left native. Under `prefers-reduced-motion` decorative
+motion stops but content still resolves to its final state. See `CLAUDE.md` for
+the rules that apply if a scene is ever reintroduced.
 
 ---
 
@@ -399,7 +389,8 @@ subscribed to `payment.captured`, `order.paid` and `payment.failed`.
 A `Content-Security-Policy-Report-Only` header ships enabled. Watch the reports,
 then rename the header to `Content-Security-Policy` to enforce it — the two
 allowances it still carries (`unsafe-inline` for the JSON-LD blocks and Next's
-bootstrap, `unsafe-eval` for three.js shader compilation) are documented at the
+bootstrap, `unsafe-eval`, which three.js shader compilation once needed and which can be
+dropped once the reports confirm nothing else uses it) are documented at the
 header in `next.config.mjs`.
 
 Google OAuth redirect URI: `https://yourdomain/api/auth/callback/google`.
