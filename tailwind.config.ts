@@ -253,12 +253,12 @@ const config: Config = {
         */
         // Telugu, for the few places the local name of a thing is the true name.
         //
-        // `--font-telugu-loaded` is only defined once the page has finished loading
-        // (see `html.telugu-ready` in globals.css and the script in layout.tsx), so
-        // the 150 KB of Telugu font is not fetched during the load itself. Until
+        // The web font is only applied once the page has finished loading (see
+        // `html.telugu-ready .font-telugu` in globals.css and the script in
+        // layout.tsx), so its 120 KB is not fetched during the load itself. Until
         // then the text is set in the system's own Telugu face.
         telugu: [
-          'var(--font-telugu-loaded, var(--font-body))',
+          'var(--font-body)',
           'Nirmala UI',
           'Gautami',
           'Noto Sans Telugu',
@@ -358,14 +358,6 @@ const config: Config = {
           "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E\")",
       },
       keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
-        },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
-        },
         // The kalam draws: used for SVG stroke reveals on section rules.
         'draw-stroke': {
           from: { strokeDashoffset: '1' },
@@ -555,8 +547,6 @@ const config: Config = {
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.22s ease-out',
-        'accordion-up': 'accordion-up 0.22s ease-out',
         'draw-stroke': 'draw-stroke 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         'dye-bloom': 'dye-bloom 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         'rise-in': 'rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards',
