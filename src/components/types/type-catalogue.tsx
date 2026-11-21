@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect, useTransition } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProductCard } from '@/components/shop/product-card';
 import { cn } from '@/lib/utils';
@@ -56,6 +56,8 @@ export function TypeCatalogue({
   const [choice, setChoice] = useState(initialCloth ?? 'all');
   const [page, setPage] = useState(1);
   const topRef = useRef<HTMLDivElement>(null);
+  const scrollOnPage = useRef(false);
+  const [, startTransition] = useTransition();
   const wished = useMemo(() => new Set(wishlistIds), [wishlistIds]);
 
   const familyOf = useMemo(() => new Map(cloths.map((c) => [c.slug, c.family])), [cloths]);
@@ -88,10 +90,21 @@ export function TypeCatalogue({
 
   const families = [...new Set(cloths.map((c) => c.family))];
 
+  /*
+    The page change is a transition so the tap returns at once and the eight
+    new cards render without holding the next frame; the scroll waits for them
+    (below) instead of forcing a layout of the old page first.
+  */
   function goTo(next: number) {
-    setPage(next);
-    topRef.current?.scrollIntoView({ block: 'start' });
+    scrollOnPage.current = true;
+    startTransition(() => setPage(next));
   }
+
+  useEffect(() => {
+    if (!scrollOnPage.current) return;
+    scrollOnPage.current = false;
+    topRef.current?.scrollIntoView({ block: 'start' });
+  }, [current]);
 
   return (
     <div>
