@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 import { useIdlePreload } from '@/components/ui/use-opener';
 import { CART_OPEN_EVENT, type CartOpenDetail } from './cart-events';
 import type { CartSummary } from '@/lib/totals';
@@ -38,8 +38,10 @@ export function CartDrawer({ cart }: { cart: CartSummary }) {
     const onOpen = (event: Event) => {
       (event as CustomEvent<CartOpenDetail>).detail.handled = true;
       setWaiting(true);
-      setMounted(true);
-      setOpen(true);
+      startTransition(() => {
+        setMounted(true);
+        setOpen(true);
+      });
     };
     window.addEventListener(CART_OPEN_EVENT, onOpen);
     return () => window.removeEventListener(CART_OPEN_EVENT, onOpen);

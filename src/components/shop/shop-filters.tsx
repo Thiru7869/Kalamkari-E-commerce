@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useState, startTransition } from 'react';
 import { FilterTrigger } from './shop-subnav';
 import { useIdlePreload, useOpener } from '@/components/ui/use-opener';
 
@@ -69,8 +69,10 @@ export function ShopFilters({
         onHint={loadPanel}
         onClick={(event) => {
           remember(event);
-          setMounted(true);
-          setOpen(true);
+          startTransition(() => {
+            setMounted(true);
+            setOpen(true);
+          });
         }}
       />
       {mounted && (

@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 import { Menu } from 'lucide-react';
 import { useIdlePreload, useOpener } from '@/components/ui/use-opener';
 
@@ -41,8 +41,10 @@ export function MobileMenu({ isSignedIn }: { isSignedIn: boolean }) {
         onFocus={loadPanel}
         onClick={(event) => {
           remember(event);
-          setMounted(true);
-          setOpen(true);
+          startTransition(() => {
+            setMounted(true);
+            setOpen(true);
+          });
         }}
         className="inline-flex h-11 w-11 items-center justify-center rounded-sm transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >

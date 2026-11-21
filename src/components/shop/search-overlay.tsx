@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useState, startTransition } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { useIdlePreload, useOpener } from '@/components/ui/use-opener';
 
@@ -40,8 +40,10 @@ export function SearchOverlay({
         onFocus={loadPanel}
         onClick={(event) => {
           remember(event);
-          setMounted(true);
-          setOpen(true);
+          startTransition(() => {
+            setMounted(true);
+            setOpen(true);
+          });
         }}
       >
         {children}

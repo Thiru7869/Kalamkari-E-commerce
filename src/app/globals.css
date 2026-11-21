@@ -219,9 +219,17 @@
     display sizes get the high-contrast cut and a 16px `h4` gets the sturdier
     one, from a single font file.
   */
-  /* Set by the script in layout.tsx once the page has loaded; see tailwind.config.ts. */
-  html.telugu-ready {
-    --font-telugu-loaded: var(--font-telugu);
+  /*
+    Set by the script in layout.tsx once the page has loaded; see tailwind.config.ts.
+
+    This is a descendant rule on purpose. The first version redefined a custom
+    property on <html>, and custom properties inherit: changing one restyled every
+    element on the page (300-450 ms at 4x CPU, three times, after load) to affect
+    two decorative words. A class on <html> with a selector for `.font-telugu`
+    invalidates only the elements that carry it.
+  */
+  html.telugu-ready .font-telugu {
+    font-family: var(--font-telugu), var(--font-body), sans-serif;
   }
 
   h1, h2, h3, h4 {
