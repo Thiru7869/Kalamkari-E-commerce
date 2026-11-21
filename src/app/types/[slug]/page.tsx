@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
@@ -9,6 +9,7 @@ import { NarrativeNote } from '@/components/shop/narrative-note';
 import { HowThisIsMade, WhatToLookFor } from '@/components/shop/craft-notes';
 import { TypeCatalogue } from '@/components/types/type-catalogue';
 import { ClothGuide, type GuideFamily } from '@/components/types/cloth-guide';
+import type { ClothGroup } from '@/components/types/cloth-select';
 import { DyePots, type PotStory } from '@/components/types/dye-pots';
 import { MakingSteps } from '@/components/types/making-steps';
 import { PriceAndCare, QuestionsAccordion } from '@/components/types/auto-open-panels';
@@ -20,9 +21,10 @@ import {
   getTypeMotifs,
   getTypePriceRange,
   getTypeFabricFromPrices,
-  getTypeProducts,
+  getTypeCataloguePage,
   getCategoryBySlug,
 } from '@/lib/queries';
+import { catalogueHref, parseCatalogue } from '@/lib/type-catalogue';
 import { getWishlistIds } from '@/lib/cart';
 import {
   typeDefs,
@@ -66,15 +68,33 @@ export function generateStaticParams() {
   return typeDefs.map((t) => ({ slug: t.slug }));
 }
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}): Promise<Metadata> {
   const { slug } = await params;
   const type = findType(slug);
   if (!type) return {};
 
+  /*
+    A filtered view (`?fabric=…`) is a subset of the page and canonicalises to
+    it. Numbered pages of the whole list are distinct pages and name
+    themselves, with the number in the title so they are not all the same
+    result in a search listing.
+  */
+  const sp = await searchParams;
+  const filtered = Boolean((Array.isArray(sp.fabric) ? sp.fabric[0] : sp.fabric)?.trim());
+  const rawPage = Array.isArray(sp.page) ? sp.page[0] : sp.page;
+  const page = rawPage && /^\d{1,4}$/.test(rawPage) ? Math.max(1, Number(rawPage)) : 1;
+  const paged = !filtered && page > 1;
+
   return {
-    title: type.title,
+    title: paged ? `${type.title} — page ${page}` : type.title,
     description: type.blurb,
-    alternates: { canonical: `/types/${type.slug}` },
+    alternates: { canonical: paged ? `/types/${type.slug}?page=${page}` : `/types/${type.slug}` },
     openGraph: { title: type.title, description: type.blurb },
   };
 }
@@ -103,21 +123,15 @@ export default async function TypePage({
   const type = findType(slug);
   if (!type) notFound();
 
-  const requestedCloth = Array.isArray(sp.fabric) ? sp.fabric[0] : sp.fabric;
-
-  const [category, varieties, motifs, dyes, range, { items, soldTotal }, wishlistIds, fromPrices] =
-    await Promise.all([
-      getCategoryBySlug(type.category),
-      getTypeVarieties(type.category),
-      getTypeMotifs(type.category),
-      getTypeDyes(type.category),
-      getTypePriceRange(type.category),
-      // The whole category, once: the catalogue filters and pages it in the
-      // browser. Capped so a very large catalogue cannot bloat the page.
-      getTypeProducts(type.category, 200),
-      getWishlistIds(),
-      getTypeFabricFromPrices(type.category),
-    ]);
+  const [category, varieties, motifs, dyes, range, wishlistIds, fromPrices] = await Promise.all([
+    getCategoryBySlug(type.category),
+    getTypeVarieties(type.category),
+    getTypeMotifs(type.category),
+    getTypeDyes(type.category),
+    getTypePriceRange(type.category),
+    getWishlistIds(),
+    getTypeFabricFromPrices(type.category),
+  ]);
 
   if (!category) notFound();
 
@@ -129,7 +143,31 @@ export default async function TypePage({
   const cloths = families.flatMap((family) =>
     (varieties.get(family) ?? []).map((f) => ({ slug: f.slug, name: f.name, family })),
   );
-  const initialCloth = cloths.some((c) => c.slug === requestedCloth) ? requestedCloth : undefined;
+
+  // The catalogue is one page of eight, cut in the database from the URL. It
+  // needs the cloth list to know what `?fabric=` may mean, so it runs after it.
+  const catalogue = parseCatalogue(sp, cloths);
+  const { items, total, soldTotal, page, pageCount } = await getTypeCataloguePage(
+    type.category,
+    { cloth: catalogue.cloth, family: catalogue.family },
+    catalogue.page,
+  );
+  // A page past the end is a stale link, not a page: send it to the real last
+  // one so the address, the title and the canonical all say what is shown.
+  if (page !== catalogue.page) {
+    redirect(catalogueHref(`/types/${type.slug}`, catalogue, page).split('#')[0]);
+  }
+  const clothGroups: ClothGroup[] = families.map((family) => ({
+    family,
+    label: FAMILY_LABELS[family] ?? family,
+    count: (varieties.get(family) ?? []).reduce((n, f) => n + f._count.products, 0),
+    cloths: (varieties.get(family) ?? []).map((f) => ({
+      slug: f.slug,
+      name: f.name,
+      count: f._count.products,
+    })),
+  }));
+  const allCount = clothGroups.reduce((n, g) => n + g.count, 0);
 
   const wishlist = [...wishlistIds];
 
@@ -265,13 +303,15 @@ export default async function TypePage({
           />
           <div className="mt-8">
             <TypeCatalogue
-              key={initialCloth ?? 'all'}
-              products={items}
-              cloths={cloths}
-              familyLabels={FAMILY_LABELS}
-              wishlistIds={wishlist}
+              basePath={`/types/${type.slug}`}
               label={label}
-              initialCloth={initialCloth}
+              products={items}
+              wishlistIds={wishlist}
+              groups={clothGroups}
+              allCount={allCount}
+              state={{ ...catalogue, page }}
+              total={total}
+              pageCount={pageCount}
             />
           </div>
           {soldTotal > 0 && (

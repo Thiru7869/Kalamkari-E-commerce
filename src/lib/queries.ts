@@ -639,6 +639,54 @@ export const getTypeProducts = cache(async (categorySlug: string, take = 8, fabr
   return { items, total, soldTotal };
 });
 
+export const TYPE_PAGE_SIZE = 8;
+
+/**
+ * One page of a type's catalogue, newest and most featured first.
+ *
+ * The page is cut in the database: a catalogue of a few hundred pieces sends
+ * eight cards to the browser, not all of them with a script to hide the rest.
+ * `id` closes the sort so two pieces with the same timestamp never swap places
+ * between page one and page two.
+ *
+ * A page past the end is answered with the last page rather than an empty one.
+ * Sold pieces are counted for the archive link and never listed.
+ */
+export const getTypeCataloguePage = cache(
+  async (categorySlug: string, filter: { cloth?: string; family?: string }, page: number) => {
+    const inCategory: Prisma.ProductWhereInput = { status: 'ACTIVE', category: { slug: categorySlug } };
+    const where: Prisma.ProductWhereInput = {
+      ...inCategory,
+      stock: { gt: 0 },
+      ...(filter.cloth
+        ? { fabric: { slug: filter.cloth } }
+        : filter.family
+          ? { fabric: { family: filter.family } }
+          : {}),
+    };
+
+    const [total, soldTotal] = await Promise.all([
+      prisma.product.count({ where }),
+      prisma.product.count({ where: { ...inCategory, stock: { lte: 0 } } }),
+    ]);
+
+    const pageCount = Math.max(1, Math.ceil(total / TYPE_PAGE_SIZE));
+    const current = Math.min(Math.max(1, page), pageCount);
+    const items =
+      total === 0
+        ? []
+        : await prisma.product.findMany({
+            where,
+            select: productCardSelect,
+            orderBy: [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }],
+            skip: (current - 1) * TYPE_PAGE_SIZE,
+            take: TYPE_PAGE_SIZE,
+          });
+
+    return { items, total, soldTotal, page: current, pageCount };
+  },
+);
+
 /**
  * Whether the current visitor may review a piece.
  *
