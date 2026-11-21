@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { WishlistButton } from './wishlist-button';
+import { HoverImage } from './hover-image';
 import { formatPrice, averageRating } from '@/lib/utils';
 import { primaryImage, toList } from '@/lib/serialize';
 import type { ProductCardData } from '@/lib/queries';
@@ -62,34 +63,8 @@ export function ProductCard({
           )}
         />
 
-        {/*
-          The second view, on hover and on keyboard focus.
-
-          Only where a pointer can hover. On a touch screen `:hover` sticks to
-          whatever was last tapped, so without the media query a phone would
-          leave one card showing its second photograph for no reason a visitor
-          could see. Phones get the second view on the piece's own page, where
-          the gallery has a swipeable rail.
-
-          Decorative — the first image carries the alt text — and withheld from
-          sold pieces, whose first image is already dimmed and which nobody is
-          choosing between.
-        */}
-        {secondImage && !soldOut && (
-          <Image
-            src={secondImage}
-            alt=""
-            aria-hidden="true"
-            fill
-            sizes={sizes}
-            className={cn(
-              'pointer-events-none object-cover opacity-0',
-              'transition-opacity duration-300 ease-out motion-reduce:transition-none',
-              '[@media(hover:hover)]:group-hover:opacity-100',
-              'group-focus-within:opacity-100',
-            )}
-          />
-        )}
+        {/* The second view, on hover and keyboard focus — see HoverImage. */}
+        {secondImage && !soldOut && <HoverImage src={secondImage} sizes={sizes} />}
 
         <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1.5">
           {product.masterpiece && <Badge variant="gold">Signed piece</Badge>}

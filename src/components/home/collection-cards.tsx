@@ -116,7 +116,7 @@ function TiltCard({ card, index }: { card: CollectionCard; index: number }) {
             look for it.
           */}
           <span
-            className="tabular absolute left-3 top-3 rounded-sm bg-kasim-950/55 px-2 py-1 font-inscription text-label uppercase tracking-[0.16em] text-cotton-100 backdrop-blur-sm"
+            className="tabular absolute left-3 top-3 rounded-sm bg-kasim-950/70 px-2 py-1 font-inscription text-label uppercase tracking-[0.16em] text-cotton-100"
             aria-hidden="true"
           >
             {String(index + 1).padStart(2, '0')}

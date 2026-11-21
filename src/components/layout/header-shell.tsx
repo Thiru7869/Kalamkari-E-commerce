@@ -68,7 +68,7 @@ export function HeaderShell({ children }: { children: React.ReactNode }) {
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 w-full bg-background/95 backdrop-blur-md',
+        'sticky top-0 z-40 w-full bg-background',
         'transition-[transform,box-shadow] duration-300 ease-out',
         scrolled && 'shadow-[0_1px_0_hsl(var(--border)),0_8px_24px_-16px_rgb(0_0_0/0.3)]',
         hidden && '-translate-y-full',

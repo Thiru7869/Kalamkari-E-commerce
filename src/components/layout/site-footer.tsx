@@ -24,7 +24,7 @@ export function SiteFooter() {
             <BrandName
               as="p"
               align="left"
-              className="brand-sheen text-3xl text-cotton-50 motion-safe:animate-name-sheen"
+              className="brand-sheen text-3xl text-cotton-50 motion-safe:hover:animate-name-sheen"
             />
             <p className="mt-3 text-sm leading-relaxed text-cotton-200/80">
               {site.description}
