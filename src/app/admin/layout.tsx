@@ -35,7 +35,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </div>
             <Link
               href="/"
-              className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              className="inline-flex min-h-[2.75rem] items-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
               View site
             </Link>

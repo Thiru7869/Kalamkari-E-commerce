@@ -5,7 +5,7 @@ import { shopCategories } from '@/content/site';
 import { typeDefs, collectionDefs } from '@/content/catalogue';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, posts] = await Promise.all([
+  const [products, posts, motifs] = await Promise.all([
     prisma.product.findMany({
       where: { status: 'ACTIVE' },
       select: { slug: true, updatedAt: true },
@@ -14,13 +14,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { published: true },
       select: { slug: true, updatedAt: true },
     }),
+    prisma.motif.findMany({ select: { slug: true } }),
   ]);
 
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: absoluteUrl('/'), lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    { url: absoluteUrl('/shop'), lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: absoluteUrl('/collections'), lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: absoluteUrl('/archive'), lastModified: now, changeFrequency: 'weekly', priority: 0.4 },
     // The process page is the store's strongest claim to authority and the
     // most linkable thing on the site.
     { url: absoluteUrl('/process'), lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
@@ -72,6 +74,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'daily' as const,
       priority: 0.75,
+    })),
+    ...motifs.map((m) => ({
+      url: absoluteUrl(`/heritage/motifs/${m.slug}`),
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
     })),
     ...products.map((p) => ({
       url: absoluteUrl(`/product/${p.slug}`),

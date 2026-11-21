@@ -38,7 +38,7 @@ export const narrativeMotifNames: Record<(typeof narrativeMotifs)[number], strin
 
 export const NARRATIVE_NOTE = {
   heading: 'The narrative pieces are drawn to order',
-  body: 'Ramayana, Mahabharata, Krishna Leela and the Tree of Life are the hardest drawing this workshop does — weeks of one person’s undivided attention, set out freehand with no block and no tracing. Whatever is in the store is what exists. The same composition is never painted twice, so a piece of your own is a commission rather than a restock.',
+  body: 'Ramayana, Mahabharata, Krishna Leela and Tree of Life subjects take weeks of one person’s work, drawn freehand with no block or tracing. The same composition is never painted twice, so a piece of your own is a commission, not a restock.',
   cta: 'Start a commission',
   href: '/custom',
 } as const;
@@ -71,33 +71,33 @@ export const collectionDefs: CollectionDef[] = [
   {
     slug: 'featured-sarees',
     label: 'Featured Sarees',
-    eyebrow: 'Chosen this week',
+    eyebrow: 'Featured',
     title: 'Featured sarees',
     blurb:
-      'The sarees the family would put in your hands first. Chosen for the drawing — the steadiness of the outline, the way a pallu resolves — and not for the margin.',
+      'The sarees the family would show you first, picked for the steadiness of the outline and the way the pallu resolves.',
     criterion:
-      'Sarees currently marked featured by the store. The selection changes as work comes off the line.',
+      'Sarees the store has marked as featured.',
     category: 'sarees',
     kind: 'featured',
   },
   {
     slug: 'premium',
     label: 'Premium',
-    eyebrow: 'Signed and exhibition grade',
+    eyebrow: 'Premium',
     title: 'Premium and signed work',
     blurb:
-      'Signed pieces, award-lineage work, and the ones that simply took a month of somebody’s undivided attention. Narrative pallus, dense jaal, the finest line this workshop draws.',
+      'Signed and exhibition-grade work: narrative pallus, dense jaal and the finest line the workshop draws.',
     criterion:
-      'Pieces the store has marked as exhibition grade, across every category — a panel qualifies on the same terms as a saree.',
+      'Pieces the store has marked as exhibition grade, in every category.',
     kind: 'premium',
   },
   {
     slug: 'new-arrivals',
     label: 'New Arrivals',
-    eyebrow: 'Off the line',
+    eyebrow: 'Newest',
     title: 'New arrivals',
     blurb:
-      'The most recent work to finish its twentieth washing. On a catalogue where a saree takes six weeks, "new" means something — these are pieces that did not exist in the spring.',
+      'The most recently finished work. A saree takes weeks to complete, so each new piece is a real addition.',
     criterion: 'Everything in the store, most recently completed first.',
     kind: 'new',
   },
@@ -191,10 +191,10 @@ export const typeDefs: TypeDef[] = [
     slug: 'dupattas',
     category: 'dupattas',
     label: 'Dupattas',
-    eyebrow: 'The piece people wear most',
+    eyebrow: 'Dupattas',
     title: 'Kalamkari dupattas',
     blurb:
-      'Shorter than a saree and far more worn. A dupatta is where most people meet this craft for the first time, and where the drawing has to work at arm’s length.',
+      'Shorter than a saree and read at arm’s length, so the drawing has to hold up close.',
     body: [
       'A dupatta is read close up. Nobody views one across a room, so the detail has to survive being looked at from a foot away — which means the border work matters more here than on almost anything else the workshop makes.',
       'Because it is worn often, it is also washed often, and that changes what cloth suits it. Mulmul and handloom cotton soften and improve; the sheer cloths — organza, Kota, Chanderi — hold their crispness but want gentler handling.',
@@ -207,7 +207,7 @@ export const typeDefs: TypeDef[] = [
       },
       {
         title: 'How it changes with wearing',
-        body: 'This is the piece that gets worn most, so it is the one that ages most visibly. Mulmul and handloom cotton improve: they soften, the colours settle a shade warmer, and the cloth starts to fall rather than sit. The sheer cloths do the opposite — organza, Kota and Chanderi keep their body and their crispness, which is why they suit occasions rather than daily wear. Neither is better; they are two different purchases.',
+        body: 'A dupatta is handled and washed often, so it shows its age most. Mulmul and handloom cotton improve: they soften, the colours settle a shade warmer, and the cloth starts to fall rather than sit. The sheer cloths do the opposite — organza, Kota and Chanderi keep their body and their crispness, which is why they suit occasions rather than daily wear. Neither is better; they are two different purchases.',
       },
     ],
     familyOrder: ['cotton', 'sheer', 'silk', 'blended'],
@@ -224,10 +224,10 @@ export const typeDefs: TypeDef[] = [
     slug: 'chunnis',
     category: 'dupattas',
     label: 'Chunnis',
-    eyebrow: 'The same cloth, the other name',
+    eyebrow: 'Chunnis',
     title: 'Kalamkari chunnis',
     blurb:
-      'Chunni and dupatta are one garment under two names. This page exists because both words are searched for — the stock behind it is the same, and the store has never pretended otherwise.',
+      'Chunni and dupatta are one garment under two names. The pieces listed here are the same stock as the dupattas.',
     body: [
       'Across the north it is a chunni; across most of the rest of the country it is a dupatta. The store keeps them in a single category because splitting the stock into two would be a fiction, and this site does not do that.',
       'What varies is not the name but the cloth. A light mulmul chunni worn daily behaves nothing like an organza one kept for occasions, and the difference is worth more attention than the vocabulary.',
@@ -257,14 +257,14 @@ export const typeDefs: TypeDef[] = [
     slug: 'paintings',
     category: 'paintings',
     label: 'Paintings',
-    eyebrow: 'The old work',
+    eyebrow: 'Paintings',
     title: 'Narrative panels and paintings',
     blurb:
       'Before Kalamkari was worn it was hung. The panels are the tradition the craft grew out of — an episode, painted to be read across a room.',
     body: [
       'Srikalahasti Kalamkari grew up serving the temple rather than the export trade. Its subjects are narrative because its purpose was narrative: a panel told a story to people standing in front of it, in registers, left to right, the way a scroll is read.',
       'That inheritance is why a panel is drawn differently from a saree. Figures carry expression at viewing distance, registers are separated by rule and border rather than by empty cloth, and the composition assumes a viewer standing still.',
-      'These are the pieces most often commissioned, and the ones where a specific episode can be asked for by name.',
+      'A specific episode can be asked for by name.',
     ],
     deepDive: [
       {
@@ -273,7 +273,7 @@ export const typeDefs: TypeDef[] = [
       },
       {
         title: 'Asking for a specific episode',
-        body: 'Panels are the pieces most often commissioned, and the ones where naming the scene is genuinely useful — the exile, the golden deer, Hanuman crossing, Kaliya subdued, the discourse at the chariot. The composition is laid out in registers to be read left to right, so the number of scenes changes the size before it changes the price. Two honest warnings, both of which are on the commission page: the monsoon stops all drying and therefore all work, and a natural dye palette is not a colour picker.',
+        body: 'Panels suit commissioning, and naming the scene helps — the exile, the golden deer, Hanuman crossing, Kaliya subdued, the discourse at the chariot. The composition is laid out in registers to be read left to right, so the number of scenes changes the size before it changes the price. Two honest warnings, both of which are on the commission page: the monsoon stops all drying and therefore all work, and a natural dye palette is not a colour picker.',
       },
     ],
     familyOrder: ['cotton', 'silk', 'blended', 'sheer'],
@@ -290,10 +290,10 @@ export const typeDefs: TypeDef[] = [
     slug: 'home-decor',
     category: 'home-decor',
     label: 'Home Decor',
-    eyebrow: 'Cloth that gets used',
+    eyebrow: 'Home',
     title: 'Kalamkari for the home',
     blurb:
-      'Cushion covers, runners, bedspreads and hangings. The pieces that get washed, sat on, and softened into a house rather than kept for occasions.',
+      'Cushion covers, runners, bedspreads and hangings: cloth meant to be washed and used.',
     body: [
       'Home pieces are the most honest test of natural dye, because they are used. A runner that goes through the wash forty times will show you exactly what iron black and madder red do over years — they soften, they settle, and they stay.',
       'The drawing is planned for it. Motifs are set at a scale that survives folding and repeated washing, and the borders are drawn heavier than they would be on a dupatta so they hold up at a distance and under wear.',
@@ -306,7 +306,7 @@ export const typeDefs: TypeDef[] = [
       },
       {
         title: 'Sizing a piece to a room',
-        body: 'Runners, bedspreads and panels are the pieces most often asked for in a size the store does not have finished, and they are also the easiest to commission, because the drawing scales without being redesigned. Send the measurement and, if it matters, the direction the piece will be seen from — a runner read from both long sides is composed differently from a wall panel read from one. Sold as singles or pairs, and which one is stated on every piece rather than left to be discovered at checkout.',
+        body: 'Runners, bedspreads and panels are easy to commission in a size the store does not have finished, because the drawing scales without being redesigned. Send the measurement and, if it matters, the direction the piece will be seen from — a runner read from both long sides is composed differently from a wall panel read from one. Sold as singles or pairs, and which one is stated on every piece rather than left to be discovered at checkout.',
       },
     ],
     familyOrder: ['cotton', 'blended', 'silk', 'sheer'],
@@ -323,10 +323,10 @@ export const typeDefs: TypeDef[] = [
     slug: 'blouse-pieces',
     category: 'blouses',
     label: 'Blouse Pieces',
-    eyebrow: 'Painted to match, or to contrast',
+    eyebrow: 'Blouse pieces',
     title: 'Kalamkari blouse pieces',
     blurb:
-      'A metre of painted cloth, stitched or unstitched. The smallest way into the craft, and the piece most often bought to sit against a saree that already exists.',
+      'A metre of painted cloth, stitched or unstitched, to wear with a saree.',
     body: [
       'A blouse piece is about a metre, which changes how it is drawn: there is no room for a narrative, so the work goes into density — a tight jaal, a heavy temple border, a single motif carried well.',
       'Most are bought to go with a saree the customer already owns. If that is what you are doing, say so when you write to us and send a photograph of the saree; matching a natural dye by eye is something the family does regularly and a colour picker cannot.',
@@ -379,21 +379,21 @@ export const homeCollectionCards = [
   {
     title: 'Featured Sarees',
     blurb:
-      'What the family would put in your hands first this week — chosen for the drawing, not the margin.',
+      'The pieces the family would show you first.',
     href: '/collections/featured-sarees',
     image: '/images/products/hero-sarees.jpg',
   },
   {
     title: 'Premium',
     blurb:
-      'Signed and exhibition-grade work. Narrative pallus, dense jaal, the hardest drawing this workshop does.',
+      'Signed and exhibition-grade work: narrative pallus and dense jaal.',
     href: '/collections/premium',
     image: '/images/products/hero-paintings.jpg',
   },
   {
     title: 'Custom Items',
     blurb:
-      'Tell us the subject, the cloth and the occasion. Nothing here is printed, so nothing has to be chosen from a catalogue.',
+      'Tell us the subject, the cloth and the occasion, and have it painted.',
     href: '/custom',
     image: '/images/products/hero-dupattas.jpg',
     accent: true,

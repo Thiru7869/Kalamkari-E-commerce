@@ -46,7 +46,7 @@ export function NarrativeNote({
           </span>{' '}
           <Link
             href={NARRATIVE_NOTE.href}
-            className="inline-flex items-center gap-1 font-medium text-primary underline-offset-4 hover:underline"
+            className="inline-flex items-center gap-1 py-3 -my-3 font-medium text-primary underline-offset-4 hover:underline"
           >
             {NARRATIVE_NOTE.cta}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

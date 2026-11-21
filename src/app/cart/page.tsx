@@ -28,7 +28,7 @@ export default async function CartPage() {
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link href="/shop">
+              <Link href="/">
                 Browse the store
                 <ArrowRight aria-hidden="true" />
               </Link>
@@ -85,7 +85,7 @@ export default async function CartPage() {
               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
                   <h2 className="font-display text-lg leading-snug">
-                    <Link href={`/product/${line.slug}`} className="hover:text-primary">
+                    <Link href={`/product/${line.slug}`} className="-my-2 inline-flex min-h-[2.75rem] items-center hover:text-primary">
                       {line.name}
                     </Link>
                   </h2>
@@ -119,7 +119,7 @@ export default async function CartPage() {
 
         <aside className="mt-10 lg:mt-0" aria-label="Order summary">
           <div className="rounded-sm border border-border bg-card p-5 lg:sticky lg:top-28">
-            <h2 className="font-display text-xl">Summary</h2>
+            <h2 className="font-display text-display-sm">Summary</h2>
 
             <dl className="mt-5 flex flex-col gap-3 text-sm">
               <div className="flex justify-between">
@@ -165,8 +165,8 @@ export default async function CartPage() {
             </p>
 
             <Link
-              href="/shop"
-              className="mt-5 inline-block text-sm text-primary underline-offset-4 hover:underline"
+              href="/"
+              className="mt-3 inline-flex min-h-[2.75rem] items-center text-sm text-primary underline-offset-4 hover:underline"
             >
               Keep looking
             </Link>

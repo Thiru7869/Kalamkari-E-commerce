@@ -43,7 +43,7 @@ export default function ProcessPage() {
               drops under it below lg rather than shrinking to nothing. */}
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)] lg:items-start lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-14">
           <div className="max-w-3xl">
-            <Breadcrumbs trail={[{ label: 'The process' }]} className="mb-6" />
+            <Breadcrumbs trail={[{ label: 'The process' }]} />
             <p className="eyebrow">The making of a Kalamkari saree</p>
             <h1 className="mt-4 text-display-xl">
               Fourteen stages.
@@ -168,7 +168,7 @@ export default function ProcessPage() {
                     >
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span className="font-inscription text-[0.6875rem] uppercase tracking-[0.18em] text-muted-foreground">
+                    <span className="font-inscription text-label uppercase tracking-[0.18em] text-muted-foreground">
                       {facet.label}
                     </span>
                     <span
@@ -279,7 +279,7 @@ export default function ProcessPage() {
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Button asChild size="lg">
-                <Link href="/shop">
+                <Link href="/">
                   See the finished work
                   <ArrowRight aria-hidden="true" />
                 </Link>

@@ -14,9 +14,8 @@ import { ThemeProvider as NextThemeProvider } from 'next-themes';
  * store is first met in daylight cotton. The toggle lets a visitor opt into
  * dark, and that choice is remembered.
  *
- * `disableTransitionOnChange` stops every colour-carrying element on the page
- * animating at once when the theme flips — with the transitions this site uses
- * on hover states, that reads as a glitch rather than a flourish.
+ * Transitions are suppressed while the theme flips by `ThemeToggle`, not by
+ * the provider: the provider's own option also ran on every page load.
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -24,7 +23,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       attribute="class"
       defaultTheme="light"
       enableSystem={false}
-      disableTransitionOnChange
     >
       {children}
     </NextThemeProvider>

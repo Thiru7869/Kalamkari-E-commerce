@@ -6,7 +6,8 @@ import { AlertCircle, Banknote, CreditCard, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox, RadioGroup, RadioGroupItem } from '@/components/ui/primitives';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { FieldError } from '@/components/forms/field-error';
 import { placeOrder } from '@/app/actions/checkout';
 import { initialCheckoutState } from '@/lib/form-state';
@@ -120,7 +121,7 @@ export function CheckoutForm({
       )}
 
       <section className="rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="flex items-center gap-3 font-display text-xl">
+        <h2 className="flex items-center gap-3 font-display text-display-sm">
           <StepNumber n={1} />
           Contact
         </h2>
@@ -147,7 +148,7 @@ export function CheckoutForm({
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="flex items-center gap-3 font-display text-xl">
+        <h2 className="flex items-center gap-3 font-display text-display-sm">
           <StepNumber n={2} />
           Where it should go
         </h2>
@@ -280,7 +281,7 @@ export function CheckoutForm({
       </section>
 
       <section className="mt-6 rounded-sm border border-border bg-background p-5 md:p-6">
-        <h2 className="flex items-center gap-3 font-display text-xl">
+        <h2 className="flex items-center gap-3 font-display text-display-sm">
           <StepNumber n={3} />
           Payment
         </h2>

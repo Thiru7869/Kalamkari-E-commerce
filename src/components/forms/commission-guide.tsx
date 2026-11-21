@@ -77,7 +77,7 @@ export function CommissionGuide({
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <h3 className="font-display text-base leading-snug">
+            <h3 className="font-display text-lg leading-snug">
               Not sure how to describe it?
             </h3>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
@@ -102,7 +102,7 @@ export function CommissionGuide({
   return (
     <div className={cn('rounded-sm border border-primary/30 bg-card p-4 md:p-5', className)}>
       <div className="flex items-center gap-3">
-        <p className="tabular font-inscription text-[0.625rem] uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="tabular font-inscription text-label uppercase tracking-[0.18em] text-muted-foreground">
           Question {step + 1} of {total}
         </p>
         <button

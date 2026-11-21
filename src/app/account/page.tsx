@@ -6,7 +6,7 @@ import { Heart, Package, MapPin, LogOut, ShieldCheck } from 'lucide-react';
 import { auth, signOut } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { ProfileForm } from '@/components/account/profile-form';
 import { AddressBook } from '@/components/account/address-book';
 import { OrderActions } from '@/components/account/order-actions';
@@ -111,7 +111,7 @@ export default async function AccountPage() {
           <div className="mt-6 rounded-sm border border-border bg-card p-8 text-center">
             <p className="text-muted-foreground">You have not ordered anything yet.</p>
             <Button asChild className="mt-5">
-              <Link href="/shop">See what is in the store</Link>
+              <Link href="/">See what is in the store</Link>
             </Button>
           </div>
         ) : (

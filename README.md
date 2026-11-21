@@ -128,10 +128,10 @@ scripts/
 src/
   auth.ts                Auth.js config (Google + email magic link)
   app/
-    page.tsx             Home
+    page.tsx             Home (the shop)
     shop/[[...category]] Shop index and the five category routes
     product/[slug]       Product detail
-    process/             The 23 steps, scroll-driven 3D
+    process/             The 23 steps, scroll-driven
     our-story/           The family
     custom/              Commission enquiry (/commission redirects here)
     journal/             Journal index and posts
@@ -190,24 +190,14 @@ the worst place to keep a canvas alive on a phone.
 
 ---
 
-## The 3D
+## Motion and 3D
 
-The home hero, built on a custom shader (`components/three/cloth-material.ts`) that makes a plane read as dyed cotton rather than a coloured polygon: a woven warp/weft grid, dye that bleeds along the weave instead of stopping at a hard edge, and ink whose density varies as a real pen running dry.
-
-- **Home hero** — cloth hanging in the store, madder red striking across it as you scroll. It illustrates the single most counter-intuitive fact about the craft: colour arrives in a boiling bath, days after it was painted on as a clear liquid.
-Its non-WebGL rendering is the same dye sequence as a five-stop gradient, slid
-by scroll, so the colour front travels rather than the surface simply darkening.
-
-**Constraints the 3D is held to:**
-
-- three.js is code-split behind `next/dynamic` and requested only after client capability detection resolves. It never delays LCP — `/process` is 161 kB first load, not 390 kB.
-- Every scene has a meaningful static fallback. **No information exists only inside a canvas.** Turn off WebGL and `/process` is still the complete article.
-- Canvases are `aria-hidden`. Phase changes are announced through a separate live region.
-- Scroll progress is written into refs, not React state, so scrolling never triggers a re-render.
-- `prefers-reduced-motion` renders a single still frame rather than an animation loop.
-- DPR is capped at 2 (1.5 on low-power devices), and segment counts drop on phones.
-
-Lenis and GSAP share **one** rAF loop (GSAP's ticker drives Lenis), and Lenis is not mounted at all under reduced motion. Touch scrolling is left native — hijacking momentum scroll on a phone is the fastest way to make a site feel broken.
+There is no 3D scene and `three` is not a dependency (the home-hero scene was
+removed). Motion is GSAP and CSS: Lenis and GSAP share **one** rAF loop (GSAP's
+ticker drives Lenis), Lenis is not mounted at all under reduced motion, and
+touch scrolling is left native. Under `prefers-reduced-motion` decorative
+motion stops but content still resolves to its final state. See `CLAUDE.md` for
+the rules that apply if a scene is ever reintroduced.
 
 ---
 
@@ -399,7 +389,8 @@ subscribed to `payment.captured`, `order.paid` and `payment.failed`.
 A `Content-Security-Policy-Report-Only` header ships enabled. Watch the reports,
 then rename the header to `Content-Security-Policy` to enforce it — the two
 allowances it still carries (`unsafe-inline` for the JSON-LD blocks and Next's
-bootstrap, `unsafe-eval` for three.js shader compilation) are documented at the
+bootstrap, `unsafe-eval`, which three.js shader compilation once needed and which can be
+dropped once the reports confirm nothing else uses it) are documented at the
 header in `next.config.mjs`.
 
 Google OAuth redirect URI: `https://yourdomain/api/auth/callback/google`.
@@ -471,14 +462,16 @@ request, deliberately with no SMTP host and no payment keys — the degraded
 configuration is the one most worth exercising.
 
 First-load JS: 103 kB shared, 162–174 kB on the heaviest content routes and
-207 kB on the home page, with three.js in a lazy chunk.
+about 181 kB on the home page (the shop). No 3D library is loaded on any route.
 
 ---
 
 ## Browsing
 
-`/shop` is the working grid — everything, filterable, paginated, three across on
-a phone. It filters on **story & motif, colour, cloth and price**, all in the
+The shop is the home page: `/` (and `/shop/<category>`) is the working grid —
+what can be bought now, filterable, paginated, two across on a phone. `/shop`
+redirects to `/` with its query string. Sold pieces are kept apart in the
+sold archive at `/archive`; Best Works is on `/collections/premium`. It filters on **story & motif, colour, cloth and price**, all in the
 URL. Colour is backed by a real `Dye` relation rather than a text match (see
 `CLAUDE.md`), and price is offered as four bands struck against the catalogue's
 actual spread rather than as a two-handle slider — bands that cannot return
@@ -504,24 +497,11 @@ store is what exists.
 
 ## First visit
 
-A five-second loading sequence opens the site: Ganesha set out in line by a
-bamboo pen, and the colours arriving afterwards out of separate pots — the
-actual order of the twenty-three steps, and the figure a Srikalahasti artist
-begins a new cloth with. It is inline SVG in the same visual language as the
-saree canvas, driven by one rAF loop so the drawing, the dye and the wordmark
-cannot drift apart. Under reduced motion the finished frame is shown complete
-and held.
-
-Then a welcome overlay, shown once, carrying the one
-fact that changes how the rest of the site reads. It traps focus, locks scroll,
-closes on Escape, and never appears on checkout, account or admin — or for
-somebody who has already scrolled past the doorway.
-
-Both are code-split and none is requested twice in a session. Persistence
-is **sessionStorage**, not localStorage: the store wanted the welcome to return
-on a new visit, and a localStorage flag written during development is invisible
-and permanent — which is exactly why the welcome appeared to have stopped
-working.
+Nothing interrupts a first visit. There is no preloader, welcome overlay or
+guided tour: the home page is the shop, and the first thing a visitor sees is
+the work. The announcement bar is the only strip above the header; it is
+server-rendered and hidden before paint by an inline script in the root layout
+for anybody who has closed it.
 
 ---
 

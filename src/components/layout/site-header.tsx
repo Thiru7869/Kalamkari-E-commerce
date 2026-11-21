@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { Heart, Search, ShoppingBag } from 'lucide-react';
 import { getCartCount } from '@/lib/cart';
 import { auth } from '@/auth';
-import { mainNav, site } from '@/content/site';
+import { mainNav } from '@/content/nav';
 import { MobileMenu } from './mobile-menu';
 import { DesktopNav } from './desktop-nav';
 import { Wordmark } from './wordmark';
@@ -19,7 +19,7 @@ async function CartBadge() {
   if (count === 0) return null;
   return (
     <span
-      className="tabular absolute -right-0.5 -top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[0.625rem] font-semibold text-primary-foreground"
+      className="tabular absolute -right-0.5 -top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-label font-semibold text-primary-foreground"
       aria-hidden="true"
     >
       {count > 9 ? '9+' : count}
@@ -66,9 +66,11 @@ export async function SiteHeader() {
           // own tightened padding at the same breakpoint, so the row is no
           // wider than it was.
           className="flex min-w-0 items-center rounded-sm focus-visible:ring-2 focus-visible:ring-ring md:mr-2 lg:mr-5"
-          aria-label={`${site.name}, home`}
         >
           <Wordmark />
+          {/* No aria-label: the visible wordmark names the link, so the spoken name
+              contains the visible text (WCAG 2.5.3). "home" is added after it. */}
+          <span className="sr-only">, home</span>
         </Link>
 
         <DesktopNav items={mainNav} />
@@ -102,7 +104,7 @@ export async function SiteHeader() {
             overlay, so nothing is lost between 1024px and 1279px except a
             visible input.
           */}
-          <div data-tour="search" className="hidden xl:block">
+          <div className="hidden xl:block">
             <HeaderSearch className="mx-1" />
           </div>
 
@@ -116,7 +118,7 @@ export async function SiteHeader() {
             </button>
           </SearchOverlay>
 
-          <ThemeToggle className="hidden sm:inline-flex" data-tour="theme" />
+          <ThemeToggle className="hidden sm:inline-flex" />
 
           <Link
             href="/wishlist"

@@ -15,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <div className="container section-y">
       <div className="mx-auto max-w-[46rem]">
-        <Breadcrumbs trail={[{ label: 'Privacy' }]} className="mb-6" />
+        <Breadcrumbs trail={[{ label: 'Privacy' }]} />
         <h1 className="text-display-lg">Privacy</h1>
         <p className="mt-5 text-body-lg text-muted-foreground">
           A small family store does not need much data, and we do not collect much.

@@ -261,7 +261,7 @@ export function Wordmark({ compact = false }: { compact?: boolean }) {
             and 0.14em through `lg` and `xl`, where the nav has taken 500px of
             the row and the block is down to ~133px against a 138px line.
           */
-          <span className="font-inscription mt-[0.3em] block text-[0.5rem] font-semibold uppercase leading-[1.35] tracking-[0.08em] text-muted-foreground sm:text-[0.5625rem] sm:tracking-[0.2em] md:text-[0.625rem] lg:tracking-[0.14em] 2xl:tracking-[0.2em]">
+          <span className="font-inscription mt-[0.3em] block text-[0.5rem] font-semibold uppercase leading-[1.35] tracking-[0.08em] text-muted-foreground sm:text-[0.625rem] sm:tracking-[0.2em] md:text-[0.625rem] lg:tracking-[0.14em] 2xl:tracking-[0.2em]">
             Fine Kalamkari Arts
             {/*
               On, off, on again — and each switch is a measurement. The town

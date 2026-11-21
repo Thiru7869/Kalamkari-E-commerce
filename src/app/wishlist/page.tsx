@@ -44,7 +44,7 @@ export default async function WishlistPage() {
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link href="/shop">Browse the store</Link>
+              <Link href="/">Browse the store</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link href="/custom">Have one painted</Link>
@@ -68,7 +68,7 @@ export default async function WishlistPage() {
         }
         action={
           <Button asChild variant="outline">
-            <Link href="/shop">Keep browsing</Link>
+            <Link href="/">Keep browsing</Link>
           </Button>
         }
       />

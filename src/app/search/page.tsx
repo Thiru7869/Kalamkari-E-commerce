@@ -122,7 +122,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
           {total === 0 ? (
             <div className="py-16 text-center">
               <SearchIcon className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
-              <h2 className="mt-5 font-display text-2xl">
+              <h2 className="mt-5 font-display text-display-sm">
                 No {narrativeMotifNames[askedFor]} pieces finished right now
               </h2>
               <p className="mx-auto mt-3 max-w-md leading-relaxed text-muted-foreground">
@@ -138,7 +138,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
                   Commission one
                 </Link>
                 <Link
-                  href="/shop"
+                  href="/"
                   className="inline-flex h-11 items-center justify-center rounded-sm border border-foreground/25 px-5 text-sm font-medium transition-colors hover:bg-foreground/5"
                 >
                   See everything
@@ -152,6 +152,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
                 {total === 1 ? 'piece' : 'pieces'} for “{query}”
               </p>
               <div className="mt-6">
+                <h2 className="sr-only">Results</h2>
                 <ProductGrid products={items} wishlistIds={wishlistIds} />
               </div>
             </>
@@ -160,7 +161,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
       ) : total === 0 ? (
         <div className="py-20 text-center">
           <SearchIcon className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
-          <h2 className="mt-5 font-display text-2xl">
+          <h2 className="mt-5 font-display text-display-sm">
             Nothing here matches “{query}”
           </h2>
           <p className="mx-auto mt-3 max-w-md leading-relaxed text-muted-foreground">
@@ -185,7 +186,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
 
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href="/shop"
+              href="/"
               className="inline-flex h-11 items-center justify-center rounded-sm border border-foreground/25 px-5 text-sm font-medium transition-colors hover:bg-foreground/5"
             >
               See everything
@@ -205,6 +206,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
             “{query}”
           </p>
           <div className="mt-8">
+            <h2 className="sr-only">Results</h2>
             <ProductGrid products={items} wishlistIds={wishlistIds} />
           </div>
         </>

@@ -169,8 +169,7 @@ const config: Config = {
          *
          * It is deliberately not in the 60-30-10 body of the page. Madder does
          * the 10%; gold sits outside the scheme entirely and is spent only on
-         * things that single something out for the visitor right now: the quick
-         * tour's ring, the rule under the name in the opening, the active mark
+         * things that single something out for the visitor right now: the rule under the name in the opening, the active mark
          * in a sub-navigation. Using it anywhere decorative would cost it the
          * only property that makes it useful.
          */
@@ -253,7 +252,18 @@ const config: Config = {
           in `src/components/layout/wordmark.tsx`.
         */
         // Telugu, for the few places the local name of a thing is the true name.
-        telugu: ['var(--font-telugu)', 'var(--font-body)', 'sans-serif'],
+        //
+        // The web font is only applied once the page has finished loading (see
+        // `html.telugu-ready .font-telugu` in globals.css and the script in
+        // layout.tsx), so its 120 KB is not fetched during the load itself. Until
+        // then the text is set in the system's own Telugu face.
+        telugu: [
+          'var(--font-body)',
+          'Nirmala UI',
+          'Gautami',
+          'Noto Sans Telugu',
+          'sans-serif',
+        ],
       },
       /**
        * The type scale, re-struck to fit a phone.
@@ -316,6 +326,9 @@ const config: Config = {
         // to two lines on every phone, which is a caption pretending to be a
         // label. `.eyebrow` in globals.css sets the tracking per breakpoint.
         'eyebrow': ['0.6875rem', { lineHeight: '1.45', letterSpacing: '0.14em' }],
+        // The smallest size the site prints: tracked caps on badges, tick labels and
+        // captions. One step, so the many 10/11/13px one-offs have somewhere to go.
+        'label': ['0.6875rem', { lineHeight: '1.45' }],
       },
       /*
         One easing curve and one duration for every hover, press and colour
@@ -345,14 +358,6 @@ const config: Config = {
           "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E\")",
       },
       keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
-        },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
-        },
         // The kalam draws: used for SVG stroke reveals on section rules.
         'draw-stroke': {
           from: { strokeDashoffset: '1' },
@@ -370,22 +375,6 @@ const config: Config = {
         },
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
-        },
-        // The quick tour's ring, breathing. Slow enough to read as attention
-        // rather than as an alarm. Struck in gold rather than madder: madder is
-        // the site's primary and is already on every heading and price, so a
-        // madder ring reads as part of the page instead of as a pointer at it.
-        'tour-pulse': {
-          '0%, 100%': { outlineColor: 'hsl(var(--gold) / 0.95)' },
-          '50%': { outlineColor: 'hsl(var(--gold) / 0.4)' },
-        },
-        // The preloader's name, arriving out of a slow cinematic push-in. The
-        // scale is small on purpose: a big zoom is a title sequence, a small one
-        // is a camera settling.
-        'name-arrive': {
-          from: { opacity: '0', transform: 'scale(1.12)', filter: 'blur(6px)' },
-          '60%': { opacity: '1' },
-          to: { opacity: '1', transform: 'scale(1)', filter: 'blur(0px)' },
         },
         // The rule under the name, drawn outward from the centre.
         'rule-draw': {
@@ -558,8 +547,6 @@ const config: Config = {
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.22s ease-out',
-        'accordion-up': 'accordion-up 0.22s ease-out',
         'draw-stroke': 'draw-stroke 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         'dye-bloom': 'dye-bloom 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards',
         'rise-in': 'rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards',
@@ -577,8 +564,6 @@ const config: Config = {
         */
         'enter-rise': 'rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
         shimmer: 'shimmer 1.8s infinite',
-        'tour-pulse': 'tour-pulse 2.4s ease-in-out infinite',
-        'name-arrive': 'name-arrive 1.5s cubic-bezier(0.16, 1, 0.3, 1) both',
         'rule-draw': 'rule-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both',
         'kalam-trail': 'kalam-trail 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite',
         marquee: 'marquee var(--marquee-duration, 42s) linear infinite',

@@ -8,7 +8,8 @@ import { ProductGrid } from '@/components/shop/product-card';
 import { NarrativeNote } from '@/components/shop/narrative-note';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { Button } from '@/components/ui/button';
-import { getCollectionProducts } from '@/lib/queries';
+import { BestWorks } from '@/components/home/best-works';
+import { getBestWorks, getCollectionProducts } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { collectionDefs, findCollection } from '@/content/catalogue';
 import { formatPrice } from '@/lib/utils';
@@ -47,9 +48,12 @@ export default async function CollectionPage({ params }: { params: Params }) {
   const collection = findCollection(slug);
   if (!collection) notFound();
 
-  const [{ items, total }, wishlistIds] = await Promise.all([
+  const [{ items, total, soldTotal }, wishlistIds, bestWorksItems] = await Promise.all([
     getCollectionProducts(collection.kind, collection.category, 24),
     getWishlistIds(),
+    // Best works lives on the premium collection: the hardest drawing the
+    // workshop does, which is what that collection is selected on.
+    collection.kind === 'premium' ? getBestWorks(6) : Promise.resolve([]),
   ]);
 
   const available = items.filter((p) => p.stock > 0);
@@ -62,8 +66,8 @@ export default async function CollectionPage({ params }: { params: Params }) {
       <header className="border-b border-border bg-cotton-100 pb-12 pt-12 md:pb-16 md:pt-16 dark:bg-card">
         <div className="container">
           <Breadcrumbs
-            trail={[{ label: 'Collections', href: '/shop' }, { label: collection.label }]}
-            className="mb-6"
+            trail={[{ label: 'Collections', href: '/collections' }, { label: collection.label }]}
+           
           />
 
           <SectionHeader
@@ -113,6 +117,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
       <div className="container section-y-sm">
         {items.length > 0 ? (
           <>
+            <h2 className="sr-only">Pieces in this collection</h2>
             <ProductGrid products={items} wishlistIds={wishlistIds} />
 
             {total > items.length && (
@@ -121,8 +126,8 @@ export default async function CollectionPage({ params }: { params: Params }) {
                   <Link
                     href={
                       collection.kind === 'new'
-                        ? '/shop?sort=newest'
-                        : `/shop?collection=${collection.kind}`
+                        ? '/?sort=newest'
+                        : `/?collection=${collection.kind}`
                     }
                   >
                     See all {total} in the shop
@@ -134,20 +139,37 @@ export default async function CollectionPage({ params }: { params: Params }) {
           </>
         ) : (
           <div className="py-16 text-center">
-            <h2 className="font-display text-2xl">Nothing in this collection right now</h2>
+            <h2 className="font-display text-display-sm">Nothing in this collection right now</h2>
             <p className="mx-auto mt-3 max-w-md leading-relaxed text-muted-foreground">
               The store holds a small number of pieces at any time, because each one is
               weeks of hand-work. This selection refills as work comes off the line.
             </p>
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
               <Button asChild size="lg" variant="outline">
-                <Link href="/shop">See everything in the store</Link>
+                <Link href="/">See everything in the store</Link>
               </Button>
               <Button asChild size="lg">
                 <Link href="/custom">Have a piece painted</Link>
               </Button>
             </div>
           </div>
+        )}
+
+      </div>
+
+      {bestWorksItems.length > 0 && <BestWorks works={bestWorksItems} />}
+
+      <div className="container section-y-sm">
+        {soldTotal > 0 && (
+          <p className="mt-10 text-center text-sm text-muted-foreground">
+            <Link
+              href="/archive"
+              className="inline-flex min-h-[2.75rem] items-center text-primary underline underline-offset-4"
+            >
+              {soldTotal} {soldTotal === 1 ? 'piece' : 'pieces'} chosen for this collection{' '}
+              {soldTotal === 1 ? 'has' : 'have'} already found a home
+            </Link>
+          </p>
         )}
 
         <RevealOnScroll className="mt-16">
@@ -167,7 +189,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
                     className="group flex h-full flex-col rounded-sm border border-border bg-card p-5 transition-colors hover:border-foreground/25"
                   >
                     <p className="eyebrow">{other.eyebrow}</p>
-                    <h3 className="mt-2 font-display text-xl">{other.title}</h3>
+                    <h3 className="mt-2 font-display text-display-sm">{other.title}</h3>
                     <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                       {other.blurb}
                     </p>

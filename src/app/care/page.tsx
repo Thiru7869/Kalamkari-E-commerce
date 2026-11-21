@@ -44,7 +44,7 @@ export default function CarePage() {
       <section className="border-b border-border bg-cotton-100 pb-8 pt-8 md:pb-12 md:pt-10 dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
-            <Breadcrumbs trail={[{ label: 'Care & washing' }]} className="mb-4" />
+            <Breadcrumbs trail={[{ label: 'Care & washing' }]} />
             <p className="eyebrow">Care</p>
             <h1 className="mt-3 text-display-lg">Looking after naturally dyed cloth</h1>
             <p className="mt-4 text-body-lg text-muted-foreground">
@@ -66,15 +66,15 @@ export default function CarePage() {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
-                  <h2 className="font-display text-xl leading-snug">{rule.title}</h2>
+                  <h2 className="font-display text-display-sm">{rule.title}</h2>
                   <p className="mt-2 leading-relaxed text-muted-foreground">{rule.body}</p>
                 </div>
               </li>
             ))}
           </ol>
 
-          <section className="mt-14 rounded-2xl border border-border bg-card p-6">
-            <h2 className="font-display text-xl">What to expect over time</h2>
+          <section className="mt-14 rounded-sm border border-border bg-card p-6">
+            <h2 className="font-display text-display-sm">What to expect over time</h2>
             <ul className="mt-4 flex list-disc flex-col gap-2.5 pl-5 leading-relaxed text-muted-foreground">
               <li>
                 Cotton will soften with every wash and keep getting better in the hand for
@@ -113,7 +113,7 @@ export default function CarePage() {
             </ul>
           </section>
 
-          <p className="mt-12 rounded-2xl border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-12 rounded-sm border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
             Still unsure about a particular piece?{' '}
             <Link href="/contact" className="text-primary underline underline-offset-4">
               Write to the store

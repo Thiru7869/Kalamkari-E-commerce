@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Fraunces, Plus_Jakarta_Sans, Noto_Sans_Telugu } from 'next/font/google';
-import { Toaster } from 'sonner';
+import { LazyToaster } from '@/components/providers/lazy-toaster';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SmoothScrollProvider } from '@/components/providers/smooth-scroll-provider';
 import { ServiceWorkerRegistrar } from '@/components/providers/service-worker-registrar';
@@ -11,7 +11,6 @@ import { MobileTabBar } from '@/components/layout/mobile-tab-bar';
 import { BagCount } from '@/components/layout/tab-bar-bag-count';
 import { CartDrawerSlot } from '@/components/cart/cart-drawer-slot';
 import { FloatingDock } from '@/components/layout/floating-dock';
-import { FirstVisit } from '@/components/welcome/first-visit';
 import { PageTransition } from '@/components/motion/page-transition';
 import { site } from '@/content/site';
 import { absoluteUrl } from '@/lib/utils';
@@ -76,6 +75,10 @@ const jakarta = Plus_Jakarta_Sans({
 const notoTelugu = Noto_Sans_Telugu({
   subsets: ['telugu'],
   display: 'swap',
+  // Not preloaded, and not referenced until the page has loaded: two weights of
+  // Telugu were about 150 KB on the type pages, requested alongside the images
+  // and scripts the first paint is waiting for, to set two decorative words.
+  preload: false,
   weight: ['400', '600'],
   variable: '--font-telugu',
 });
@@ -171,7 +174,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{if(localStorage.getItem('svl_announce')==='1'){document.documentElement.dataset.announce='closed'}}catch(e){}",
+              "try{if(localStorage.getItem('svl_announce')==='1'){document.documentElement.dataset.announce='closed'}}catch(e){}" +
+              "addEventListener('load',function(){setTimeout(function(){document.documentElement.classList.add('telugu-ready')},800)});",
           }}
         />
 
@@ -197,22 +201,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <CartDrawerSlot />
             </Suspense>
             <FloatingDock />
-            {/* The doorway, then the walk-through. Both code-split and never
-                requested for a returning visitor. */}
-            <FirstVisit />
           </SmoothScrollProvider>
 
-          <Toaster
-            position="bottom-center"
-            // Clear of the phone tab bar.
-            offset={88}
-            toastOptions={{
-              classNames: {
-                toast: 'font-sans rounded-sm border border-border bg-card text-card-foreground',
-                description: 'text-muted-foreground',
-              },
-            }}
-          />
+          <LazyToaster />
           <ServiceWorkerRegistrar />
         </ThemeProvider>
       </body>

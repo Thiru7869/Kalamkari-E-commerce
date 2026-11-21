@@ -317,10 +317,10 @@ export function ProcessJourney({
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
-            <p className="tabular font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-primary">
+            <p className="tabular font-inscription text-label uppercase tracking-[0.16em] text-primary">
               Stage {current.n} of {total}
             </p>
-            <p className="mt-1 font-display text-[0.9375rem] leading-tight">{current.title}</p>
+            <p className="mt-1 font-display text-base leading-tight">{current.title}</p>
 
             {/* Where the cloth has got to, drawn rather than counted. The
                 numeral alone made the reader do the division. */}
@@ -331,7 +331,7 @@ export function ProcessJourney({
                   style={{ width: `${((stage + 1) / total) * 100}%` }}
                 />
               </div>
-              <p className="tabular mt-1.5 font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="tabular mt-1.5 font-inscription text-label uppercase tracking-[0.16em] text-muted-foreground">
                 {current.coversSteps.length > 0
                   ? `Steps ${current.coversSteps[0]}–${current.coversSteps[current.coversSteps.length - 1]} of 23`
                   : 'Between the numbered steps'}
@@ -390,7 +390,7 @@ function StageSection({
             {String(stage.n).padStart(2, '0')}
           </span>
           <div className="min-w-0">
-            <p className="font-inscription text-[0.625rem] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="font-inscription text-label uppercase tracking-[0.18em] text-muted-foreground">
               Stage {stage.n} of {total}
               {steps.length > 0 && (
                 <>
@@ -461,7 +461,7 @@ function StageSection({
         {/* ---- The numbered operations inside this stage ------------------ */}
         {steps.length > 0 && (
           <div className="mt-9 border-t border-border pt-7">
-            <h3 className="font-inscription text-[0.625rem] uppercase tracking-[0.18em] text-muted-foreground">
+            <h3 className="font-inscription text-label uppercase tracking-[0.18em] text-muted-foreground">
               {steps.length === 1
                 ? 'The operation, as it is counted'
                 : `The ${steps.length} operations inside this stage`}
@@ -487,7 +487,7 @@ function StageSection({
                     )}
                   </div>
 
-                  <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted-foreground">
+                  <p className="mt-2.5 text-base leading-relaxed text-muted-foreground">
                     {step.body}
                   </p>
 
@@ -656,7 +656,7 @@ function ClothFrame({
             onClick={onRelease}
             className={cn(
               'absolute bottom-5 left-1/2 -translate-x-1/2 rounded-sm border px-3 py-1.5',
-              'text-[0.6875rem] uppercase tracking-[0.12em] backdrop-blur-sm transition-opacity duration-300',
+              'text-label uppercase tracking-[0.12em] backdrop-blur-sm transition-opacity duration-300',
               'opacity-60 hover:opacity-100 focus-visible:opacity-100',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               light
@@ -675,7 +675,7 @@ function ClothFrame({
       <div className="mt-4 px-1">
         <p
           className={cn(
-            'tabular font-inscription text-[0.6875rem] uppercase tracking-[0.18em] transition-colors duration-700',
+            'tabular font-inscription text-label uppercase tracking-[0.18em] transition-colors duration-700',
             light ? 'text-cotton-100/80' : 'text-kasim-900/70',
           )}
           aria-hidden="true"
@@ -701,7 +701,7 @@ function ClothFrame({
         </p>
         <p
           className={cn(
-            'mt-2 text-[0.8125rem] leading-relaxed transition-colors duration-700',
+            'mt-2 text-sm leading-relaxed transition-colors duration-700',
             light ? 'text-cotton-100/75' : 'text-kasim-900/75',
           )}
           aria-hidden="true"

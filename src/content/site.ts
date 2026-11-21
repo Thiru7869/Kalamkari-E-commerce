@@ -177,10 +177,10 @@ export const exploreSections = [
   {
     title: 'The work',
     items: [
-      { label: 'Everything in the store', href: '/shop', hint: 'The full grid, filterable by cloth, story and price' },
+      { label: 'Everything in the store', href: '/', hint: 'The full grid, filterable by cloth, story and price' },
       { label: 'Sarees', href: '/types/sarees', hint: 'Nine yards, drawn end to end — and which cloth to choose' },
       { label: 'Paintings', href: '/types/paintings', hint: 'Narrative panels, the tradition the craft grew out of' },
-      { label: 'New arrivals', href: '/collections/new-arrivals', hint: 'The most recent work to finish its twentieth washing' },
+      { label: 'New arrivals', href: '/collections/new-arrivals', hint: 'The most recently finished work' },
     ],
   },
   {
@@ -251,80 +251,15 @@ export const shopCategories = [
   { slug: 'home-decor', label: 'Home Decor', hint: 'Cushions, runners, bedspreads, panels' },
 ] as const;
 
-export const mainNav: NavItem[] = [
-  {
-    label: 'Shop',
-    href: '/shop',
-    hint: 'Everything currently in the store',
-    // The tile uses the image the home page already shows for this collection.
-    mega: { feature: { href: '/collections/premium', image: '/images/products/hero-paintings.jpg' } },
-    children: [
-      // The editorial type pages, not the filtered grid: somebody opening this
-      // menu is choosing what kind of thing they want, which is exactly the
-      // question those pages answer.
-      { label: 'Sarees', href: '/types/sarees', hint: 'Painted end to end, pallu to border' },
-      { label: 'Dupattas', href: '/types/dupattas', hint: 'And chunnis, by either name' },
-      { label: 'Chunnis', href: '/types/chunnis', hint: 'The same cloth, the other name' },
-      { label: 'Paintings', href: '/types/paintings', hint: 'Narrative panels and framed work' },
-      { label: 'Home Decor', href: '/types/home-decor', hint: 'Cushions, runners, bedspreads' },
-      { label: 'Blouse Pieces', href: '/types/blouse-pieces', hint: 'Stitched or unstitched' },
-      { label: 'Featured Sarees', href: '/collections/featured-sarees', hint: 'Chosen this week' },
-      { label: 'Premium', href: '/collections/premium', hint: 'Signed and exhibition grade' },
-      { label: 'New Arrivals', href: '/collections/new-arrivals', hint: 'Newest off the line' },
-    ],
-  },
-  {
-    label: 'The Process',
-    href: '/process',
-    hint: 'All 23 steps, and the seven pots',
-    children: [
-      /*
-        "What is Kalamkari?" is the most-searched question this site can
-        answer, and until now the only route to the answer was a link inside a
-        section halfway down the home page — invisible to anybody who opened
-        the menu instead of scrolling, which on a phone is most people. It
-        points at the definition block at the head of /process rather than at a
-        page of its own: a separate route would restate what /process and
-        /our-story already say, and this content layer does not do that.
-      */
-      { label: 'What is Kalamkari?', href: '/process#what-is-kalamkari', hint: 'The word, the pen, and the two crafts that share the name' },
-      { label: 'All 23 steps', href: '/process', hint: 'The full sequence, with the cloth changing as you read' },
-      { label: 'The vegetable palette', href: '/process#colours', hint: 'Eight colours, and where each one comes from' },
-      { label: 'The dye table', href: '/process#dyes', hint: 'The same eight, as a reference' },
-    ],
-  },
-  {
-    label: 'Our Story',
-    href: '/our-story',
-    hint: 'The family behind the kalam',
-  },
-  {
-    label: 'Custom',
-    href: '/custom',
-    hint: 'Have a piece painted for you, to your subject and cloth',
-  },
-  {
-    label: 'Journal',
-    href: '/journal',
-    hint: 'Notes on dye, motif and season',
-  },
-  {
-    label: 'Visit Us',
-    href: '/contact',
-    hint: 'Find the store in Srikalahasti',
-  },
-];
-
 /**
- * The phone tab bar: the five things done most often while shopping.
+ * The phone tab bar: the four things done most often while shopping.
  *
  * Search opens the search panel rather than navigating, so it has no `href`.
  * Story, Process, Custom, Journal, Visit and Account live in the menu drawer.
  * (`MobileTabBar` holds its own copy of this list with the icon components.)
  */
 export const mobileTabs = [
-  { label: 'Home', href: '/', icon: 'home' },
-  { label: 'Shop', href: '/shop', icon: 'grid' },
+  { label: 'Shop', href: '/', icon: 'grid' },
   { label: 'Search', href: null, icon: 'search' },
   { label: 'Wishlist', href: '/wishlist', icon: 'heart' },
   { label: 'Bag', href: '/cart', icon: 'bag' },
@@ -339,7 +274,7 @@ export const footerNav = [
       { label: 'Paintings', href: '/types/paintings' },
       { label: 'Home Decor', href: '/types/home-decor' },
       { label: 'Blouse Pieces', href: '/types/blouse-pieces' },
-      { label: 'Everything', href: '/shop' },
+      { label: 'Everything', href: '/' },
     ],
   },
   {
@@ -348,6 +283,7 @@ export const footerNav = [
       { label: 'Featured Sarees', href: '/collections/featured-sarees' },
       { label: 'Premium', href: '/collections/premium' },
       { label: 'New Arrivals', href: '/collections/new-arrivals' },
+      { label: 'Sold Archive', href: '/archive' },
       { label: 'Commission a Piece', href: '/custom' },
     ],
   },
@@ -356,21 +292,7 @@ export const footerNav = [
     links: [
       { label: 'What is Kalamkari?', href: '/process#what-is-kalamkari' },
       { label: 'The 23 Steps', href: '/process' },
-      /*
-        The long view of the craft, and the only link to it on the site.
-
-        `/heritage` is deliberately not in `mainNav`, not in `exploreSections`
-        and not in the mobile drawer. It is an essay rather than a place to buy
-        or do something, and the header is for the latter — a nav item pointing
-        at eight screens of reading competes with "Shop" and loses, or wins and
-        sends somebody to an essay when they wanted a saree.
-
-        It *is* in the sitemap. "Reachable only from the footer" is a statement
-        about how the site navigates, not an instruction to hide the page from
-        search — and a piece on what Srikalahasti Kalamkari is and why it
-        matters is exactly the page somebody should be able to find without
-        already being here.
-      */
+      // Heritage also has its own door in the header (src/content/nav.ts).
       { label: 'Heritage of Kalamkari', href: '/heritage' },
       { label: 'Our Story', href: '/our-story' },
       { label: 'Natural Dyes', href: '/process#dyes' },

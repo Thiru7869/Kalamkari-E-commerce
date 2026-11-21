@@ -52,7 +52,7 @@ export default async function MotifsPage() {
             return (
               <li key={motif.slug}>
                 <RevealOnScroll>
-                  <article className="grid overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40 sm:grid-cols-[minmax(0,14rem)_1fr]">
+                  <article className="grid overflow-hidden rounded-sm border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40 sm:grid-cols-[minmax(0,14rem)_1fr]">
                     <div className="relative aspect-[16/9] bg-muted sm:aspect-auto sm:min-h-[11rem]">
                       {src && (
                         <Image
@@ -65,20 +65,29 @@ export default async function MotifsPage() {
                       )}
                     </div>
                     <div className="flex flex-col justify-center p-5 sm:p-7">
-                      <p className="tabular font-inscription text-[0.6875rem] tracking-[0.14em] text-primary/70">
+                      <p className="tabular font-inscription text-label tracking-[0.14em] text-primary/70">
                         {String(i + 1).padStart(2, '0')}
                       </p>
-                      <h2 className="mt-1 font-display text-xl leading-snug">{motif.name}</h2>
+                      <h2 className="mt-1 font-display text-display-sm">{motif.name}</h2>
                       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                         {motif.story}
                       </p>
-                      <Link
-                        href={`/shop?motif=${motif.slug}`}
-                        className="mt-4 inline-flex min-h-[2.75rem] items-center gap-1.5 self-start text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        See {motif.name} pieces
-                        <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-                      </Link>
+                      <div className="mt-4 flex flex-wrap gap-x-6">
+                        <Link
+                          href={`/heritage/motifs/${motif.slug}`}
+                          className="inline-flex min-h-[2.75rem] items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          About {motif.name}
+                          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                        <Link
+                          href={`/?motif=${motif.slug}`}
+                          className="inline-flex min-h-[2.75rem] items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          See {motif.name} pieces
+                          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                      </div>
                     </div>
                   </article>
                 </RevealOnScroll>
@@ -93,7 +102,7 @@ export default async function MotifsPage() {
         shop={[
           { label: 'Sarees', href: '/types/sarees' },
           { label: 'Paintings', href: '/types/paintings' },
-          { label: 'Shop all', href: '/shop' },
+          { label: 'Shop all', href: '/' },
         ]}
       />
     </>

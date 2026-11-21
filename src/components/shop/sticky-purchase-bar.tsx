@@ -59,7 +59,7 @@ export function StickyPurchaseBar({
       // `inert` while hidden: nobody tabs into a bar that is off screen.
       inert={shown ? undefined : true}
       className={cn(
-        'fixed inset-x-0 z-30 border-t border-border bg-background/95 backdrop-blur-md md:hidden',
+        'fixed inset-x-0 z-30 border-t border-border bg-background md:hidden',
         'bottom-[calc(4.25rem+1px+env(safe-area-inset-bottom))]',
         'transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none',
         shown ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0',

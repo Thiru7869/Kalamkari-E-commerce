@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Heart, Home, LayoutGrid, Search, ShoppingBag } from 'lucide-react';
+import { Heart, LayoutGrid, Search, ShoppingBag } from 'lucide-react';
 import { SearchOverlay } from '@/components/shop/search-overlay';
 import { cn } from '@/lib/utils';
 
 /**
- * Five things a phone shopper does most: start, browse, look for something,
+ * Four things a phone shopper does most: browse (the shop is the home page), look for something,
  * come back to what they saved, and check out.
  *
  * Story, Process, Custom, Journal, Visit and the account are not here. They
@@ -19,12 +19,11 @@ import { cn } from '@/lib/utils';
  * server (`BagCount`), because the cart is read there.
  */
 type Tab =
-  | { label: string; href: string; Icon: typeof Home; kind?: undefined }
-  | { label: string; href?: undefined; Icon: typeof Home; kind: 'search' };
+  | { label: string; href: string; Icon: typeof LayoutGrid; kind?: undefined }
+  | { label: string; href?: undefined; Icon: typeof LayoutGrid; kind: 'search' };
 
 const tabs: Tab[] = [
-  { label: 'Home', href: '/', Icon: Home },
-  { label: 'Shop', href: '/shop', Icon: LayoutGrid },
+  { label: 'Shop', href: '/', Icon: LayoutGrid },
   { label: 'Search', Icon: Search, kind: 'search' },
   { label: 'Wishlist', href: '/wishlist', Icon: Heart },
   { label: 'Bag', href: '/cart', Icon: ShoppingBag },
@@ -54,10 +53,10 @@ export function MobileTabBar({ bagCount }: { bagCount?: React.ReactNode }) {
   return (
     <nav
       aria-label="Bottom navigation"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <ul className="grid grid-cols-5">
+      <ul className="grid grid-cols-4">
         {tabs.map((tab) => {
           const { label, Icon } = tab;
 
@@ -79,7 +78,7 @@ export function MobileTabBar({ bagCount }: { bagCount?: React.ReactNode }) {
                 />
                 {label === 'Bag' && bagCount}
               </span>
-              <span className="text-[0.625rem] font-medium leading-none">{label}</span>
+              <span className="text-label font-medium leading-none">{label}</span>
             </>
           );
 
@@ -103,9 +102,6 @@ export function MobileTabBar({ bagCount }: { bagCount?: React.ReactNode }) {
             <li key={label}>
               <Link
                 href={href}
-                // The quick tour's "Shop" stop. Process and Custom no longer
-                // have a tab; the tour finds those through the header nav.
-                data-tour={href === '/shop' ? 'shop' : undefined}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(cell, isActive ? 'text-primary' : 'text-muted-foreground')}
               >

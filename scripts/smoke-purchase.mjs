@@ -104,17 +104,21 @@ function check(label, pass, detail = '') {
 async function main() {
   console.log(`\nSmoke-testing the purchase path at ${BASE}\n`);
 
-  const product = await prisma.product.findUnique({
-    where: { slug: 'lotus-cushion-cover-single' },
-    select: { id: true, name: true, price: true, stock: true },
+  // Any piece that can be bought, preferring the deepest stock. A fixed slug made
+  // this test fail once repeated runs had sold the seed's six cushion covers —
+  // an empty shelf, not a broken checkout.
+  const product = await prisma.product.findFirst({
+    where: { status: 'ACTIVE', stock: { gt: 0 } },
+    orderBy: [{ stock: 'desc' }, { createdAt: 'asc' }],
+    select: { id: true, slug: true, name: true, price: true, stock: true },
   });
-  if (!product) throw new Error('Seed data missing — run npm run db:seed');
+  if (!product) throw new Error('Nothing in stock to buy — run npm run db:seed');
 
   const stockBefore = product.stock;
   console.log(`Product: ${product.name} (stock ${stockBefore})\n`);
 
   // 1 — add to cart
-  const add = await callAction('addToCart', '/product/lotus-cushion-cover-single', [
+  const add = await callAction('addToCart', `/product/${product.slug}`, [
     product.id,
     1,
   ]);
@@ -183,6 +187,25 @@ async function main() {
       ? await prisma.cartItem.count({ where: { cartId: ourCart.id } })
       : -1;
     check('cart emptied after checkout', remaining === 0, `${remaining} item(s) left`);
+  }
+
+  // A missing record must answer 404, not a 200 that paints the error page —
+  // search engines index the latter. A `loading.tsx` above a route that can
+  // `notFound()` flushes its shell with 200 first, which is how this broke.
+  const status = async (path) => (await fetch(`${BASE}${path}`, { redirect: 'manual' })).status;
+  for (const path of [
+    '/product/no-such-piece',
+    '/shop/no-such-category',
+    '/heritage/motifs/no-such-motif',
+    '/types/no-such-type',
+    '/collections/no-such-collection',
+  ]) {
+    const code = await status(path);
+    check(`unknown route answers 404: ${path}`, code === 404, `got ${code}`);
+  }
+  for (const path of ['/', '/archive', '/collections/premium', '/types/sarees']) {
+    const code = await status(path);
+    check(`known route answers 200: ${path}`, code === 200, `got ${code}`);
   }
 
   const failed = results.filter((r) => !r.pass);

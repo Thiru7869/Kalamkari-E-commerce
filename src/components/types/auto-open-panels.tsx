@@ -8,7 +8,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/primitives';
+} from '@/components/ui/accordion';
 import { useMediaQuery } from '@/components/layout/use-media-query';
 
 export type DisclosureItem = {
@@ -124,7 +124,7 @@ function DisclosureList({ items }: { items: DisclosureItem[] }) {
               <span className="font-display text-lg leading-snug">{title}</span>
             </AccordionTrigger>
             <AccordionContent className="pb-6 pr-4">
-              <p className="border-l-2 border-primary/40 pl-5 text-[0.9375rem] leading-relaxed">
+              <p className="border-l-2 border-primary/40 pl-5 text-base leading-relaxed">
                 {body}
               </p>
               {link && (

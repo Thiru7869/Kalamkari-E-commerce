@@ -84,7 +84,7 @@ export function HowThisIsMade({ typeLabel }: { typeLabel: string }) {
                     >
                       {String(stage.n).padStart(2, '0')}
                     </span>
-                    <span className="font-inscription text-[0.625rem] uppercase tracking-[0.16em] text-muted-foreground">
+                    <span className="font-inscription text-label uppercase tracking-[0.16em] text-muted-foreground">
                       Stage {stage.n} of {TOTAL_MAIN_STAGES}
                     </span>
                   </div>
@@ -99,7 +99,7 @@ export function HowThisIsMade({ typeLabel }: { typeLabel: string }) {
                   </p>
 
                   {stage.duration && (
-                    <p className="mt-3 font-inscription text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/75">
+                    <p className="mt-3 font-inscription text-label uppercase tracking-[0.14em] text-muted-foreground/75">
                       {stage.duration}
                     </p>
                   )}

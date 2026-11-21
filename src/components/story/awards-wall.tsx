@@ -66,10 +66,10 @@ export function AwardsWall() {
                   {principalAward.year}
                 </p>
                 <div className="min-w-0">
-                  <h3 className="font-display text-2xl leading-tight text-cotton-50 md:text-3xl">
+                  <h3 className="font-display text-display-sm text-cotton-50">
                     {principalAward.name}
                   </h3>
-                  <p className="mt-1 font-inscription text-[0.6875rem] uppercase tracking-[0.18em] text-myrobalan-300/85">
+                  <p className="mt-1 font-inscription text-label uppercase tracking-[0.18em] text-myrobalan-300/85">
                     {principalAward.discipline}
                   </p>
                 </div>
@@ -99,12 +99,12 @@ export function AwardsWall() {
                 <li key={reason.title} className="flex flex-col p-6 md:p-7">
                   <span
                     aria-hidden="true"
-                    className="tabular font-inscription text-[0.625rem] uppercase tracking-[0.2em] text-primary"
+                    className="tabular font-inscription text-label uppercase tracking-[0.2em] text-primary"
                   >
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <h4 className="mt-3 font-display text-lg leading-snug">{reason.title}</h4>
-                  <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted-foreground">
+                  <p className="mt-2.5 text-base leading-relaxed text-muted-foreground">
                     {reason.body}
                   </p>
                   <Link
@@ -179,7 +179,7 @@ export function AwardsWall() {
                       certificate looks like part of the certificate. */}
                   <figcaption
                     aria-hidden="true"
-                    className="tabular mt-1.5 font-inscription text-[0.5625rem] uppercase tracking-[0.14em] text-muted-foreground/70 md:text-[0.625rem]"
+                    className="tabular mt-1.5 font-inscription text-label uppercase tracking-[0.14em] text-muted-foreground/70 md:text-label"
                   >
                     {award.label}
                   </figcaption>

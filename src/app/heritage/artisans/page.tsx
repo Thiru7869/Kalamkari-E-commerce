@@ -5,7 +5,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
 import { PageHero } from '@/components/heritage/page-hero';
 import { HeritagePageFooter } from '@/components/heritage/page-footer';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { family, principalAward } from '@/content/family';
 import { heritageSections } from '@/content/heritage';
 import { renderInlineMarkdown } from '@/lib/markdown';
@@ -42,7 +42,7 @@ export default function ArtisansPage() {
           {family.map((m, i) => (
             <li key={m.id}>
               <RevealOnScroll delay={(i % 3) * 0.05} className="h-full">
-                <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40">
+                <article className="flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <Image
                       src={m.image}
@@ -74,12 +74,12 @@ export default function ArtisansPage() {
       </section>
 
       <section className="container" aria-labelledby="the-award">
-        <div className="grid gap-6 rounded-3xl bg-kasim-900 p-6 text-cotton-100 sm:p-9 md:grid-cols-[auto_1fr] md:items-center md:gap-10">
+        <div className="grid gap-6 rounded-sm bg-kasim-900 p-6 text-cotton-100 sm:p-9 md:grid-cols-[auto_1fr] md:items-center md:gap-10">
           <p className="font-display text-5xl leading-none text-cotton-50 tabular md:text-6xl">
             {principalAward.year}
           </p>
           <div>
-            <h2 id="the-award" className="font-display text-xl text-cotton-50 md:text-2xl">
+            <h2 id="the-award" className="font-display text-display-sm text-cotton-50">
               {principalAward.name}, {principalAward.discipline}
             </h2>
             <p className="mt-1 text-sm text-cotton-200/80">{principalAward.recipient}</p>

@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, ShoppingBag } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
-import { QuantityStepper } from '@/components/ui/primitives';
+import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { addToCart } from '@/app/actions/cart';
 import { requestCartDrawer } from '@/components/cart/cart-events';
 
@@ -55,6 +55,7 @@ export function AddToCart({
     return (
       <Button
         size="lg"
+        data-cart-add
         onClick={onAdd}
         disabled={pending || soldOut}
         className={className}
@@ -100,7 +101,13 @@ export function AddToCart({
         {showStepper && (
           <QuantityStepper value={quantity} onChange={setQuantity} max={stock} disabled={pending} />
         )}
-        <Button size="lg" onClick={onAdd} disabled={pending} className="min-w-[12rem] flex-1">
+        <Button
+          size="lg"
+          data-cart-add
+          onClick={onAdd}
+          disabled={pending}
+          className="min-w-[12rem] flex-1"
+        >
           {pending ? (
             <>
               <Loader2 className="animate-spin" aria-hidden="true" />

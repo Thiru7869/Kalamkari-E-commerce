@@ -46,13 +46,13 @@ export const collections = {
     label: 'Featured',
     title: 'Featured pieces',
     blurb:
-      'What the family would put in your hands first this week. Chosen for the drawing, not for the margin — the selection changes as work comes off the line.',
+      'The pieces the family would show you first, picked for the drawing.',
   },
   premium: {
     label: 'Premium',
     title: 'Premium and signed work',
     blurb:
-      'Exhibition-grade pieces: signed, award-lineage, or simply the ones that took a month of somebody\'s undivided attention. Narrative pallus, dense jaal, the hardest drawing this workshop does.',
+      'Signed and exhibition-grade work: narrative pallus, dense jaal and the finest line the workshop draws.',
   },
 } as const;
 
@@ -221,6 +221,8 @@ export const getProductBySlug = cache(async (slug: string) => {
       category: true,
       fabric: true,
       motifs: { include: { motif: true } },
+      // The indexed dyes behind `naturalDyes`, for "where the colours come from".
+      dyes: { include: { dye: true }, orderBy: { dye: { position: 'asc' } } },
       reviews: {
         orderBy: { createdAt: 'desc' },
         take: 12,
@@ -230,12 +232,18 @@ export const getProductBySlug = cache(async (slug: string) => {
   });
 });
 
-/** Pieces to show under a product: same motif first, then same category. */
+/**
+ * Pieces to show under a product: same motif first, then same category.
+ *
+ * Only pieces still in stock. Recommending a sold piece beside the one you are
+ * looking at sends you to a dead end; the sold ones live in the archive.
+ */
 export async function getRelatedProducts(productId: string, categoryId: string, motifIds: string[]) {
   const byMotif = motifIds.length
     ? await prisma.product.findMany({
         where: {
           status: 'ACTIVE',
+          stock: { gt: 0 },
           id: { not: productId },
           motifs: { some: { motifId: { in: motifIds } } },
         },
@@ -249,6 +257,7 @@ export async function getRelatedProducts(productId: string, categoryId: string, 
   const fill = await prisma.product.findMany({
     where: {
       status: 'ACTIVE',
+      stock: { gt: 0 },
       categoryId,
       id: { not: productId, notIn: byMotif.map((p) => p.id) },
     },
@@ -259,17 +268,8 @@ export async function getRelatedProducts(productId: string, categoryId: string, 
   return [...byMotif, ...fill];
 }
 
-export async function getFeaturedProducts(take = 6) {
-  return prisma.product.findMany({
-    where: { status: 'ACTIVE', featured: true },
-    select: productCardSelect,
-    orderBy: [{ masterpiece: 'desc' }, { createdAt: 'desc' }],
-    take,
-  });
-}
-
 /**
- * The best of the work, for /our-story.
+ * The best of the work, for /collections/premium.
  *
  * Signed and exhibition-grade pieces, newest first, and *only* those — the
  * store's own `masterpiece` flag decides, not a rating average and not a
@@ -292,182 +292,55 @@ export async function getBestWorks(take = 6) {
   });
 }
 
-/* -------------------------------------------------------------------------- */
-/* The quick store                                                            */
-/* -------------------------------------------------------------------------- */
-
-/** Card data plus the motif slugs, which the spread below selects on. */
-const quickStoreSelect = {
-  ...productCardSelect,
-  motifs: { select: { motif: { select: { slug: true, name: true } } } },
-} satisfies Prisma.ProductSelect;
-
-export type QuickStoreItem = Prisma.ProductGetPayload<{ select: typeof quickStoreSelect }>;
+/**
+ * The sold archive, newest sale first, paged like the shop.
+ *
+ * Kept apart from the shop grid on purpose: the grid is what can be bought, and
+ * a sold piece in it is a card that cannot be acted on. Each of these keeps its
+ * own page, which marks it sold and recommends pieces still available.
+ */
+export async function getSoldProducts(page = 1) {
+  const current = Math.max(1, page);
+  const where = { status: 'ACTIVE', stock: { lte: 0 } } satisfies Prisma.ProductWhereInput;
+  const [items, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      select: productCardSelect,
+      orderBy: { updatedAt: 'desc' },
+      skip: (current - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.product.count({ where }),
+  ]);
+  return { items, total, page: current, pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
+}
 
 /**
- * Ten pieces for the landing page, chosen to be unlike each other.
+ * One motif and the pieces that carry it, for `/heritage/motifs/<slug>`.
  *
- * `getFeaturedProducts` answers "what has the store marked featured", which is
- * the right question for a featured rail and the wrong one here. Featured
- * follows what came off the line recently, and work comes off the line in runs
- * — so the top ten by that ordering were four Tree of Life pieces on tussar
- * within ₹4,000 of each other. A visitor scrolling that concludes the shop
- * makes one thing.
- *
- * So the ordering picks the candidates and a spread pass picks the ten. The
- * rule is one pass down the list taking anything whose motif *and* fabric *and*
- * price band are all new, then a second pass relaxing to motif-or-fabric, then
- * whatever is left in order. That is a greedy diversity selection rather than a
- * clever one, and it is the right amount of clever: it is deterministic, it
- * needs no extra query, and it degrades to plain ordering on a catalogue too
- * small to spread — which is the state this store will be in for most of a
- * quiet month, and a row of eight is not a bug.
- *
- * Scoped to a category by default, because the landing rail asks for sarees.
- * Falls back to the whole catalogue when the category cannot fill the row: an
- * eight-piece rail of real sarees beats ten with two empty cards, but a
- * four-piece rail is a section that looks broken.
+ * Available pieces are returned as cards; the sold ones are only counted, so
+ * the page can point at the archive without listing pieces nobody can buy.
+ * Cached: `generateMetadata` and the page body both resolve the same slug.
  */
-export async function getQuickStore(take = 10, categorySlug = 'sarees') {
-  const scope = {
-    status: 'ACTIVE',
-    stock: { gt: 0 },
-  } satisfies Prisma.ProductWhereInput;
-
-  const order: Prisma.ProductOrderByWithRelationInput[] = [
-    { featured: 'desc' },
-    { masterpiece: 'desc' },
-    { createdAt: 'desc' },
-  ];
-
-  // Three times the row, so the spread below has something to choose between.
-  // Taking exactly `take` would make the diversity pass a no-op.
-  let candidates = await prisma.product.findMany({
-    where: { ...scope, category: { slug: categorySlug } },
-    select: quickStoreSelect,
-    orderBy: order,
-    take: take * 3,
+export const getMotifWithPieces = cache(async (slug: string) => {
+  const motif = await prisma.motif.findUnique({
+    where: { slug },
+    select: { id: true, slug: true, name: true, story: true },
   });
+  if (!motif) return null;
 
-  if (candidates.length < take) {
-    const fill = await prisma.product.findMany({
-      where: { ...scope, id: { notIn: candidates.map((p) => p.id) } },
-      select: quickStoreSelect,
-      orderBy: order,
-      take: take * 3 - candidates.length,
-    });
-    candidates = [...candidates, ...fill];
-  }
+  const carries = { motifs: { some: { motifId: motif.id } }, status: 'ACTIVE' };
+  const [available, soldCount] = await Promise.all([
+    prisma.product.findMany({
+      where: { ...carries, stock: { gt: 0 } },
+      select: productCardSelect,
+      orderBy: [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
+    }),
+    prisma.product.count({ where: { ...carries, stock: { lte: 0 } } }),
+  ]);
 
-  return spreadForVariety(candidates, take);
-}
-
-/**
- * Price bands, in paise.
- *
- * Deliberately coarse. The job is to stop ten pieces landing in one bracket,
- * not to sort the catalogue — and a fine-grained band would put two pieces
- * ₹500 apart in different buckets and call that variety.
- */
-function priceBand(paise: number): number {
-  if (paise < 800000) return 0; // under ₹8,000
-  if (paise < 1800000) return 1; // ₹8,000 – ₹18,000
-  if (paise < 3500000) return 2; // ₹18,000 – ₹35,000
-  return 3; // above ₹35,000
-}
-
-/**
- * Greedy spread: take the highest-ranked piece that repeats least.
- *
- * Three passes, each looser than the last, so the row fills even on a thin
- * catalogue. Order within a pass is the incoming order, so the store's own
- * featured and masterpiece flags still decide who goes first among equals.
- */
-function spreadForVariety(candidates: QuickStoreItem[], take: number): QuickStoreItem[] {
-  const chosen: QuickStoreItem[] = [];
-  const usedMotifs = new Set<string>();
-  const usedFabrics = new Set<string>();
-  const usedBands = new Set<number>();
-  const taken = new Set<string>();
-
-  const motifsOf = (p: QuickStoreItem) => p.motifs.map((m) => m.motif.slug);
-
-  const accept = (p: QuickStoreItem) => {
-    chosen.push(p);
-    taken.add(p.id);
-    motifsOf(p).forEach((m) => usedMotifs.add(m));
-    if (p.fabric) usedFabrics.add(p.fabric.slug);
-    usedBands.add(priceBand(p.price));
-  };
-
-  // Pass 1 — everything about this piece is new.
-  for (const p of candidates) {
-    if (chosen.length >= take) break;
-    const motifNew = motifsOf(p).every((m) => !usedMotifs.has(m));
-    const fabricNew = !p.fabric || !usedFabrics.has(p.fabric.slug);
-    const bandNew = !usedBands.has(priceBand(p.price));
-    if (motifNew && fabricNew && bandNew) accept(p);
-  }
-
-  // Pass 2 — the motif or the cloth is new. Price is allowed to repeat, since
-  // by now every band worth having is usually already represented.
-  for (const p of candidates) {
-    if (chosen.length >= take) break;
-    if (taken.has(p.id)) continue;
-    const motifNew = motifsOf(p).every((m) => !usedMotifs.has(m));
-    const fabricNew = !p.fabric || !usedFabrics.has(p.fabric.slug);
-    if (motifNew || fabricNew) accept(p);
-  }
-
-  // Pass 3 — fill in the given order.
-  for (const p of candidates) {
-    if (chosen.length >= take) break;
-    if (taken.has(p.id)) continue;
-    accept(p);
-  }
-
-  return chosen;
-}
-
-export const getCategories = cache(async () => {
-  return prisma.category.findMany({ orderBy: { position: 'asc' } });
+  return { motif, available, soldCount };
 });
-
-/**
- * Per-category figures for the home page plates: how many pieces are
- * available now and the lowest price among them. Read from the catalogue, so a
- * category with nothing in stock has no entry and its plate states nothing.
- * Prices are paise.
- */
-export async function getCategoryStats(): Promise<Map<string, { count: number; from: number }>> {
-  const rows = await prisma.product.groupBy({
-    by: ['categoryId'],
-    where: { status: 'ACTIVE', stock: { gt: 0 } },
-    _count: { _all: true },
-    _min: { price: true },
-  });
-  const stats = new Map<string, { count: number; from: number }>();
-  for (const row of rows) {
-    if (row._min.price == null) continue;
-    stats.set(row.categoryId, { count: row._count._all, from: row._min.price });
-  }
-  return stats;
-}
-
-/**
- * The most recent pieces that have gone, newest first. A one-of-one piece that
- * sold keeps its page and is marked sold by the card, so this is read straight
- * from stock rather than from orders: a cancelled order returns its piece to
- * the catalogue, which makes stock the only honest signal.
- */
-export async function getRecentlySold(take = 4) {
-  return prisma.product.findMany({
-    where: { status: 'ACTIVE', stock: { lte: 0 } },
-    select: productCardSelect,
-    orderBy: { updatedAt: 'desc' },
-    take,
-  });
-}
 
 /** Cached: `generateMetadata` and the shop page each resolve the same slug. */
 export const getCategoryBySlug = cache(async (slug: string) => {
@@ -584,6 +457,7 @@ export const getBlogPost = cache(async (slug: string) => {
 export const getTypeVarieties = cache(async (categorySlug: string) => {
   const scope: Prisma.ProductWhereInput = {
     status: 'ACTIVE',
+    stock: { gt: 0 },
     category: { slug: categorySlug },
   };
 
@@ -625,6 +499,7 @@ export const getTypeVarieties = cache(async (categorySlug: string) => {
 export const getTypeDyes = cache(async (categorySlug: string) => {
   const scope: Prisma.ProductWhereInput = {
     status: 'ACTIVE',
+    stock: { gt: 0 },
     category: { slug: categorySlug },
   };
 
@@ -667,6 +542,7 @@ export const getTypeFabricFromPrices = cache(async (categorySlug: string) => {
 export const getTypeMotifs = cache(async (categorySlug: string) => {
   const scope: Prisma.ProductWhereInput = {
     status: 'ACTIVE',
+    stock: { gt: 0 },
     category: { slug: categorySlug },
   };
 
@@ -706,24 +582,27 @@ export const getTypePriceRange = cache(async (categorySlug: string) => {
  */
 export const getCollectionProducts = cache(
   async (kind: 'featured' | 'premium' | 'new', categorySlug?: string, take = 24) => {
-    const where: Prisma.ProductWhereInput = {
+    const base: Prisma.ProductWhereInput = {
       status: 'ACTIVE',
       ...(categorySlug ? { category: { slug: categorySlug } } : {}),
       ...(kind === 'featured' ? { featured: true } : {}),
       ...(kind === 'premium' ? { masterpiece: true } : {}),
     };
+    // Purchasable pieces only; sold ones are counted and live in the archive.
+    const where: Prisma.ProductWhereInput = { ...base, stock: { gt: 0 } };
 
     const orderBy: Prisma.ProductOrderByWithRelationInput[] =
       kind === 'new'
         ? [{ createdAt: 'desc' }]
         : [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }];
 
-    const [items, total] = await Promise.all([
+    const [items, total, soldTotal] = await Promise.all([
       prisma.product.findMany({ where, select: productCardSelect, orderBy, take }),
       prisma.product.count({ where }),
+      prisma.product.count({ where: { ...base, stock: { lte: 0 } } }),
     ]);
 
-    return { items, total };
+    return { items, total, soldTotal };
   },
 );
 
@@ -743,19 +622,70 @@ export const getCollectionProducts = cache(
  * had been narrowed to organza.
  */
 export const getTypeProducts = cache(async (categorySlug: string, take = 8, fabric?: string) => {
-  const where: Prisma.ProductWhereInput = { status: 'ACTIVE', category: { slug: categorySlug } };
-  if (fabric) where.fabric = { slug: fabric };
-  const [items, total] = await Promise.all([
+  const base: Prisma.ProductWhereInput = { status: 'ACTIVE', category: { slug: categorySlug } };
+  if (fabric) base.fabric = { slug: fabric };
+  // Purchasable pieces only. Sold ones are counted so the page can point at the
+  // archive, and are never in the grid beside work that can be bought.
+  const [items, total, soldTotal] = await Promise.all([
     prisma.product.findMany({
-      where,
+      where: { ...base, stock: { gt: 0 } },
       select: productCardSelect,
-      orderBy: [{ stock: 'desc' }, { masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }],
       take,
     }),
-    prisma.product.count({ where }),
+    prisma.product.count({ where: { ...base, stock: { gt: 0 } } }),
+    prisma.product.count({ where: { ...base, stock: { lte: 0 } } }),
   ]);
-  return { items, total };
+  return { items, total, soldTotal };
 });
+
+export const TYPE_PAGE_SIZE = 8;
+
+/**
+ * One page of a type's catalogue, newest and most featured first.
+ *
+ * The page is cut in the database: a catalogue of a few hundred pieces sends
+ * eight cards to the browser, not all of them with a script to hide the rest.
+ * `id` closes the sort so two pieces with the same timestamp never swap places
+ * between page one and page two.
+ *
+ * A page past the end is answered with the last page rather than an empty one.
+ * Sold pieces are counted for the archive link and never listed.
+ */
+export const getTypeCataloguePage = cache(
+  async (categorySlug: string, filter: { cloth?: string; family?: string }, page: number) => {
+    const inCategory: Prisma.ProductWhereInput = { status: 'ACTIVE', category: { slug: categorySlug } };
+    const where: Prisma.ProductWhereInput = {
+      ...inCategory,
+      stock: { gt: 0 },
+      ...(filter.cloth
+        ? { fabric: { slug: filter.cloth } }
+        : filter.family
+          ? { fabric: { family: filter.family } }
+          : {}),
+    };
+
+    const [total, soldTotal] = await Promise.all([
+      prisma.product.count({ where }),
+      prisma.product.count({ where: { ...inCategory, stock: { lte: 0 } } }),
+    ]);
+
+    const pageCount = Math.max(1, Math.ceil(total / TYPE_PAGE_SIZE));
+    const current = Math.min(Math.max(1, page), pageCount);
+    const items =
+      total === 0
+        ? []
+        : await prisma.product.findMany({
+            where,
+            select: productCardSelect,
+            orderBy: [{ masterpiece: 'desc' }, { featured: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }],
+            skip: (current - 1) * TYPE_PAGE_SIZE,
+            take: TYPE_PAGE_SIZE,
+          });
+
+    return { items, total, soldTotal, page: current, pageCount };
+  },
+);
 
 /**
  * Whether the current visitor may review a piece.

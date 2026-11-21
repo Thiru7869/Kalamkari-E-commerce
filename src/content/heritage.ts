@@ -105,7 +105,7 @@ export const heritageSections: HeritageSection[] = [
       'A story cannot be carved into a block. A block repeats, and a scene happens once — so the narrative work and the freehand method are not two facts about this craft but one fact stated twice. The moment a workshop moves to blocks it loses the ability to draw an episode, and gains the ability to make a hundred metres of border.',
       'The same hand now goes onto sarees, dupattas and chunnis, blouse pieces, wall panels and cloth for the house. The subjects and the sequence have not changed; what changed is that a person wears the story instead of a temple hanging it.',
     ],
-    link: { label: 'What the store makes', href: '/shop' },
+    link: { label: 'What the store makes', href: '/' },
   },
 
   /* ---------------------------------------------------------------- */

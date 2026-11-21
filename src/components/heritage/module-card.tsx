@@ -25,7 +25,7 @@ export function ModuleCard({
     <Link
       href={module.href}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[border-color,box-shadow] duration-swift ease-swift hover:border-primary/40 hover:shadow-[0_18px_40px_-28px_rgb(0_0_0/0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'group flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card transition-[border-color,box-shadow] duration-swift ease-swift hover:border-primary/40 hover:shadow-[0_18px_40px_-28px_rgb(0_0_0/0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         className,
       )}
     >
@@ -40,7 +40,7 @@ export function ModuleCard({
       </div>
       <div className={cn('flex flex-1 flex-col', compact ? 'p-4' : 'p-5')}>
         {index !== undefined && (
-          <p className="tabular font-inscription text-[0.6875rem] tracking-[0.14em] text-primary/70">
+          <p className="tabular font-inscription text-label tracking-[0.14em] text-primary/70">
             {String(index + 1).padStart(2, '0')}
           </p>
         )}

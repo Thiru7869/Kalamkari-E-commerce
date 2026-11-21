@@ -12,7 +12,8 @@ import { RecordView } from '@/components/shop/record-view';
 import { RecentlyViewed } from '@/components/shop/recently-viewed';
 import { ReviewSection } from '@/components/shop/review-section';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
-import { Badge, Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { getProductBySlug, getRelatedProducts, getReviewEligibility } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { prisma } from '@/lib/prisma';
@@ -76,7 +77,7 @@ export default async function ProductPage({ params }: { params: Params }) {
       <div className="container pt-6 md:pt-8">
         <Breadcrumbs
           trail={[
-            { label: 'Shop', href: '/shop' },
+            { label: 'Shop', href: '/' },
             { label: product.category.name, href: `/shop/${product.category.slug}` },
             { label: product.name },
           ]}
@@ -120,6 +121,15 @@ export default async function ProductPage({ params }: { params: Params }) {
                   ? 'Shipping included.'
                   : `Shipping ${formatPrice(site.shipping.flatRate)}.`}
               </p>
+
+              {/* Where it ships from and how long it takes, from the same
+                  shipping settings as the Shipping & returns section below. */}
+              {!soldOut && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Dispatched from Srikalahasti. Delivery in {site.shipping.domesticDays} across
+                  India.
+                </p>
+              )}
 
               {/* Availability, stated from the stock column and nothing else:
                   sold, the last one, or available. No count is shown. */}
@@ -203,7 +213,14 @@ export default async function ProductPage({ params }: { params: Params }) {
                     <dt className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
                       Painted by
                     </dt>
-                    <dd className="mt-1">{product.artisan}</dd>
+                    <dd className="mt-1">
+                      <Link
+                        href="/heritage/artisans"
+                        className="inline-flex items-center py-3 -my-3 underline-offset-4 hover:text-primary hover:underline"
+                      >
+                        {product.artisan}
+                      </Link>
+                    </dd>
                   </div>
                 )}
               </dl>
@@ -249,16 +266,55 @@ export default async function ProductPage({ params }: { params: Params }) {
                           <li key={motif.id}>
                             <h3 className="font-medium text-foreground">{motif.name}</h3>
                             <p className="mt-1">{motif.story}</p>
+                            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+                              <Link
+                                href={`/heritage/motifs/${motif.slug}`}
+                                className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+                              >
+                                About {motif.name}
+                                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                              </Link>
+                              <Link
+                                href={`/?motif=${motif.slug}`}
+                                className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+                              >
+                                See other {motif.name} pieces
+                                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                              </Link>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+
+                {product.dyes.length > 0 && (
+                  <AccordionItem value="colours">
+                    <AccordionTrigger>Where the colours come from</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="flex flex-col gap-4">
+                        {product.dyes.map(({ dye }) => (
+                          <li key={dye.id}>
+                            <h3 className="font-medium text-foreground">{dye.name}</h3>
+                            <p className="mt-1">{dye.source}</p>
                             <Link
-                              href={`/shop?motif=${motif.slug}`}
+                              href={`/?dye=${dye.slug}`}
                               className="mt-2 inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
                             >
-                              See other {motif.name} pieces
+                              See other pieces in this colour
                               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                             </Link>
                           </li>
                         ))}
                       </ul>
+                      <Link
+                        href="/heritage/colours"
+                        className="mt-4 inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline"
+                      >
+                        All eight colours and their sources
+                        <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Link>
                     </AccordionContent>
                   </AccordionItem>
                 )}
@@ -350,7 +406,19 @@ export default async function ProductPage({ params }: { params: Params }) {
       {related.length > 0 && (
         <section className="border-t border-border section-y">
           <div className="container">
-            <h2 className="text-display-sm">Painted in the same tradition</h2>
+            <h2 className="text-display-sm">
+              {soldOut ? 'Similar pieces still available' : 'Painted in the same tradition'}
+            </h2>
+            {soldOut && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                This piece has found a home. These are close to it in motif or kind, and can be
+                bought now.{' '}
+                <Link href="/archive" className="text-primary underline underline-offset-4">
+                  See the sold archive
+                </Link>
+                .
+              </p>
+            )}
             <ul className={cn('mt-7 grid grid-cols-2 md:grid-cols-4', PRODUCT_GRID_GAP)}>
               {related.map((p) => (
                 <li key={p.id} className="flex">

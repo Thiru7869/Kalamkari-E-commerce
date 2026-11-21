@@ -35,7 +35,7 @@ export default async function AdminOrderPage({ params }: { params: Params }) {
     <>
       <Link
         href="/admin/orders"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex min-h-[2.75rem] items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         All orders

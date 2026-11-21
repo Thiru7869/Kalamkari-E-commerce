@@ -90,7 +90,7 @@ export default async function TrackOrderPage({ searchParams }: { searchParams: S
       {order && (
         <div className="mt-14">
           <div className="mb-8 flex flex-wrap items-baseline justify-between gap-3 border-b border-border pb-5">
-            <h2 className="tabular font-display text-2xl">{order.number}</h2>
+            <h2 className="tabular font-display text-display-sm">{order.number}</h2>
             <p className="text-sm text-muted-foreground">{statusLabel(order.status)}</p>
           </div>
           <OrderDetail order={order} />

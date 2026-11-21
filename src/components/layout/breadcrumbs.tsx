@@ -4,17 +4,13 @@ import { cn, absoluteUrl } from '@/lib/utils';
 export type Crumb = { label: string; href?: string };
 
 /**
- * The trail back up.
+ * The trail back up: Home, the ancestors, then the current page.
  *
- * Extracted from the two hand-written copies on /shop and /product so the rest
- * of the site can have one. It matters more here than on a typical shop: the
- * journal, the care guide and the process page are all deep-linkable from
- * search and from the assistant, so a large share of visitors arrive halfway
- * down the tree with no idea what is above them.
- *
- * The final crumb is the current page and is never a link — it carries
- * `aria-current="page"` instead. Separators are decorative and hidden, so a
- * screen reader hears the list rather than a row of slashes.
+ * The last crumb is not a link and carries `aria-current="page"`. Separators
+ * are hidden from assistive tech. The same trail is emitted as BreadcrumbList
+ * JSON-LD, so what a reader sees and what a crawler is told cannot drift apart.
+ * A long final crumb (a product or article title) is truncated on narrow
+ * screens so the trail stays on one line.
  */
 export function Breadcrumbs({
   trail,
@@ -26,20 +22,6 @@ export function Breadcrumbs({
 }) {
   if (trail.length === 0) return null;
 
-  /*
-    The same trail, again, for a search engine.
-
-    Google builds the breadcrumb line under a result from this rather than from
-    the visible markup, and without it a deep page — a product, a journal entry,
-    a cloth type — is listed under a bare domain with no indication of where it
-    sits. It is emitted from this component rather than from each page so the
-    two can never drift: the trail a reader sees and the trail a crawler is told
-    about are the same array.
-
-    Positions are 1-based and include Home, matching what is rendered. Only
-    entries with a real href get an `item`; the last crumb is the current page
-    and schema.org expects it to be nameless of a URL.
-  */
   const itemListElement = [
     { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') },
     ...trail.map((crumb, i) => ({
@@ -51,7 +33,7 @@ export function Breadcrumbs({
   ];
 
   return (
-    <nav aria-label="Breadcrumb" className={cn('text-sm text-muted-foreground', className)}>
+    <nav aria-label="Breadcrumb" className={cn('mb-5 text-sm text-muted-foreground', className)}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -62,9 +44,9 @@ export function Breadcrumbs({
           }),
         }}
       />
-      <ol className="flex flex-wrap items-center gap-1.5">
+      <ol className="flex flex-wrap items-center gap-x-1.5">
         <li>
-          <Link href="/" className="hover:text-foreground">
+          <Link href="/" className="inline-flex items-center py-3 -my-3 hover:text-foreground">
             Home
           </Link>
         </li>
@@ -72,14 +54,18 @@ export function Breadcrumbs({
         {trail.map((crumb, i) => {
           const isLast = i === trail.length - 1;
           return (
-            <li key={`${crumb.label}-${i}`} className="flex items-center gap-1.5">
+            <li key={`${crumb.label}-${i}`} className="flex min-w-0 items-center gap-1.5">
               <span aria-hidden="true">/</span>
               {crumb.href && !isLast ? (
-                <Link href={crumb.href} className="hover:text-foreground">
+                <Link href={crumb.href} className="inline-flex items-center py-3 -my-3 hover:text-foreground">
                   {crumb.label}
                 </Link>
               ) : (
-                <span aria-current={isLast ? 'page' : undefined} className="text-foreground">
+                <span
+                  aria-current={isLast ? 'page' : undefined}
+                  className="max-w-[12rem] truncate text-foreground sm:max-w-md"
+                  title={crumb.label}
+                >
                   {crumb.label}
                 </span>
               )}

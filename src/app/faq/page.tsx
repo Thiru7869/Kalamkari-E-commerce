@@ -6,7 +6,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/primitives';
+} from '@/components/ui/accordion';
 import { SupportLinks } from '@/components/heritage/support-links';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';
@@ -48,7 +48,7 @@ export default function FaqPage() {
       {/* ------------------------------------------------------------------ */}
       <header className="border-b border-border bg-cotton-100 pb-10 pt-10 md:pb-14 md:pt-12 dark:bg-card">
         <div className="container">
-          <Breadcrumbs trail={[{ label: 'Questions' }]} />
+          <Breadcrumbs trail={[{ label: 'FAQ' }]} />
 
           <div className="mt-5 max-w-3xl">
             {/* Kept in step with the landing section deliberately: a reader
@@ -57,7 +57,7 @@ export default function FaqPage() {
                 sentence reads as having gone somewhere else. */}
             <p className="eyebrow">Across the people</p>
             <h1 className="mt-3 text-display-lg leading-tight">
-              These are some questions we are frequently asked
+              Frequently asked questions
             </h1>
             <p className="mt-5 text-body-lg leading-relaxed text-muted-foreground">
               Collected from the front room in {site.location.town}, from letters, and from
@@ -138,7 +138,7 @@ export default function FaqPage() {
                       </AccordionTrigger>
 
                       <AccordionContent className="pb-6 pr-4 md:pr-8">
-                        <p className="border-l-2 border-primary/40 pl-5 text-[0.9375rem] leading-relaxed">
+                        <p className="border-l-2 border-primary/40 pl-5 text-base leading-relaxed">
                           {answer}
                         </p>
 

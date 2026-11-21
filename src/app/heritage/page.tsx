@@ -48,7 +48,7 @@ export default function HeritagePage() {
           <Link href="/process">See how it is made</Link>
         </Button>
         <Button asChild size="lg" variant="outline" className="rounded-full">
-          <Link href="/shop">Shop the work</Link>
+          <Link href="/">Shop the work</Link>
         </Button>
       </PageHero>
 
@@ -68,9 +68,9 @@ export default function HeritagePage() {
       </section>
 
       <section className="container pb-16 md:pb-20" aria-labelledby="authentic-heading">
-        <div className="flex flex-col gap-5 rounded-3xl border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-5 rounded-sm border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
           <div className="max-w-xl">
-            <h2 id="authentic-heading" className="font-display text-xl md:text-2xl">
+            <h2 id="authentic-heading" className="font-display text-display-sm">
               Is it really hand-painted?
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

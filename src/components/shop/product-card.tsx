@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { WishlistButton } from './wishlist-button';
+import { HoverImage } from './hover-image';
 import { formatPrice, averageRating } from '@/lib/utils';
 import { primaryImage, toList } from '@/lib/serialize';
 import type { ProductCardData } from '@/lib/queries';
@@ -62,34 +63,8 @@ export function ProductCard({
           )}
         />
 
-        {/*
-          The second view, on hover and on keyboard focus.
-
-          Only where a pointer can hover. On a touch screen `:hover` sticks to
-          whatever was last tapped, so without the media query a phone would
-          leave one card showing its second photograph for no reason a visitor
-          could see. Phones get the second view on the piece's own page, where
-          the gallery has a swipeable rail.
-
-          Decorative — the first image carries the alt text — and withheld from
-          sold pieces, whose first image is already dimmed and which nobody is
-          choosing between.
-        */}
-        {secondImage && !soldOut && (
-          <Image
-            src={secondImage}
-            alt=""
-            aria-hidden="true"
-            fill
-            sizes={sizes}
-            className={cn(
-              'pointer-events-none object-cover opacity-0',
-              'transition-opacity duration-300 ease-out motion-reduce:transition-none',
-              '[@media(hover:hover)]:group-hover:opacity-100',
-              'group-focus-within:opacity-100',
-            )}
-          />
-        )}
+        {/* The second view, on hover and keyboard focus — see HoverImage. */}
+        {secondImage && !soldOut && <HoverImage src={secondImage} sizes={sizes} />}
 
         <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1.5">
           {product.masterpiece && <Badge variant="gold">Signed piece</Badge>}
@@ -109,7 +84,7 @@ export function ProductCard({
       </div>
 
       <div className="flex flex-1 flex-col pt-2.5">
-        <h3 className="font-display text-[1.0625rem] leading-snug">
+        <h3 className="font-display text-lg leading-snug">
           <Link
             href={`/product/${product.slug}`}
             className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -138,7 +113,7 @@ export function ProductCard({
           in the same tracked capitals the site uses for every label.
         */}
         {product.craftDays != null && !soldOut && (
-          <p className="tabular mt-1.5 font-inscription text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground">
+          <p className="tabular mt-1.5 font-inscription text-label uppercase tracking-[0.12em] text-muted-foreground">
             {product.craftDays} days by hand
           </p>
         )}
@@ -294,7 +269,7 @@ export function ProductGrid({
             */}
             <div className="flex items-center gap-4 py-7 md:py-9" aria-hidden="true">
               <span className="h-px flex-1 bg-border" />
-              <span className="tabular font-inscription text-[0.6875rem] uppercase tracking-[0.2em] text-muted-foreground/70">
+              <span className="tabular font-inscription text-label uppercase tracking-[0.2em] text-muted-foreground/70">
                 {gi + 1}
               </span>
               <span className="h-px flex-1 bg-border" />

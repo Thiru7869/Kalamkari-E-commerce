@@ -6,7 +6,7 @@ import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { submitReview } from '@/app/actions/forms';
 import { initialFormState } from '@/lib/form-state';
 import { formatDate, cn } from '@/lib/utils';

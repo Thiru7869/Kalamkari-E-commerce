@@ -120,7 +120,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
           <h2 className="mt-3 text-display-md">{bestWorks.heading}</h2>
           <p className="mt-4 leading-relaxed text-muted-foreground">{bestWorks.empty}</p>
           <Link
-            href="/shop"
+            href="/"
             className="mt-6 inline-flex min-h-[2.75rem] items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             Everything in the store
@@ -173,7 +173,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
               {bestWorks.heading}
             </h2>
             <span aria-hidden="true" className={cn('mt-4 block h-px w-14 border-t', tone.edge)} />
-            <p className={cn('mt-4 text-[0.9375rem] leading-relaxed', tone.quiet)}>
+            <p className={cn('mt-4 text-base leading-relaxed', tone.quiet)}>
               {bestWorks.standfirst}
             </p>
           </div>
@@ -273,7 +273,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                       onClick={() => go(i)}
                       aria-label={`Piece ${i + 1}: ${w.name}`}
                       aria-current={i === index}
-                      className="group/seg flex h-11 flex-1 items-center focus-visible:outline-none"
+                      className="group/seg flex h-11 min-w-6 flex-1 items-center focus-visible:outline-none"
                     >
                       <span
                         className={cn(
@@ -295,7 +295,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
               {/* Position and the pot the ground came from. */}
               <p
                 className={cn(
-                  'tabular mt-1 font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
+                  'tabular mt-1 font-inscription text-label uppercase tracking-[0.16em]',
                   tone.faint,
                 )}
               >
@@ -310,7 +310,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
             <div key={work.id} className="min-w-0 motion-safe:animate-story-in">
               <p
                 className={cn(
-                  'font-inscription text-[0.625rem] uppercase tracking-[0.18em]',
+                  'font-inscription text-label uppercase tracking-[0.18em]',
                   tone.faint,
                 )}
               >
@@ -342,7 +342,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                   <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                     <dt
                       className={cn(
-                        'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
+                        'font-inscription text-label uppercase tracking-[0.16em]',
                         tone.faint,
                       )}
                     >
@@ -355,7 +355,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                   <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                     <dt
                       className={cn(
-                        'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
+                        'font-inscription text-label uppercase tracking-[0.16em]',
                         tone.faint,
                       )}
                     >
@@ -367,7 +367,7 @@ export function BestWorks({ works }: { works: ProductCardData[] }) {
                 <div className={cn('py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-5', tone.rule)}>
                   <dt
                     className={cn(
-                      'font-inscription text-[0.5625rem] uppercase tracking-[0.16em]',
+                      'font-inscription text-label uppercase tracking-[0.16em]',
                       tone.faint,
                     )}
                   >

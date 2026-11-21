@@ -2,14 +2,14 @@
 
 import { useActionState, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Pencil, Plus, Star, Trash2 } from 'lucide-react';
 import { saveAddress, deleteAddress, setDefaultAddress } from '@/app/actions/account';
 import { initialFormState } from '@/lib/form-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/primitives';
+import { Badge } from '@/components/ui/badge';
 import { FieldError } from '@/components/forms/field-error';
 
 export type AddressRow = {

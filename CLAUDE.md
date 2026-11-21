@@ -76,7 +76,7 @@ Hence the split in `src/lib/cart.ts`:
 | `recordRecentlyViewed()` | Yes | Server actions only |
 
 `src/lib/recently-viewed.ts` follows the same split for the same reason. The
-rail is rendered during `/shop` and every product page, so the read path must
+rail is rendered on the shop (`/`, `/shop/<category>`) and every product page, so the read path must
 never write; the write happens in `recordProductView` (`src/app/actions/`),
 called from an effect after paint.
 
@@ -145,14 +145,13 @@ uses for magic links.
   `src/content`, and it must carry the page where it is defended. No "since
   1952", no units sold. Where a count exists in code — the step count is
   `totalSteps` — import it rather than writing it down twice.
-- `best-works.ts` — the six grounds the Best Works rail is mounted on, each
+- `best-works.ts` — the six grounds the Best Works rail on `/collections/premium` is mounted on, each
   sampled off a dye ramp and each stating its own `ink`. `npm run audit:ink`
   checks them against the same contrast ladder as the flooded dye colours; a
   ground that cannot carry text fails the check rather than shipping.
 - `catalogue.ts` — the editorial layer over the shop: the type and collection
   pages, and the commission-first note on the narrative motifs.
 - `commission.ts` — the guided questions, the attachment limits, the timeline.
-- `welcome.ts` — the doorway (the welcome overlay's copy and version).
 - `assistant.ts` — Lakshmi's knowledge base, which also backs the offline
   answer engine. The assistant's name, launcher label and role all come from
   `assistantIdentity` in that file; nothing hardcodes them.
@@ -174,7 +173,7 @@ follows the workshop. Two entries are deliberately not what a dye manual says:
 These were corrected by the store on 2026-08-12. `naturalDyes`, the `Dye` seed
 `source` strings and the eight-stage summary in `saree-stages.tsx` were all
 brought into line at the same time — if you change one, change all four, or the
-product page, the shop filter and the home page will describe the same pot
+product page, the shop filter and the shop page will describe the same pot
 differently.
 
 `openPalette` is deliberately **not** a member of `colourStories`. That array
@@ -258,7 +257,7 @@ deployment.
 
 Anything read more than once in a single render is wrapped in `React.cache`:
 `resolveCart`, `getCart`, `getCartCount`, `getWishlistIds`, `getProductBySlug`,
-`getCategoryBySlug`, `getCategories`, `getBlogPost`, `getReviewEligibility`.
+`getCategoryBySlug`, `getBlogPost`, `getReviewEligibility`.
 Prisma calls are not deduplicated the way `fetch` is. `generateMetadata` and the
 page body both run, so an uncached query on a product page costs two.
 
@@ -313,10 +312,12 @@ So there are two failures to look for, not one, and
 npm run audit:layout          # dev server or `npm start` must be running
 ```
 
-checks every important route at 320/375/390/430px for **four** failures:
+checks every important route at 320/375/390/430/768/1024px for **five** failures:
 documents that scroll sideways, elements that clip their own text, visible
-elements hanging past the viewport edge, and pages that rendered no `<h1>` at
-all. The last one is not a layout rule — it is how the script knows a route
+elements hanging past the viewport edge, pages that rendered no `<h1>` at
+all, and tap targets under 24px (WCAG 2.2 AA 2.5.8 — links inside a sentence and
+stretched card links are exempt; 36px chips are a decision, a 15px footer link
+is a bug). The last one is not a layout rule — it is how the script knows a route
 still renders its page. An unknown product slug answers **200** and paints the
 error boundary, which measures perfectly clean; without the heading check a
 stale route in the list would report `ok` forever while covering nothing. It excludes `sr-only` (a 1×1 box
@@ -332,11 +333,10 @@ So the audit scans for edge-crossing elements *unconditionally*, not only when
 the document already overflows.
 
 **Anything that can cover the viewport must be measured on the viewport.** The
-audit dismisses the preloader and welcome overlay by default,
-because otherwise they are the only thing it measures. That default is also how
-the tour-card bug shipped: the audit suppressed the one component that was
-broken. `--intro=preloader|welcome` marks the earlier stages as seen so the named
-one renders and can be measured. Run it after touching any of them.
+audit measures every route as rendered. The preloader, welcome overlay and
+tour were removed; if an interruption is ever added back it needs its own
+audit stage, because the one that shipped a bug (a tour card) did so while the
+audit suppressed it.
 
 ## Transform is one property, not several
 
@@ -390,12 +390,16 @@ Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
 - Media queries are subscribed, not sampled (`useMediaQuery`). A preference read
   once on mount is wrong as soon as the visitor changes it.
 
-## The 3D
+## Smooth scrolling and any future 3D
+
+**No 3D scene is mounted and `three` is not a dependency.** The hero scene was
+removed and the packages were dropped. If a scene is reintroduced, add the
+packages back and follow these rules:
 
 - three.js is code-split behind `next/dynamic` and requested only after client
   capability detection resolves. It must never delay LCP.
 - **No information exists only inside a canvas.** Every scene has a meaningful
-  static fallback; turn off WebGL and `/process` is still the complete article.
+  static fallback.
 - Canvases are `aria-hidden`; phase changes are announced through a separate
   live region.
 - Scroll progress is written into refs, not React state, so scrolling never
@@ -403,21 +407,91 @@ Built to WCAG 2.2 AA rather than retrofitted. The non-obvious parts:
 - Lenis and GSAP share **one** rAF loop (GSAP's ticker drives Lenis). Lenis is
   not mounted at all under reduced motion, and touch scrolling is left native.
 
+## The shop is the home page
+
+`/` renders the shop: `ShopView` (`src/components/shop/shop-view.tsx`), shared
+with `/shop/<category>`. `/shop` itself is a permanent (308) redirect to `/` in
+`next.config.mjs`, and Next carries the query string across, so old
+`/shop?motif=…` links still work. Internal links point at `/` directly.
+
+- **The grid lists only what can be bought.** `ShopView` always passes
+  `inStockOnly: true`. Sold pieces live at `/archive` (`getSoldProducts`), keep
+  their product pages, and are never in the grid beside available work.
+- **"Similar" never recommends a sold piece.** `getRelatedProducts` filters on
+  stock. `src/lib/shop-visibility.int.test.ts` pins both rules.
+- **Best works** is on `/collections/premium`; the shop header links to it.
+- **Story cards** in the grid (`GridStory`) and the two bands below it read
+  `heritageModules`. Nothing is written in the component, so it cannot say what
+  the destination page does not.
+- **Motif pages** (`/heritage/motifs/<slug>`) read the motif's own `story` and the
+  `ProductMotif` relation: available pieces as cards, sold ones only counted
+  with a link to the archive. The motif list, the product page and the motif
+  page all show the same `story` column, so they cannot disagree.
+- **The header** is `src/content/nav.ts` (it lives outside `site.ts` because it
+  reads `heritageModules`, which reads `site` — one file would be an import
+  cycle).
+
 ## Interruptions
 
-The welcome overlay and the preloader are the only things on this site that
-interrupt. Both are governed by `src/components/welcome/first-visit.tsx`:
+**There are none, and one must not be added casually.** The preloader, welcome
+overlay and quick tour were removed when the shop became the home page: a
+first-time buyer should land on product, not on a film. The announcement bar is
+server-rendered and hidden *before paint* by an inline script in the root
+layout, not in an effect. Deciding it in an effect either shifts the page down
+36px on every first load or flashes the bar at everybody who has closed it.
 
-- Never on `/checkout`, `/admin`, `/account`, `/signin` or `/orders`.
-- Never for somebody who has already scrolled past 200px — that is a reader, not
-  an arrival.
-- Never twice. Dismissal is stored under a version, so changing the copy is what
-  brings it back, not a cleared cache.
+## Not-found status codes
 
-The announcement bar is server-rendered and hidden *before paint* by an inline
-script in the root layout, not in an effect. Deciding it in an effect either
-shifts the page down 36px on every first load or flashes the bar at everybody
-who has closed it.
+**There is deliberately no root `src/app/loading.tsx`.** A `loading.tsx` wraps its
+segment in a Suspense boundary, the shell is flushed with `200` immediately, and
+a later `notFound()` can then only paint the not-found page — a soft 404 that
+search engines index. The root one made every dynamic route without its own
+loading file answer `200` for a missing record. With it gone, `/heritage/motifs/<bad>`,
+`/types/<bad>` and `/collections/<bad>` return a real `404`.
+
+`product/[slug]` and `shop/[[...category]]` lost theirs for the same reason:
+`/product/<bad>` and `/shop/<bad>` now return a real `404`. The cost is that
+navigating to them shows no skeleton while the server renders, which on this
+catalogue is a few hundred milliseconds. Segments that still keep a
+`loading.tsx` (`search`, `account`, `wishlist`) cannot `notFound()` on a slug, so
+they are unaffected. `npm run smoke` asserts the status of five unknown routes
+and four known ones; check with `curl -I` before adding a `loading.tsx` to any
+route that can `notFound()`.
+
+## First-load JavaScript
+
+Three things were costing every page main-thread time before it could respond
+to a tap, and `src/components/ui/bundle-boundaries.test.ts` fails if they return:
+
+- **`ui/primitives.tsx` is a `'use client'` barrel.** Importing one export from
+  it — even `Badge`, which has no state — ships Select, Tabs, Accordion,
+  Checkbox and RadioGroup. Site-wide components import `ui/badge` and
+  `ui/dialog`, which are separate modules. `primitives` re-exports both so older
+  imports keep working, but new site-wide code must not use it.
+- **GSAP, ScrollTrigger and Lenis are imported lazily**, only for a fine pointer
+  without reduced motion, after idle. Touch scrolling is native, so on a phone
+  they did nothing but download. `/process` imports GSAP itself.
+- **The toast layer (`sonner`) is a dynamic import** (`providers/lazy-toaster`).
+
+Lighthouse's mobile score is a *simulation* (4x CPU, slow 4G) and swings 10–20
+points between identical runs on a busy machine. Compare transferred JS and
+main-thread time across several runs, not a single score.
+
+## Type-page catalogue and disclosure lists
+
+- **Type pages paginate on the server.** `/types/<slug>?fabric=<cloth|family:x>&page=N`
+  renders eight cards via `getTypeCataloguePage`; the state is parsed by
+  `src/lib/type-catalogue.ts`. Do not go back to sending the whole category and
+  hiding most of it in the browser: the payload and hydration scale with the
+  catalogue. Pages are links, the cloth control is a GET form that works without
+  script, and an out-of-range page redirects to the last one.
+- **`ui/accordion.tsx` is not Radix.** Radix measured every panel in a layout
+  effect during hydration (7 on a type page, 6 on a product page). The
+  replacement animates a CSS grid track instead. Don't reintroduce a measuring
+  accordion; `ui/checkbox.tsx` is a native input for the same reason.
+- **Dialog panels load lazily and return focus themselves** (`useOpener`). A
+  panel with no Radix trigger drops focus on `<body>` when it closes unless the
+  shell passes `onCloseAutoFocus={restore}`.
 
 ## Errors
 

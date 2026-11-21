@@ -270,7 +270,7 @@ export function TwoCrafts() {
                     <div>
                       <dt
                         className={cn(
-                          'font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
+                          'font-inscription text-label uppercase tracking-[0.16em]',
                           tone.faint,
                         )}
                       >
@@ -283,7 +283,7 @@ export function TwoCrafts() {
                     <div>
                       <dt
                         className={cn(
-                          'font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
+                          'font-inscription text-label uppercase tracking-[0.16em]',
                           tone.faint,
                         )}
                       >
@@ -314,14 +314,14 @@ export function TwoCrafts() {
                   <Line step={5}>
                     <p
                       className={cn(
-                        'mt-5 max-w-xl border-l-2 pl-4 text-[0.9375rem] leading-relaxed',
+                        'mt-5 max-w-xl border-l-2 pl-4 text-base leading-relaxed',
                         dye ? (light ? 'border-white/30' : 'border-black/25') : 'border-primary/40',
                         tone.quiet,
                       )}
                     >
                       <span
                         className={cn(
-                          'mr-2 font-inscription text-[0.625rem] uppercase tracking-[0.16em]',
+                          'mr-2 font-inscription text-label uppercase tracking-[0.16em]',
                           tone.faint,
                         )}
                       >
@@ -352,7 +352,7 @@ export function TwoCrafts() {
                           <p className={cn('font-display text-base leading-snug', tone.strong)}>
                             {route.label}
                           </p>
-                          <p className={cn('mt-1.5 text-[0.8125rem] leading-relaxed', tone.quiet)}>
+                          <p className={cn('mt-1.5 text-sm leading-relaxed', tone.quiet)}>
                             {route.body}
                           </p>
                         </li>
@@ -466,7 +466,7 @@ export function TwoCrafts() {
               */}
               <p
                 className={cn(
-                  'mt-2.5 font-inscription text-[0.6875rem] uppercase tracking-[0.16em] transition-colors duration-700',
+                  'mt-2.5 font-inscription text-label uppercase tracking-[0.16em] transition-colors duration-700',
                   // Was white/80 and black/70, set by eye. Both are body copy
                   // on a flooded ground, so they take the solved ladder.
                   dye ? tone.body : 'text-primary',
@@ -555,7 +555,7 @@ export function TwoCrafts() {
                         <span className="min-w-0">
                           <span
                             className={cn(
-                              'block text-[0.75rem] font-medium leading-tight transition-colors duration-700',
+                              'block text-xs font-medium leading-tight transition-colors duration-700',
                               tone.strong,
                             )}
                           >
@@ -563,7 +563,7 @@ export function TwoCrafts() {
                           </span>
                           <span
                             className={cn(
-                              'mt-0.5 block text-[0.625rem] leading-tight transition-colors duration-700',
+                              'mt-0.5 block text-label leading-tight transition-colors duration-700',
                               tone.faint,
                             )}
                           >
@@ -609,7 +609,7 @@ export function TwoCrafts() {
                     <span className="min-w-0">
                       <span
                         className={cn(
-                          'block text-[0.75rem] font-medium leading-tight transition-colors duration-700',
+                          'block text-xs font-medium leading-tight transition-colors duration-700',
                           tone.strong,
                         )}
                       >
@@ -617,7 +617,7 @@ export function TwoCrafts() {
                       </span>
                       <span
                         className={cn(
-                          'mt-0.5 block text-[0.625rem] leading-tight transition-colors duration-700',
+                          'mt-0.5 block text-label leading-tight transition-colors duration-700',
                           tone.faint,
                         )}
                       >

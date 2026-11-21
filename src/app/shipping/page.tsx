@@ -18,7 +18,7 @@ export default function ShippingPage() {
         <div className="mx-auto max-w-[46rem]">
           <Breadcrumbs
             trail={[{ label: "Shipping & returns" }]}
-            className="mb-4"
+           
           />
           <h1 className="text-display-lg">Shipping &amp; returns</h1>
 
@@ -132,7 +132,7 @@ export default function ShippingPage() {
             </div>
           </section>
 
-          <p className="mt-10 rounded-2xl border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-10 rounded-sm border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
             Anything unclear?{" "}
             <Link
               href="/contact"

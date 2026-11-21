@@ -54,7 +54,7 @@ export default function CulturePage() {
           {storyMethod.map((m, i) => (
             <li
               key={m.id}
-              className="rounded-2xl border border-border bg-card p-6 transition-colors duration-swift ease-swift hover:border-primary/40"
+              className="rounded-sm border border-border bg-card p-6 transition-colors duration-swift ease-swift hover:border-primary/40"
             >
               <span
                 aria-hidden="true"
@@ -70,16 +70,16 @@ export default function CulturePage() {
       </section>
 
       <section className="container section-y" aria-labelledby="the-stories">
-        <div className="flex flex-col gap-5 rounded-3xl border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-5 rounded-sm border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 id="the-stories" className="font-display text-xl md:text-2xl">
+            <h2 id="the-stories" className="font-display text-display-sm">
               The stories on the cloth
             </h2>
             <ul className="mt-4 flex flex-wrap gap-2">
               {narrativeMotifs.map((slug) => (
                 <li key={slug}>
                   <Link
-                    href={`/shop?motif=${slug}`}
+                    href={`/?motif=${slug}`}
                     className="inline-flex min-h-[2.5rem] items-center rounded-full border border-border bg-background px-4 text-sm transition-colors duration-swift ease-swift hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {narrativeMotifNames[slug]}
@@ -103,7 +103,7 @@ export default function CulturePage() {
         shop={[
           { label: 'Sarees', href: '/types/sarees' },
           { label: 'Paintings', href: '/types/paintings' },
-          { label: 'Shop all', href: '/shop' },
+          { label: 'Shop all', href: '/' },
         ]}
       />
     </>

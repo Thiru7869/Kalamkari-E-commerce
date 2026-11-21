@@ -63,7 +63,7 @@
       At `39 63% 42%` it measured **3.32:1** on the cotton ground: below AA for
       text, and below the 3:1 that non-text UI needs as well. That is not a
       cosmetic miss, because gold is not a decorative colour here — it is the
-      site's single *pointing* colour, spent on the quick tour's ring, the
+      site's single *pointing* colour, spent on the
       active mark in a sub-navigation, and the rule under the name. Every one
       of those is a thing whose entire job is to be noticed, and on a cream
       page none of them quite were.
@@ -219,6 +219,19 @@
     display sizes get the high-contrast cut and a 16px `h4` gets the sturdier
     one, from a single font file.
   */
+  /*
+    Set by the script in layout.tsx once the page has loaded; see tailwind.config.ts.
+
+    This is a descendant rule on purpose. The first version redefined a custom
+    property on <html>, and custom properties inherit: changing one restyled every
+    element on the page (300-450 ms at 4x CPU, three times, after load) to affect
+    two decorative words. A class on <html> with a selector for `.font-telugu`
+    invalidates only the elements that carry it.
+  */
+  html.telugu-ready .font-telugu {
+    font-family: var(--font-telugu), var(--font-body), sans-serif;
+  }
+
   h1, h2, h3, h4 {
     @apply font-display;
     font-weight: 600;
@@ -497,38 +510,6 @@
     @apply pointer-events-none absolute inset-0 bg-cloth-grain opacity-[0.18];
     mix-blend-mode: multiply;
     z-index: -1;
-  }
-
-  /*
-    The ring the quick tour draws on whatever it is currently describing.
-
-    An outline rather than a box-shadow so it follows the element's own shape
-    and cannot be clipped by an ancestor's overflow — several of the targets
-    live inside scrolling rails. It sits outside the element rather than
-    inside it, so nothing shifts when it appears.
-
-    Struck in gold, not in madder. Madder is the site's primary: it is already
-    on every heading, every price and every link, so a madder ring reads as
-    more of the page rather than as a finger pointing at one part of it. Gold
-    appears nowhere else in the running design, which is precisely what makes
-    it legible as "this, now". The wash behind it lifts the target off the
-    surrounding page without hiding anything.
-  */
-  [data-tour-active] {
-    position: relative;
-    outline: 2px solid hsl(var(--gold));
-    outline-offset: 4px;
-    border-radius: calc(var(--radius) - 2px);
-    box-shadow:
-      0 0 0 6px hsl(var(--gold) / 0.14),
-      0 12px 40px -12px hsl(var(--gold) / 0.5);
-    animation: tour-pulse 2.4s ease-in-out infinite;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    [data-tour-active] {
-      animation: none;
-    }
   }
 
   /* Set before paint by the inline script in the root layout. */

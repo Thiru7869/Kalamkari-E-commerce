@@ -53,7 +53,7 @@ export default function ColoursPage() {
           {colourStories.map((c, i) => (
             <li key={c.id}>
               <RevealOnScroll delay={(i % 4) * 0.05} className="h-full">
-                <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40">
+                <article className="flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card transition-colors duration-swift ease-swift hover:border-primary/40">
                   <div
                     className={cn(
                       'flex h-28 items-end p-4',
@@ -73,7 +73,7 @@ export default function ColoursPage() {
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.source}</p>
                     <p className="mt-3 text-sm leading-relaxed">{c.note}</p>
                     <Link
-                      href={`/shop?dye=${DYE_SLUG[c.id] ?? ''}`}
+                      href={`/?dye=${DYE_SLUG[c.id] ?? ''}`}
                       className="mt-auto inline-flex min-h-[2.75rem] items-center gap-1 pt-3 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       Shop this colour
@@ -88,8 +88,8 @@ export default function ColoursPage() {
       </section>
 
       <section className="container pb-4" aria-labelledby="not-used">
-        <div className="rounded-3xl border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9">
-          <h2 id="not-used" className="font-display text-xl md:text-2xl">
+        <div className="rounded-sm border border-border bg-cotton-100 p-6 dark:bg-card sm:p-9">
+          <h2 id="not-used" className="font-display text-display-sm">
             What we do not use
           </h2>
           <ul className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">
@@ -107,7 +107,7 @@ export default function ColoursPage() {
         shop={[
           { label: 'Sarees', href: '/types/sarees' },
           { label: 'Dupattas', href: '/types/dupattas' },
-          { label: 'Shop all', href: '/shop' },
+          { label: 'Shop all', href: '/' },
         ]}
       />
     </>

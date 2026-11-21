@@ -14,8 +14,7 @@
  *   node scripts/audit-layout.mjs                 # against localhost:3000
  *   node scripts/audit-layout.mjs --base=http://localhost:3000
  *   node scripts/audit-layout.mjs --widths=320,430
- *   node scripts/audit-layout.mjs --routes=/,/shop
- *   node scripts/audit-layout.mjs --intro=welcome # measure the welcome overlay
+ *   node scripts/audit-layout.mjs --routes=/,/archive
  *
  * Exits non-zero if anything overflows, so it can gate a build.
  */
@@ -27,23 +26,9 @@ const arg = (name, fallback) => {
 };
 
 const BASE = arg('base', 'http://localhost:3000').replace(/\/$/, '');
-const WIDTHS = arg('widths', '320,375,390,430').split(',').map(Number);
-/**
- * Which stage of the first-visit sequence to leave running.
- *
- * `skip` (default) dismisses both. Naming a stage marks everything
- * *before* it as already seen, so that stage appears immediately and can be
- * measured without waiting out a 14-second preloader film first.
- */
-const INTRO_STAGES = ['preloader', 'welcome'];
-const INTRO = arg('intro', 'skip');
-if (INTRO !== 'skip' && !INTRO_STAGES.includes(INTRO)) {
-  console.error(`--intro must be one of: skip, ${INTRO_STAGES.join(', ')}`);
-  process.exit(2);
-}
-/** The stages to mark as seen so the requested one is what renders. */
-const SEEN_STAGES =
-  INTRO === 'skip' ? INTRO_STAGES : INTRO_STAGES.slice(0, INTRO_STAGES.indexOf(INTRO));
+const SESSION = arg('session', '');
+const WIDTHS = arg('widths', '320,375,390,430,768,1024').split(',').map(Number);
+
 
 /**
  * The widest span of layouts on the site, not every URL.
@@ -71,8 +56,9 @@ const ROUTES = arg(
   'routes',
   [
     '/',
-    '/shop',
+    '/?fabric=cotton',
     '/shop/sarees',
+    '/archive',
     '/product/tree-of-life-tussar-silk-saree',
     '/types/sarees',
     // The cloth filter applied in place. A different render of the same route
@@ -81,6 +67,7 @@ const ROUTES = arg(
     // exercises.
     '/types/sarees?fabric=cotton',
     '/types/dupattas',
+    '/collections',
     '/collections/premium',
     '/process',
     '/our-story',
@@ -93,6 +80,13 @@ const ROUTES = arg(
     // capped measure with a wrapping contents rail above it. Neither shape is
     // exercised anywhere else in this list.
     '/heritage',
+    '/heritage/motifs',
+    '/heritage/motifs/ramayana',
+    '/heritage/artisans',
+    '/heritage/colours',
+    '/heritage/craftsmanship',
+    '/heritage/culture',
+    '/heritage/history',
     '/shipping',
     '/privacy',
     '/terms',
@@ -251,6 +245,50 @@ const PROBE = () => {
       the exact failure mode this script exists to prevent.
     */
     h1Count: document.querySelectorAll('h1').length,
+    /*
+      WCAG 2.2 AA 2.5.8: a pointer target is at least 24 x 24 CSS px, with two
+      exemptions that matter here: a link inside a sentence, and a stretched
+      link whose real hit area is an ::after overlay across its card. Anything
+      else under 24px is a finding. The project aims for 44px; 24px is the floor
+      this audit enforces, because a 36px filter chip is a decision and a 15px
+      footer link is a bug.
+    */
+    smallTargets: (() => {
+      const found = [];
+      const sel = 'a[href],button,input:not([type=hidden]),select,textarea,[role=button],[role=tab],summary';
+      for (const el of document.querySelectorAll(sel)) {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0 || cs.visibility === 'hidden') continue;
+        if (el.closest('.sr-only, [aria-hidden="true"]') || el.classList.contains('skip-link')) continue;
+        const after = getComputedStyle(el, '::after');
+        if (after.position === 'absolute' && after.content !== 'none') continue;
+        const p = el.parentElement;
+        const inSentence =
+          el.tagName === 'A' &&
+          /^inline/.test(cs.display) &&
+          p &&
+          [...p.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 12);
+        if (inSentence) continue;
+        // WCAG 2.5.8 "equivalent": a radio or checkbox whose own <label> is a
+        // 24px+ target can be operated through that label.
+        const lab = el.closest('label') ?? (el.id ? document.querySelector(`label[for="${el.id}"]`) : null);
+        if (lab) {
+          const lr = lab.getBoundingClientRect();
+          if (lr.width >= 23.5 && lr.height >= 23.5) continue;
+        }
+        // Half a pixel of slack: a 24px box laid out at 23.99 is not a finding.
+        if (Math.min(r.width, r.height) >= 23.5) continue;
+        found.push({
+          tag: el.tagName.toLowerCase(),
+          href: el.getAttribute('href') ?? '',
+          text: (el.getAttribute('aria-label') || el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 30),
+          w: Math.round(r.width),
+          h: Math.round(r.height),
+        });
+      }
+      return found.slice(0, 6);
+    })(),
   };
 };
 
@@ -268,30 +306,25 @@ for (const width of WIDTHS) {
       '(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
   });
 
+  // Signed-in routes (/admin, /account) need a session. Create one in a local
+  // database and pass it here: --session=<authjs.session-token value>.
+  if (SESSION) {
+    await context.addCookies([{ name: 'authjs.session-token', value: SESSION, url: BASE }]);
+  }
+
   /*
-    The first-visit sequence is audited separately, not skipped.
-
-    By default the preloader and welcome overlay are dismissed the
-    way a returning visitor has already dismissed them — otherwise they cover
-    the page and are the only thing measured. That default hid a real bug: a
-    quick-tour card (since removed) centred itself with `-translate-x-1/2` while also animating
-    `transform`, so it settled at `left: 50%` and ran off the right edge of
-    every phone, clipping its own copy. It shipped, because the audit
-    suppressed the one component that was broken.
-
-    `--intro=welcome` (or `preloader`) runs the same measurements
-    with that stage live. Anything that can cover the viewport has to be
-    measured on the viewport.
+    Nothing on this site opens over the page any more (the preloader, welcome
+    overlay and quick tour were removed), so there is no first-visit stage to
+    measure. If an interruption is ever added back, it needs its own audit
+    stage: anything that can cover the viewport has to be measured on it.
   */
-  await context.addInitScript((seen) => {
+  await context.addInitScript(() => {
     try {
-      // Matches first-visit.tsx (sessionStorage, `svl_intro_<step>`).
-      for (const step of seen) sessionStorage.setItem(`svl_intro_${step}`, '1');
-      // announcement-bar.tsx (localStorage) is dismissed either way — it is a
+      // announcement-bar.tsx (localStorage) is dismissed — it is a
       // server-rendered strip, not an overlay, and never covers anything.
       localStorage.setItem('svl_announce', '1');
     } catch {}
-  }, SEEN_STAGES);
+  });
 
   const page = await context.newPage();
 
@@ -337,7 +370,8 @@ for (const width of WIDTHS) {
     // No heading means the route did not render its page — see the note in
     // PROBE. A clean measurement of the error boundary is not a pass.
     const empty = result.h1Count === 0;
-    const bad = scrolls || clips || hangs || empty;
+    const small = result.smallTargets.length > 0;
+    const bad = scrolls || clips || hangs || empty || small;
     if (bad) failures++;
     const mark = empty
       ? 'NO <H1>'
@@ -347,7 +381,9 @@ for (const width of WIDTHS) {
           ? 'OFF-EDGE'
           : clips
             ? 'CLIPPED'
-            : 'ok';
+            : small
+              ? 'TINY TAP'
+              : 'ok';
     console.log(
       `${String(width).padStart(4)}px  ${String(route).padEnd(38)} ` +
         `${mark.padEnd(9)} ${scrolls ? `+${result.overflowPx}px (scrollWidth ${result.scrollWidth} vs ${result.limit})` : ''}`,
@@ -356,6 +392,11 @@ for (const width of WIDTHS) {
       console.log(
         `            └ <${o.tag}${o.id ? '#' + o.id : ''}> [${o.position}] w=${o.width} ` +
           `right=${o.right} (+${o.over} past edge) depth=${o.depth}\n              class="${o.cls}"`,
+      );
+    }
+    for (const t of result.smallTargets) {
+      console.log(
+        `            ◦ <${t.tag}${t.href ? ' href=' + t.href : ''}> "${t.text}" is ${t.w}x${t.h}px — under the 24px target minimum`,
       );
     }
     for (const c of result.clipped) {
@@ -373,7 +414,7 @@ await browser.close();
 
 console.log(
   failures === 0
-    ? '\nNo horizontal overflow, and nothing clipping its own text, at any width.'
+    ? '\nNo horizontal overflow, nothing clipping its own text, and no tap target under 24px, at any width.'
     : `\n${failures} route/width combination(s) overflow or clip content.`,
 );
 process.exit(failures === 0 ? 0 : 1);

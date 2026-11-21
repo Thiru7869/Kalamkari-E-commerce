@@ -47,7 +47,7 @@ export default function CommissionPage() {
       <section className="border-b border-border bg-cotton-100 pb-8 pt-8 md:pb-12 md:pt-10 dark:bg-card">
         <div className="container">
           <div className="max-w-3xl">
-            <Breadcrumbs trail={[{ label: 'Custom' }]} className="mb-4" />
+            <Breadcrumbs trail={[{ label: 'Commission' }]} />
             <p className="eyebrow">Commissions</p>
             <h1 className="mt-3 text-display-lg">Have it painted for you</h1>
             <p className="mt-4 text-body-lg text-muted-foreground">
@@ -70,7 +70,7 @@ export default function CommissionPage() {
                 {stages.map((stage) => (
                   <li key={stage.n} className="flex gap-5">
                     <span
-                      className="tabular font-display text-2xl leading-none text-primary/60"
+                      className="tabular font-display text-2xl leading-none text-primary"
                       aria-hidden="true"
                     >
                       {stage.n}
@@ -85,7 +85,7 @@ export default function CommissionPage() {
                 ))}
               </ol>
 
-              <div className="mt-12 rounded-2xl border border-border bg-muted/40 p-5 md:p-6">
+              <div className="mt-12 rounded-sm border border-border bg-muted/40 p-5 md:p-6">
                 <h3 className="font-display text-lg">Two honest warnings</h3>
                 <ul className="mt-4 flex list-disc flex-col gap-3 pl-4 text-sm leading-relaxed text-muted-foreground">
                   <li>
@@ -109,7 +109,7 @@ export default function CommissionPage() {
             </div>
 
             <div>
-              <div className="rounded-2xl border border-border bg-card p-5 md:p-7 lg:sticky lg:top-24">
+              <div className="rounded-sm border border-border bg-card p-5 md:p-7 lg:sticky lg:top-24">
                 <h2 className="text-display-sm">Tell us what you have in mind</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   There is no obligation in this, and no payment is taken here. It starts a
@@ -144,11 +144,11 @@ export default function CommissionPage() {
                     <span className="tabular font-display text-2xl leading-none text-primary/70">
                       {stage.n}
                     </span>
-                    <h3 className="mt-3 font-display text-base leading-snug">{stage.title}</h3>
+                    <h3 className="mt-3 font-display text-lg leading-snug">{stage.title}</h3>
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
                       {stage.body}
                     </p>
-                    <p className="mt-3 text-[0.6875rem] uppercase tracking-[0.12em] text-muted-foreground/70">
+                    <p className="mt-3 text-label uppercase tracking-[0.12em] text-muted-foreground/70">
                       {stage.when}
                     </p>
                   </div>

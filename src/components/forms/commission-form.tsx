@@ -46,7 +46,7 @@ export function CommissionForm({ className }: { className?: string }) {
       <div className={className} role="status">
         <div className="rounded-sm border border-border bg-background p-6 text-center">
           <CheckCircle2 className="mx-auto h-8 w-8 text-primary" aria-hidden="true" />
-          <h3 className="mt-4 font-display text-xl">Sent</h3>
+          <h3 className="mt-4 font-display text-display-sm">Sent</h3>
           <p className="mt-3 leading-relaxed text-muted-foreground">{state.message}</p>
         </div>
       </div>

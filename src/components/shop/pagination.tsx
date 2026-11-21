@@ -48,7 +48,7 @@ export function Pagination({ page, pageCount }: { page: number; pageCount: numbe
           <span className="sr-only sm:not-sr-only">Previous</span>
         </Link>
       ) : (
-        <span className="inline-flex h-11 min-w-11 items-center justify-center gap-1 px-2 text-sm text-muted-foreground/50 sm:px-3">
+        <span className="inline-flex h-11 min-w-11 items-center justify-center gap-1 px-2 text-sm text-muted-foreground sm:px-3">
           <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span className="sr-only sm:not-sr-only">Previous</span>
         </span>
@@ -91,7 +91,7 @@ export function Pagination({ page, pageCount }: { page: number; pageCount: numbe
           <ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
         </Link>
       ) : (
-        <span className="inline-flex h-11 min-w-11 items-center justify-center gap-1 px-2 text-sm text-muted-foreground/50 sm:px-3">
+        <span className="inline-flex h-11 min-w-11 items-center justify-center gap-1 px-2 text-sm text-muted-foreground sm:px-3">
           <span className="sr-only sm:not-sr-only">Next</span>
           <ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
         </span>

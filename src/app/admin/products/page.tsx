@@ -38,7 +38,7 @@ export default async function AdminProductsPage() {
         left out rather than half-built.
       </p>
 
-      <div className="mt-8 overflow-x-auto rounded-sm border border-border bg-background">
+      <div className="relative mt-8 overflow-x-auto rounded-sm border border-border bg-background">
         <table className="w-full min-w-[54rem] text-sm">
           <thead>
             <tr className="border-b border-border text-left">
@@ -66,7 +66,7 @@ export default async function AdminProductsPage() {
                     </div>
                     <Link
                       href={`/product/${product.slug}`}
-                      className="font-medium text-primary underline-offset-4 hover:underline"
+                      className="-my-3 inline-flex min-h-[2.75rem] items-center font-medium text-primary underline-offset-4 hover:underline"
                     >
                       {product.name}
                     </Link>

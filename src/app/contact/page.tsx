@@ -1,14 +1,15 @@
-import type { Metadata } from 'next';
-import { Breadcrumbs } from '@/components/layout/breadcrumbs';
-import { MapPin, Clock, Mail, Phone, MessageCircle } from 'lucide-react';
-import { ContactForm } from '@/components/forms/contact-form';
-import { site, contactEmail, contactPhone, whatsappHref } from '@/content/site';
-import { absoluteUrl } from '@/lib/utils';
+import type { Metadata } from "next";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { MapPin, Clock, Mail, Phone, MessageCircle } from "lucide-react";
+import { ContactForm } from "@/components/forms/contact-form";
+import { WorkshopInvitation } from "@/components/home/workshop-invitation";
+import { site, contactEmail, contactPhone, whatsappHref } from "@/content/site";
+import { absoluteUrl } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: 'Visit us in Srikalahasti',
+  title: "Visit us in Srikalahasti",
   description: `Find the store in ${site.location.town}, ${site.location.district}, Andhra Pradesh. Come and watch Kalamkari being painted, or write to us.`,
-  alternates: { canonical: '/contact' },
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
@@ -23,13 +24,14 @@ export default function ContactPage() {
       <section className="border-b border-border bg-cotton-100 pb-8 pt-8 md:pb-12 md:pt-10 dark:bg-card">
         <div className="container">
           <div className="max-w-2xl">
-            <Breadcrumbs trail={[{ label: 'Visit us' }]} className="mb-4" />
+            <Breadcrumbs trail={[{ label: "Visit us" }]} />
             <p className="eyebrow">Visit us</p>
             <h1 className="mt-3 text-display-lg">Come and see it being made</h1>
             <p className="mt-4 text-body-lg text-muted-foreground">
-              Photographs of Kalamkari are not very convincing. The cloth in your hands is.
-              If you are anywhere near {site.location.town} — and if you are visiting the
-              temple, you are — the store is worth an hour.
+              See the drawing and dyeing in progress, and handle the cloth
+              before you decide. If you are anywhere near {site.location.town} —
+              and if you are visiting the temple, you are — the store is worth
+              an hour.
             </p>
           </div>
         </div>
@@ -42,88 +44,102 @@ export default function ContactPage() {
               <h2 className="text-display-md">Finding the store</h2>
 
               <dl className="mt-8 flex flex-col gap-7">
-                <div className="flex gap-4">
-                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                  <div className="min-w-0">
-                    <dt className="font-medium">Where</dt>
-                    <dd className="mt-1.5 leading-relaxed text-muted-foreground">
-                      {site.name}
-                      <br />
-                      {site.location.town}, {site.location.district}
-                      <br />
-                      {site.location.state} {site.location.postalCode}, {site.location.country}
-                      <br />
-                      <a
-                        href={site.location.mapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-primary underline underline-offset-4"
-                      >
-                        Open in Google Maps
-                      </a>
-                    </dd>
-                  </div>
+                <div className="min-w-0">
+                  <dt className="flex items-center gap-4 font-medium">
+                    <MapPin
+                      className="h-5 w-5 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
+                    Where
+                  </dt>
+                  <dd className="mt-1.5 min-w-0 pl-9 leading-relaxed text-muted-foreground">
+                    {site.name}
+                    <br />
+                    {site.location.town}, {site.location.district}
+                    <br />
+                    {site.location.state} {site.location.postalCode},{" "}
+                    {site.location.country}
+                    <br />
+                    <a
+                      href={site.location.mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-block text-primary underline underline-offset-4"
+                    >
+                      Open in Google Maps
+                    </a>
+                  </dd>
                 </div>
 
-                <div className="flex gap-4">
-                  <Clock className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                  <div className="min-w-0">
-                    <dt className="font-medium">When</dt>
-                    <dd className="mt-1.5 leading-relaxed text-muted-foreground">
-                      {site.hours.note}
-                    </dd>
-                  </div>
+                <div className="min-w-0">
+                  <dt className="flex items-center gap-4 font-medium">
+                    <Clock
+                      className="h-5 w-5 shrink-0 text-primary"
+                      aria-hidden="true"
+                    />
+                    When
+                  </dt>
+                  <dd className="mt-1.5 min-w-0 pl-9 leading-relaxed text-muted-foreground">
+                    {site.hours.note}
+                  </dd>
                 </div>
 
                 {phone && (
-                  <div className="flex gap-4">
-                    <Phone className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                    <div className="min-w-0">
-                      <dt className="font-medium">Call</dt>
-                      <dd className="mt-1.5 text-muted-foreground">
-                        <a
-                          href={`tel:${phone.replace(/\s/g, '')}`}
-                          className="underline underline-offset-4 hover:text-foreground"
-                        >
-                          {phone}
-                        </a>
-                      </dd>
-                    </div>
+                  <div className="min-w-0">
+                    <dt className="flex items-center gap-4 font-medium">
+                      <Phone
+                        className="h-5 w-5 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      Call
+                    </dt>
+                    <dd className="mt-1.5 min-w-0 pl-9 text-muted-foreground">
+                      <a
+                        href={`tel:${phone.replace(/\s/g, "")}`}
+                        className="underline underline-offset-4 hover:text-foreground"
+                      >
+                        {phone}
+                      </a>
+                    </dd>
                   </div>
                 )}
 
                 {whatsapp && (
-                  <div className="flex gap-4">
-                    <MessageCircle
-                      className="mt-0.5 h-5 w-5 shrink-0 text-primary"
-                      aria-hidden="true"
-                    />
-                    <div className="min-w-0">
-                      <dt className="font-medium">WhatsApp</dt>
-                      <dd className="mt-1.5 text-muted-foreground">
-                        <a
-                          href={whatsapp}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline underline-offset-4 hover:text-foreground"
-                        >
-                          Message the store
-                        </a>
-                        <span className="mt-1 block text-sm">
-                          The quickest way to ask about a specific piece.
-                        </span>
-                      </dd>
-                    </div>
+                  <div className="min-w-0">
+                    <dt className="flex items-center gap-4 font-medium">
+                      <MessageCircle
+                        className="h-5 w-5 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      WhatsApp
+                    </dt>
+                    <dd className="mt-1.5 min-w-0 pl-9 text-muted-foreground">
+                      <a
+                        href={whatsapp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-4 hover:text-foreground"
+                      >
+                        Message the store
+                      </a>
+                      <span className="mt-1 block text-sm">
+                        The quickest way to ask about a specific piece.
+                      </span>
+                    </dd>
                   </div>
                 )}
 
                 {email && (
-                  <div className="flex gap-4">
-                    <Mail className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-                    <div className="min-w-0">
-                      <dt className="font-medium">Email</dt>
-                      <dd className="mt-1.5 text-muted-foreground">
-                        {/*
+                  <div className="min-w-0">
+                    <dt className="flex items-center gap-4 font-medium">
+                      <Mail
+                        className="h-5 w-5 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      Email
+                    </dt>
+                    <dd className="mt-1.5 min-w-0 pl-9 text-muted-foreground">
+                      {/*
                           `anywhere`, not `break-word`.
 
                           The store's address is forty characters with no space
@@ -142,38 +158,39 @@ export default function ContactPage() {
                           unbroken address. `anywhere` reduces it, which is what
                           actually removes the floor.
                         */}
-                        <a
-                          href={`mailto:${email}`}
-                          className="underline underline-offset-4 [overflow-wrap:anywhere] hover:text-foreground"
-                        >
-                          {email}
-                        </a>
-                      </dd>
-                    </div>
+                      <a
+                        href={`mailto:${email}`}
+                        className="inline-block py-2 -my-2 underline underline-offset-4 [overflow-wrap:anywhere] hover:text-foreground"
+                      >
+                        {email}
+                      </a>
+                    </dd>
                   </div>
                 )}
               </dl>
 
-              <div className="mt-10 rounded-2xl border border-border bg-muted/40 p-5">
+              <div className="mt-10 rounded-sm border border-border bg-muted/40 p-5">
                 <h3 className="font-display text-lg">Before you travel</h3>
                 <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
-                  Send a message first. The store is a working home, and the difference
-                  between arriving unannounced and arriving expected is the difference
-                  between seeing a shop and having someone sit with you while they paint.
+                  Send a message first. The store is a working home, and the
+                  difference between arriving unannounced and arriving expected
+                  is the difference between seeing a shop and having someone sit
+                  with you while they paint.
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  If you want to see dyeing rather than drawing, say so — the dye pots run
-                  on their own schedule, and the monsoon stops them entirely.
+                  If you want to see dyeing rather than drawing, say so — the
+                  dye pots run on their own schedule, and the monsoon stops them
+                  entirely.
                 </p>
               </div>
             </div>
 
             <div>
-              <div className="rounded-2xl border border-border bg-card p-5 md:p-7">
+              <div className="rounded-sm border border-border bg-card p-5 md:p-7">
                 <h2 className="text-display-sm">Write to us</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  About a piece, a visit, wholesale, an exhibition, or a question about the
-                  craft. We read everything.
+                  About a piece, a visit, wholesale, an exhibition, or a
+                  question about the craft. We read everything.
                 </p>
                 <ContactForm className="mt-7" />
               </div>
@@ -182,20 +199,23 @@ export default function ContactPage() {
         </div>
       </section>
 
+      {/* Come and see it being made: the offer that sets the store apart. */}
+      <WorkshopInvitation />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Store',
+            "@context": "https://schema.org",
+            "@type": "Store",
             name: site.name,
-            url: absoluteUrl('/contact'),
+            url: absoluteUrl("/contact"),
             address: {
-              '@type': 'PostalAddress',
+              "@type": "PostalAddress",
               addressLocality: site.location.town,
               addressRegion: site.location.state,
               postalCode: site.location.postalCode,
-              addressCountry: 'IN',
+              addressCountry: "IN",
             },
             hasMap: site.location.mapsUrl,
             /*
