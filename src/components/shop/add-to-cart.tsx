@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, ShoppingBag } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
-import { QuantityStepper } from '@/components/ui/primitives';
+import { QuantityStepper } from '@/components/ui/quantity-stepper';
 import { addToCart } from '@/app/actions/cart';
 import { requestCartDrawer } from '@/components/cart/cart-events';
 

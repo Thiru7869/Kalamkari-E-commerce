@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/primitives';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PRODUCT_GRID_GAP } from '@/components/shop/product-card';
 import { cn } from '@/lib/utils';
 

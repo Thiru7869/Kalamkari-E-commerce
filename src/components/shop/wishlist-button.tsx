@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { toggleWishlist } from '@/app/actions/cart';
 import { cn } from '@/lib/utils';
 
@@ -57,7 +57,7 @@ export function WishlistButton({
       // above it to remain clickable.
       className={cn(
         'relative z-10 inline-flex h-10 items-center gap-2 rounded-sm px-2.5 transition-colors',
-        'bg-background/85 backdrop-blur-sm hover:bg-background',
+        'bg-background/90 hover:bg-background',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         showLabel ? 'min-w-[3rem]' : 'w-10 justify-center',
         className,

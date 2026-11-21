@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Pencil, Plus, Star, Trash2 } from 'lucide-react';
 import { saveAddress, deleteAddress, setDefaultAddress } from '@/app/actions/account';
 import { initialFormState } from '@/lib/form-state';

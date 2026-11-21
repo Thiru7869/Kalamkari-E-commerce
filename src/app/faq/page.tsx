@@ -6,7 +6,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/primitives';
+} from '@/components/ui/accordion';
 import { SupportLinks } from '@/components/heritage/support-links';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { RevealOnScroll } from '@/components/motion/reveal-on-scroll';

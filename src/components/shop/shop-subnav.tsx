@@ -57,7 +57,7 @@ export function ShopSubnav({
       */
       data-subnav=""
       className={cn(
-        'z-30 -mx-5 border-b border-border bg-background/95 backdrop-blur-md md:mx-0',
+        'z-30 -mx-5 border-b border-border bg-background md:mx-0',
       )}
     >
       {/* ---- Row one: the filter, above the types ------------------------- */}
@@ -124,10 +124,15 @@ export function ShopSubnav({
 export function FilterTrigger({
   count,
   onClick,
+  onHint,
+  expanded,
   className,
 }: {
   count: number;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  /** Fired when the button is approached (pointer, touch, focus): preload the sheet. */
+  onHint?: () => void;
+  expanded?: boolean;
   className?: string;
 }) {
   const active = count > 0;
@@ -135,6 +140,11 @@ export function FilterTrigger({
   return (
     <button
       type="button"
+      aria-haspopup="dialog"
+      aria-expanded={expanded}
+      onPointerEnter={onHint}
+      onTouchStart={onHint}
+      onFocus={onHint}
       onClick={onClick}
       className={cn(
         'inline-flex h-9 items-center gap-2 rounded-sm border px-3 text-sm font-medium transition-colors',

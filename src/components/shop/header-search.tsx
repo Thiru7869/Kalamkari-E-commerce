@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { SearchOverlay } from './search-overlay';
+import { useMediaQuery } from '@/components/layout/use-media-query';
 import { useTypewriter } from './use-typewriter';
 import { searchPlaceholders } from '@/content/site';
 import { cn } from '@/lib/utils';
@@ -29,7 +30,10 @@ import { cn } from '@/lib/utils';
  */
 export function HeaderSearch({ className }: { className?: string }) {
   const [active, setActive] = useState(false);
-  const placeholder = useTypewriter(searchPlaceholders, { active: true });
+  // The field is `display: none` below xl. Typing into it there would cost a
+  // render every few dozen milliseconds, forever, for nobody.
+  const visible = useMediaQuery('(min-width: 1280px)');
+  const placeholder = useTypewriter(searchPlaceholders, { active: visible });
 
   return (
     <SearchOverlay className={cn('relative', className)}>

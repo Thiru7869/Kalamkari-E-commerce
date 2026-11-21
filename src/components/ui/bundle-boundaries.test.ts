@@ -36,16 +36,47 @@ describe('bundle boundaries', () => {
     }
   });
 
-  it('keeps site-wide components off the primitives barrel', () => {
-    const siteWide = [
-      ...walk(join(root, 'components/layout')),
-      join(root, 'components/cart/cart-drawer.tsx'),
-      join(root, 'components/shop/product-card.tsx'),
-      join(root, 'app/layout.tsx'),
-    ];
-    for (const file of siteWide) {
+  it('keeps every module off the primitives barrel', () => {
+    // Importing the barrel ships Select, Tabs, Accordion, Checkbox and
+    // RadioGroup to the page whether it uses them or not. Import the module.
+    const barrel = join(root, 'components/ui/primitives.tsx');
+    for (const file of walk(root)) {
+      if (file === barrel || file.endsWith('.test.ts')) continue;
       expect(readFileSync(file, 'utf8'), file).not.toContain('@/components/ui/primitives');
     }
+  });
+
+  it('keeps the Radix Dialog out of the first-load bundle', () => {
+    // Four controls open a dialog. Each is a small shell (button + state) that
+    // requests its panel on first approach or press; only the panel may import
+    // the dialog. Otherwise react-remove-scroll and the focus lock ship on every
+    // page, to be parsed by visitors who never open anything.
+    const shells = [
+      'components/layout/mobile-menu.tsx',
+      'components/layout/explore-menu.tsx',
+      'components/cart/cart-drawer.tsx',
+      'components/shop/shop-filters.tsx',
+    ];
+    for (const file of shells) {
+      const source = read(file);
+      expect(source, file).not.toContain('@/components/ui/dialog');
+      expect(source, file).toMatch(/dynamic\(/);
+    }
+  });
+
+  it('imports sonner only from the lazily mounted renderer', () => {
+    // `@/lib/toast` loads the library on the first message. A direct import
+    // anywhere else puts all of sonner back into the page's own bundle.
+    for (const file of walk(root)) {
+      if (file.endsWith('toaster-layer.tsx') || file.endsWith('.test.ts')) continue;
+      expect(readFileSync(file, 'utf8'), file).not.toMatch(/from 'sonner'/);
+    }
+  });
+
+  it('keeps the search overlay shell off the Radix Dialog', () => {
+    const shell = read('components/shop/search-overlay.tsx');
+    expect(shell).not.toContain('@radix-ui/react-dialog');
+    expect(shell).toMatch(/dynamic\(/);
   });
 
   it('loads the toast layer, GSAP and Lenis lazily', () => {

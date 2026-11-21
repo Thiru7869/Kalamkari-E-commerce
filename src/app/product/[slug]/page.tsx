@@ -13,7 +13,7 @@ import { RecentlyViewed } from '@/components/shop/recently-viewed';
 import { ReviewSection } from '@/components/shop/review-section';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/primitives';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { getProductBySlug, getRelatedProducts, getReviewEligibility } from '@/lib/queries';
 import { getWishlistIds } from '@/lib/cart';
 import { prisma } from '@/lib/prisma';

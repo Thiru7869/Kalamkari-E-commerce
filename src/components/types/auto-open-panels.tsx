@@ -8,7 +8,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/primitives';
+} from '@/components/ui/accordion';
 import { useMediaQuery } from '@/components/layout/use-media-query';
 
 export type DisclosureItem = {
