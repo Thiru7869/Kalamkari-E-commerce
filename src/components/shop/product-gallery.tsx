@@ -148,6 +148,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
                   fill
                   sizes="85vw"
                   priority={i === 0}
+                  fetchPriority={i === 0 ? 'high' : undefined}
                   className="object-cover"
                 />
                 <ExpandHint className="opacity-100" />
@@ -231,7 +232,6 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
               alt={altFor(active)}
               fill
               sizes="(min-width: 1024px) 50vw, 90vw"
-              priority
               className="object-cover"
             />
           </div>
