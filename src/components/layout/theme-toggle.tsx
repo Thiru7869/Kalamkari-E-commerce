@@ -6,6 +6,34 @@ import { Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
+ * Stops every transition for the moment the theme flips, so the whole page does
+ * not animate between palettes at once (with the hover transitions this site
+ * uses, that reads as a glitch).
+ *
+ * This lives here, not on the provider, on purpose. next-themes' own
+ * `disableTransitionOnChange` also fires on *mount*, where the pre-paint script
+ * has already set the class: it injected a `*` rule, forced a style recalc and
+ * removed the rule again, which cost two near-full-document recalcs on every
+ * page load for nothing. Here it runs only when somebody presses the button.
+ */
+function withoutTransitions(change: () => void) {
+  const style = document.createElement('style');
+  style.appendChild(
+    document.createTextNode(
+      '*,*::before,*::after{-webkit-transition:none!important;transition:none!important}',
+    ),
+  );
+  document.head.appendChild(style);
+  change();
+  // React commits the new theme and next-themes applies the class in an effect;
+  // the rule has to outlive both, or the flip animates after all.
+  window.setTimeout(() => {
+    window.getComputedStyle(document.body);
+    style.remove();
+  }, 120);
+}
+
+/**
  * The light/dark switch.
  *
  * Two details that matter more than they look:
@@ -42,7 +70,7 @@ export function ThemeToggle({
   return (
     <button
       type="button"
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      onClick={() => withoutTransitions(() => setTheme(isDark ? 'light' : 'dark'))}
       aria-pressed={isDark}
       {...rest}
       className={cn(
