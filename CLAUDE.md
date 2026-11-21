@@ -477,6 +477,22 @@ Lighthouse's mobile score is a *simulation* (4x CPU, slow 4G) and swings 10–20
 points between identical runs on a busy machine. Compare transferred JS and
 main-thread time across several runs, not a single score.
 
+## Type-page catalogue and disclosure lists
+
+- **Type pages paginate on the server.** `/types/<slug>?fabric=<cloth|family:x>&page=N`
+  renders eight cards via `getTypeCataloguePage`; the state is parsed by
+  `src/lib/type-catalogue.ts`. Do not go back to sending the whole category and
+  hiding most of it in the browser: the payload and hydration scale with the
+  catalogue. Pages are links, the cloth control is a GET form that works without
+  script, and an out-of-range page redirects to the last one.
+- **`ui/accordion.tsx` is not Radix.** Radix measured every panel in a layout
+  effect during hydration (7 on a type page, 6 on a product page). The
+  replacement animates a CSS grid track instead. Don't reintroduce a measuring
+  accordion; `ui/checkbox.tsx` is a native input for the same reason.
+- **Dialog panels load lazily and return focus themselves** (`useOpener`). A
+  panel with no Radix trigger drops focus on `<body>` when it closes unless the
+  shell passes `onCloseAutoFocus={restore}`.
+
 ## Errors
 
 Use typed errors, not sentinel strings. `SoldOutError` in `src/lib/errors.ts`
