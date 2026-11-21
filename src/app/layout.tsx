@@ -75,6 +75,10 @@ const jakarta = Plus_Jakarta_Sans({
 const notoTelugu = Noto_Sans_Telugu({
   subsets: ['telugu'],
   display: 'swap',
+  // Not preloaded, and not referenced until the page has loaded: two weights of
+  // Telugu were about 150 KB on the type pages, requested alongside the images
+  // and scripts the first paint is waiting for, to set two decorative words.
+  preload: false,
   weight: ['400', '600'],
   variable: '--font-telugu',
 });
@@ -170,7 +174,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{if(localStorage.getItem('svl_announce')==='1'){document.documentElement.dataset.announce='closed'}}catch(e){}",
+              "try{if(localStorage.getItem('svl_announce')==='1'){document.documentElement.dataset.announce='closed'}}catch(e){}" +
+              "addEventListener('load',function(){setTimeout(function(){document.documentElement.classList.add('telugu-ready')},800)});",
           }}
         />
 

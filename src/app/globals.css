@@ -219,6 +219,11 @@
     display sizes get the high-contrast cut and a 16px `h4` gets the sturdier
     one, from a single font file.
   */
+  /* Set by the script in layout.tsx once the page has loaded; see tailwind.config.ts. */
+  html.telugu-ready {
+    --font-telugu-loaded: var(--font-telugu);
+  }
+
   h1, h2, h3, h4 {
     @apply font-display;
     font-weight: 600;

@@ -252,7 +252,18 @@ const config: Config = {
           in `src/components/layout/wordmark.tsx`.
         */
         // Telugu, for the few places the local name of a thing is the true name.
-        telugu: ['var(--font-telugu)', 'var(--font-body)', 'sans-serif'],
+        //
+        // `--font-telugu-loaded` is only defined once the page has finished loading
+        // (see `html.telugu-ready` in globals.css and the script in layout.tsx), so
+        // the 150 KB of Telugu font is not fetched during the load itself. Until
+        // then the text is set in the system's own Telugu face.
+        telugu: [
+          'var(--font-telugu-loaded, var(--font-body))',
+          'Nirmala UI',
+          'Gautami',
+          'Noto Sans Telugu',
+          'sans-serif',
+        ],
       },
       /**
        * The type scale, re-struck to fit a phone.
